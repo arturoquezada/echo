@@ -4584,31 +4584,38 @@ async function loadAgentNamesFromSheet() {
         normalizeText(agent.status) === &quot;activo&quot;
       );
 
-    const isSupervisor = agents.some(agent =&gt;
-      agent.supervisorEmail === evaluatorEmail
-    );
-
-    if (isSupervisor) {
+    if (isEchoExternalClient()) {
+      const allowedCampaign = normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
       agents = agents.filter(agent =&gt;
-        agent.supervisorEmail === evaluatorEmail
+        normalizeText(agent.campaign) === allowedCampaign
       );
     } else {
-      const qaRules = qaAssignments.filter(rule =&gt;
-        rule.email === evaluatorEmail
+      const isSupervisor = agents.some(agent =&gt;
+        agent.supervisorEmail === evaluatorEmail
       );
 
-      console.log(&quot;Evaluator:&quot;, evaluatorEmail);
-      console.log(&quot;QA Assignments loaded:&quot;, qaAssignments);
-      console.log(&quot;QA Rules for evaluator:&quot;, qaRules);
-
-      if (qaRules.length &gt; 0) {
+      if (isSupervisor) {
         agents = agents.filter(agent =&gt;
-          qaRules.some(rule =&gt;
-            normalizeText(agent.campaign) === normalizeText(rule.campaign) &amp;&amp;
-            normalizeText(agent.lob) === normalizeText(rule.lob) &amp;&amp;
-            normalizeText(agent.queue) === normalizeText(rule.queue)
-          )
+          agent.supervisorEmail === evaluatorEmail
         );
+      } else {
+        const qaRules = qaAssignments.filter(rule =&gt;
+          rule.email === evaluatorEmail
+        );
+
+        console.log(&quot;Evaluator:&quot;, evaluatorEmail);
+        console.log(&quot;QA Assignments loaded:&quot;, qaAssignments);
+        console.log(&quot;QA Rules for evaluator:&quot;, qaRules);
+
+        if (qaRules.length &gt; 0) {
+          agents = agents.filter(agent =&gt;
+            qaRules.some(rule =&gt;
+              normalizeText(agent.campaign) === normalizeText(rule.campaign) &amp;&amp;
+              normalizeText(agent.lob) === normalizeText(rule.lob) &amp;&amp;
+              normalizeText(agent.queue) === normalizeText(rule.queue)
+            )
+          );
+        }
       }
     }
 
@@ -4984,16 +4991,52 @@ if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queue
         }
         
         let echoEmbeddedEvaluatorEmail = null;
+let echoEmbeddedAccessRole = null;
+let echoEmbeddedCampaignKey = null;
+let echoEmbeddedOrganization = null;
 
 function getEvaluatorFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return params.get(&quot;username&quot;) || echoEmbeddedEvaluatorEmail || null;
+  return echoEmbeddedEvaluatorEmail || params.get(&quot;username&quot;) || null;
+}
+
+function isEchoExternalClient() {
+  return normalizeText(echoEmbeddedAccessRole) === &quot;client_form&quot;;
+}
+
+function configureEchoClientScope() {
+  if (!isEchoExternalClient()) return;
+
+  const allowedCampaignKey = normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
+  const campaignSelect = document.getElementById(&quot;Campaign&quot;);
+  if (!campaignSelect) return;
+
+  const allowedOption = Array.from(campaignSelect.options).find(option =&gt;
+    normalizeText(option.value) === allowedCampaignKey
+  );
+
+  if (!allowedOption) {
+    console.error(&quot;Configured client campaign is not available in the form:&quot;, allowedCampaignKey);
+    return;
+  }
+
+  campaignSelect.innerHTML = `&lt;option value=&quot;${allowedOption.value}&quot;&gt;${allowedOption.textContent}&lt;/option&gt;`;
+  campaignSelect.value = allowedOption.value;
+  campaignSelect.disabled = true;
+  updateLOBOptions();
 }
 
 window.addEventListener(&quot;message&quot;, async (event) =&gt; {
   if (!event.data || event.data.type !== &quot;echoEvaluator&quot;) return;
+
   echoEmbeddedEvaluatorEmail = event.data.email || null;
+  echoEmbeddedAccessRole = event.data.accessRole || null;
+  echoEmbeddedCampaignKey = event.data.campaignKey || null;
+  echoEmbeddedOrganization = event.data.organization || null;
+
   try {
+    configureEchoClientScope();
+
     if (typeof loadQAAssignments === &quot;function&quot; &amp;&amp; (!qaAssignments || qaAssignments.length === 0)) {
       await loadQAAssignments();
     }
@@ -5006,9 +5049,25 @@ window.addEventListener(&quot;message&quot;, async (event) =&gt; {
 });
 
 async function addEvaluation() {
+  const authenticatedEvaluator = normalizeText(getEvaluatorFromURL());
+  if (!authenticatedEvaluator) {
+    alert(&quot;No se pudo validar tu identidad desde Echo. Cierra sesión y vuelve a entrar.&quot;);
+    return;
+  }
+
   if (!currentRubricGroup) {
     alert(&quot;Primero selecciona una combinación válida para cargar la rúbrica.&quot;);
     return;
+  }
+
+  if (isEchoExternalClient()) {
+    const allowedCampaign = normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
+    if (normalizeText(currentRubricGroup.campaign_key) !== allowedCampaign) {
+      alert(&quot;Tu acceso está limitado al formulario de la campaña autorizada.&quot;);
+      configureEchoClientScope();
+      clearDynamicRubric();
+      return;
+    }
   }
 
   // ── Validaciones ──────────────────────────────────────────────
@@ -5140,6 +5199,7 @@ if (responsesError) {
   alert(&quot;✅ Evaluación guardada correctamente.&quot;);
   document.getElementById(&quot;FORM_ID&quot;).reset();
   clearDynamicRubric();
+  configureEchoClientScope();
   setTodayDate();
 }
         
@@ -5155,8 +5215,17 @@ if (responsesError) {
         document.addEventListener(&quot;DOMContentLoaded&quot;, async function () {
   setTodayDate();
   await loadContactTypesFromSheet();
-await loadQAAssignments();
-await loadAgentNamesFromSheet();
+  await loadQAAssignments();
+
+  const evaluator = normalizeText(getEvaluatorFromURL());
+  if (evaluator) {
+    await loadAgentNamesFromSheet();
+  } else {
+    const agentSelect = document.getElementById(&quot;agentName&quot;);
+    if (agentSelect) {
+      agentSelect.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;Validando acceso desde Echo...&lt;/option&gt;&#x27;;
+    }
+  }
 });
 
 function highlightEmptyFields() {
@@ -7107,8 +7176,10 @@ const AGENT_VIEW_HTML_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVzIj4KPGhlYWQ
 /* ═══════════════ STATE ═══════════════ */
 let currentUser = null;
 let currentEmployee = null;
+let currentExternalAccess = null;
 let canAccessCorrections = false;
 let isAgentUser = false;
+let isClientUser = false;
 let agentViewMessageBound = false;
 let currentRubric = [];
 let rubricResponses = {};
@@ -7157,44 +7228,107 @@ function showLoginError(msg) {
 
 async function bootApp(user) {
   currentUser = user;
+  currentEmployee = null;
+  currentExternalAccess = null;
+  isAgentUser = false;
+  isClientUser = false;
+  canAccessCorrections = false;
 
-  // Resolve the authenticated employee record.
-  const { data: emp } = await sb.from('employees').select('*').eq('auth_user_id', user.id).maybeSingle();
-  if (!emp) {
-    const { data: emp2 } = await sb.from('employees').select('*').eq('email', user.email).maybeSingle();
-    if (!emp2) { showNoAccess(); return; }
-    currentEmployee = emp2;
-  } else {
+  // 1) Internal users continue resolving through employees.
+  const { data: emp, error: empError } = await sb
+    .from('employees')
+    .select('*')
+    .eq('auth_user_id', user.id)
+    .maybeSingle();
+
+  if (empError) console.error('Error resolving employee by auth_user_id:', empError);
+
+  if (emp) {
     currentEmployee = emp;
+  } else {
+    const { data: empByEmail, error: empEmailError } = await sb
+      .from('employees')
+      .select('*')
+      .ilike('email', user.email || '')
+      .maybeSingle();
+
+    if (empEmailError) console.error('Error resolving employee by email:', empEmailError);
+    currentEmployee = empByEmail || null;
   }
 
-  const normalizedRole = String(currentEmployee.system_role || '').trim().toLowerCase();
-  isAgentUser = AGENT_ROLES.includes(normalizedRole);
-  canAccessCorrections = !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee.id);
+  // 2) External users never enter employees. Their permission comes from app_access.
+  if (!currentEmployee) {
+    const { data: externalAccess, error: accessError } = await sb
+      .from('app_access')
+      .select('id,auth_user_id,email,display_name,app_key,access_role,organization,campaign_key,is_active')
+      .eq('auth_user_id', user.id)
+      .eq('app_key', 'echo')
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (accessError) {
+      console.error('Error resolving Echo external access:', accessError);
+      showNoAccess();
+      return;
+    }
+
+    currentExternalAccess = externalAccess || null;
+    const externalRole = String(currentExternalAccess?.access_role || '').trim().toLowerCase();
+
+    if (!currentExternalAccess || externalRole !== 'client_form') {
+      showNoAccess();
+      return;
+    }
+
+    isClientUser = true;
+  }
+
+  const normalizedRole = isClientUser
+    ? String(currentExternalAccess.access_role || '').trim().toLowerCase()
+    : String(currentEmployee.system_role || '').trim().toLowerCase();
+
+  isAgentUser = !isClientUser && AGENT_ROLES.includes(normalizedRole);
+  canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
 
   // Shared user card.
-  const name = currentEmployee.full_name || user.email;
-  document.getElementById('sidebarName').textContent = name.split(' ').slice(0,2).join(' ');
-  document.getElementById('sidebarRole').textContent = normalizedRole.replace(/_/g, ' ') || 'usuario';
-  document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  const name = isClientUser
+    ? (currentExternalAccess.display_name || currentExternalAccess.email || user.email)
+    : (currentEmployee.full_name || user.email);
 
-  // Role-based navigation: agents only see Mis evaluaciones.
+  document.getElementById('sidebarName').textContent = String(name || 'Usuario').split(' ').slice(0,2).join(' ');
+  document.getElementById('sidebarRole').textContent = isClientUser
+    ? 'Cliente · Formulario'
+    : (normalizedRole.replace(/_/g, ' ') || 'usuario');
+  document.getElementById('sidebarAvatar').textContent = String(name || 'U').charAt(0).toUpperCase();
+
+  // Role-based navigation:
+  // - Agent: only Mis evaluaciones.
+  // - External client_form: only Formulario.
+  // - Internal staff: existing modules and correction permission.
   document.querySelectorAll('.staff-only').forEach(el => {
-    el.classList.toggle('hidden-by-permission', isAgentUser);
-    el.setAttribute('aria-hidden', String(isAgentUser));
+    const page = el.dataset.page || '';
+    const hidden = isAgentUser || (isClientUser && page !== 'formulario');
+    el.classList.toggle('hidden-by-permission', hidden);
+    el.setAttribute('aria-hidden', String(hidden));
   });
+
   const navAgent = document.getElementById('navMisEvaluaciones');
   if (navAgent) {
     navAgent.classList.toggle('hidden-by-permission', !isAgentUser);
     navAgent.setAttribute('aria-hidden', String(!isAgentUser));
   }
+
   const navCorr = document.getElementById('navCorrecciones');
   if (navCorr) {
-    navCorr.classList.toggle('hidden-by-permission', isAgentUser || !canAccessCorrections);
-    navCorr.setAttribute('aria-hidden', String(isAgentUser || !canAccessCorrections));
+    const hideCorrections = isAgentUser || isClientUser || !canAccessCorrections;
+    navCorr.classList.toggle('hidden-by-permission', hideCorrections);
+    navCorr.setAttribute('aria-hidden', String(hideCorrections));
   }
+
   const sectionLabel = document.getElementById('sidebarSectionLabel');
-  if (sectionLabel) sectionLabel.textContent = isAgentUser ? 'Mi QA' : 'QA Tools';
+  if (sectionLabel) {
+    sectionLabel.textContent = isAgentUser ? 'Mi QA' : (isClientUser ? 'Echo Cliente' : 'QA Tools');
+  }
 
   document.getElementById('loginWall').style.display = 'none';
   document.getElementById('noAccessScreen').classList.remove('show');
@@ -7206,12 +7340,20 @@ async function bootApp(user) {
   if (isAgentUser) {
     switchPage('mis-evaluaciones', navAgent);
     await ensureAgentViewLoaded();
-  } else {
-    const navDashboard = document.querySelector('.nav-item[data-page="dashboard"]');
-    switchPage('dashboard', navDashboard);
-    loadDashboard();
-    setTimeout(sendEvaluatorToForm, 250);
+    return;
   }
+
+  if (isClientUser) {
+    const navForm = document.querySelector('.nav-item[data-page="formulario"]');
+    switchPage('formulario', navForm);
+    setTimeout(sendEvaluatorToForm, 250);
+    return;
+  }
+
+  const navDashboard = document.querySelector('.nav-item[data-page="dashboard"]');
+  switchPage('dashboard', navDashboard);
+  loadDashboard();
+  setTimeout(sendEvaluatorToForm, 250);
 }
 
 async function sendAgentSessionToFrame() {
@@ -7277,9 +7419,11 @@ async function handleLogout() {
   document.getElementById('loginEmail').value = '';
   document.getElementById('loginPassword').value = '';
   isAgentUser = false;
+  isClientUser = false;
   canAccessCorrections = false;
   currentUser = null;
   currentEmployee = null;
+  currentExternalAccess = null;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 }
 
@@ -7295,8 +7439,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 function switchPage(page, el) {
   // Hard client-side route guard. Database RLS remains the final security layer.
   if (isAgentUser && page !== 'mis-evaluaciones') page = 'mis-evaluaciones';
-  if (!isAgentUser && page === 'mis-evaluaciones') page = 'dashboard';
-  if (page === 'correcciones' && !canAccessCorrections) page = 'dashboard';
+  if (isClientUser && page !== 'formulario') page = 'formulario';
+  if (!isAgentUser && page === 'mis-evaluaciones') page = isClientUser ? 'formulario' : 'dashboard';
+  if (page === 'correcciones' && !canAccessCorrections) page = isClientUser ? 'formulario' : 'dashboard';
 
   const target = document.getElementById('page-' + page);
   if (!target) return;
@@ -7332,6 +7477,7 @@ function switchCorrTab(tab, btn) {
 /* ═══════════════ DASHBOARD ═══════════════ */
 function activateStaffIframe(id) {
   if (isAgentUser) return null;
+  if (isClientUser && id !== 'qaFormIframe') return null;
   const iframe = document.getElementById(id);
   if (!iframe) return null;
   if (!iframe.getAttribute('srcdoc')) {
@@ -7379,7 +7525,15 @@ function sendEvaluatorToForm() {
   if (isAgentUser) return;
   const iframe = activateStaffIframe('qaFormIframe');
   if (!iframe || !iframe.contentWindow || !currentUser?.email) return;
-  iframe.contentWindow.postMessage({ type: 'echoEvaluator', email: currentUser.email }, '*');
+
+  iframe.contentWindow.postMessage({
+    type: 'echoEvaluator',
+    email: currentUser.email,
+    accessRole: isClientUser ? currentExternalAccess?.access_role : 'internal',
+    campaignKey: isClientUser ? currentExternalAccess?.campaign_key : null,
+    organization: isClientUser ? currentExternalAccess?.organization : null,
+    isExternal: isClientUser
+  }, '*');
 }
 
 async function loadWeeklyChart() {
