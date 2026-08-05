@@ -3927,7 +3927,7 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
     &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;echo-form-version&quot; content=&quot;rubric-resolver-v4&quot;&gt;
+    &lt;meta name=&quot;echo-form-version&quot; content=&quot;rubric-options-v5&quot;&gt;
     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
     &lt;title&gt;QA Evaluation Tool&lt;/title&gt;
     &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
@@ -4929,12 +4929,12 @@ async function loadAgentNamesFromSheet() {
 
           currentRubricGroup = group;
 
+          // Cargar rubros y opciones en consultas separadas.
+          // El embed relacional qa_rubric_options(*) podía devolver los rubros
+          // sin sus opciones bajo una sesión authenticated, dejando selects vacíos.
           const { data: items, error: itemsError } = await supabaseClient
             .from(&quot;qa_rubric_items&quot;)
-            .select(`
-              *,
-              qa_rubric_options (*)
-            `)
+            .select(&quot;*&quot;)
             .eq(&quot;rubric_group_id&quot;, group.id)
             .eq(&quot;is_active&quot;, true)
             .order(&quot;display_order&quot;, { ascending: true });
@@ -4957,6 +4957,61 @@ async function loadAgentNamesFromSheet() {
               &lt;/div&gt;`;
             return;
           }
+
+          const itemIds = items.map(item =&gt; item.id).filter(Boolean);
+          const { data: rubricOptions, error: optionsError } = await supabaseClient
+            .from(&quot;qa_rubric_options&quot;)
+            .select(&quot;id,rubric_item_id,option_key,display_label,score_multiplier,display_order,is_active&quot;)
+            .in(&quot;rubric_item_id&quot;, itemIds)
+            .eq(&quot;is_active&quot;, true)
+            .order(&quot;display_order&quot;, { ascending: true });
+
+          if (optionsError) {
+            console.error(&quot;Error cargando opciones de rúbrica:&quot;, optionsError);
+            container.innerHTML = `
+              &lt;div class=&quot;additional-fields&quot;&gt;
+                &lt;strong&gt;Se cargaron los rubros, pero no sus opciones.&lt;/strong&gt;&lt;br&gt;
+                ${optionsError.message || &quot;Supabase rechazó la lectura de qa_rubric_options.&quot;}
+              &lt;/div&gt;`;
+            window.parent?.postMessage?.({
+              type: &quot;echoFormError&quot;,
+              action: &quot;loadRubricOptions&quot;,
+              message: optionsError.message || String(optionsError),
+              code: optionsError.code || null
+            }, &quot;*&quot;);
+            return;
+          }
+
+          const optionsByItemId = new Map();
+          (rubricOptions || []).forEach(option =&gt; {
+            if (!optionsByItemId.has(option.rubric_item_id)) {
+              optionsByItemId.set(option.rubric_item_id, []);
+            }
+            optionsByItemId.get(option.rubric_item_id).push(option);
+          });
+
+          const itemsWithOptions = items.map(item =&gt; ({
+            ...item,
+            qa_rubric_options: (optionsByItemId.get(item.id) || [])
+              .sort((a, b) =&gt; Number(a.display_order || 0) - Number(b.display_order || 0))
+          }));
+
+          const itemsWithoutOptions = itemsWithOptions
+            .filter(item =&gt; item.is_required &amp;&amp; item.qa_rubric_options.length === 0);
+
+          console.log(&quot;Echo rubric loaded:&quot;, {
+            group: {
+              id: group.id,
+              display_name: group.display_name,
+              queue_key: group.queue_key
+            },
+            items: itemsWithOptions.length,
+            options: (rubricOptions || []).length,
+            itemsWithoutOptions: itemsWithoutOptions.map(item =&gt; ({
+              id: item.id,
+              label: item.display_label
+            }))
+          });
 
           let { data: flags, error: flagsError } = await supabaseClient
             .from(&quot;qa_rubric_policy_flags&quot;)
@@ -4994,7 +5049,7 @@ async function loadAgentNamesFromSheet() {
             }
           }
 
-          currentRubricItems = items || [];
+          currentRubricItems = itemsWithOptions;
           currentPolicyFlags = flags || [];
           renderDynamicRubric();
         }
@@ -5011,25 +5066,14 @@ async function loadAgentNamesFromSheet() {
         
           currentRubricItems.forEach(item =&gt; {
             const options = (item.qa_rubric_options || [])
-              .filter(option =&gt; option.is_active)
-              .sort((a, b) =&gt; a.display_order - b.display_order);
+              .filter(option =&gt; option.is_active !== false)
+              .sort((a, b) =&gt; Number(a.display_order || 0) - Number(b.display_order || 0));
 
-            const w = parseFloat(item.weight) || 0;
-
-            let autoOptions = &#x27;&#x27;;
-            if (options.length &gt; 0) {
-              autoOptions = options.map(option =&gt;
-                `&lt;option value=&quot;${option.id}&quot; data-multiplier=&quot;${option.score_multiplier}&quot; data-option-key=&quot;${option.option_key}&quot;&gt;${option.display_label}&lt;/option&gt;`
-              ).join(&#x27;&#x27;);
-            } else if (item.scoring_type === &#x27;critical&#x27;) {
-              autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Sí cumple&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (EC)&lt;/option&gt;`;
-            } else if (item.scoring_type === &#x27;bonus&#x27;) {
-              autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Sí aplica (+${w} pts)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No aplica&lt;/option&gt;`;
-            } else if (item.scoring_type === &#x27;binary&#x27;) {
-              autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Cumple (100%)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (0%)&lt;/option&gt;`;
-            } else {
-              autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Cumple (100%)&lt;/option&gt;&lt;option value=&quot;partial&quot; data-multiplier=&quot;0.5&quot; data-option-key=&quot;partial&quot;&gt;Parcial (50%)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (0%)&lt;/option&gt;`;
-            }
+            const optionHtml = options.length &gt; 0
+              ? options.map(option =&gt;
+                  `&lt;option value=&quot;${option.id}&quot; data-multiplier=&quot;${Number(option.score_multiplier || 0)}&quot; data-option-key=&quot;${option.option_key || &quot;&quot;}&quot;&gt;${option.display_label || option.option_key || &quot;Opción&quot;}&lt;/option&gt;`
+                ).join(&quot;&quot;)
+              : `&lt;option value=&quot;&quot; disabled&gt;No hay opciones configuradas para este rubro&lt;/option&gt;`;
 
             html += `
               &lt;label for=&quot;rubric_${item.id}&quot;&gt;
@@ -5041,13 +5085,18 @@ async function loadAgentNamesFromSheet() {
                 data-weight=&quot;${item.weight}&quot;
                 data-scoring-type=&quot;${item.scoring_type || &#x27;standard&#x27;}&quot;
                 data-is-bonus=&quot;${item.is_bonus || false}&quot;
+                data-options-count=&quot;${options.length}&quot;
                 class=&quot;dynamic-rubric-select&quot;
                 onchange=&quot;updateDynamicScore()&quot;
                 ${item.is_required ? &quot;required&quot; : &quot;&quot;}
+                ${options.length === 0 ? &quot;disabled&quot; : &quot;&quot;}
               &gt;
                 &lt;option value=&quot;&quot;&gt;Selecciona una opción&lt;/option&gt;
-                ${autoOptions}
+                ${optionHtml}
               &lt;/select&gt;
+              ${options.length === 0
+                ? `&lt;div style=&quot;margin:-10px 0 18px;color:#dc2626;font-size:12px;font-weight:600;&quot;&gt;Este rubro no tiene opciones activas en Supabase.&lt;/div&gt;`
+                : &quot;&quot;}
             `;
           });
         
@@ -5259,6 +5308,14 @@ async function addEvaluation() {
 
   if (!currentRubricGroup) {
     alert(&quot;Primero selecciona una combinación válida para cargar la rúbrica.&quot;);
+    return;
+  }
+
+  const rubricItemsWithoutOptions = Array.from(
+    document.querySelectorAll(&quot;.dynamic-rubric-select[data-options-count=\&quot;0\&quot;]&quot;)
+  );
+  if (rubricItemsWithoutOptions.length &gt; 0) {
+    alert(&quot;La rúbrica tiene rubros sin opciones activas. No se puede guardar hasta corregir la configuración.&quot;);
     return;
   }
 
