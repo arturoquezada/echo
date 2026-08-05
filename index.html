@@ -4504,7 +4504,13 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
     &lt;script&gt;
         const SUPABASE_URL = &quot;https://kpuqabxmpavxgbzxzlng.supabase.co&quot;;
         const SUPABASE_ANON_KEY = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdXFhYnhtcGF2eGdienh6bG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTk1NzAsImV4cCI6MjA4MDI3NTU3MH0.CoB4NA6Z8qtTrRzvIqfP-hm3T1m24WpRNI1Xc74all8&quot;;
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        });
         
         let currentRubricGroup = null;
         let currentRubricItems = [];
@@ -4876,23 +4882,23 @@ if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queue
               &lt;/div&gt;
           `;
         
-          currentRubricItems.forEach(item => {
+          currentRubricItems.forEach(item =&gt; {
             const options = (item.qa_rubric_options || [])
-              .filter(option => option.is_active)
-              .sort((a, b) => a.display_order - b.display_order);
+              .filter(option =&gt; option.is_active)
+              .sort((a, b) =&gt; a.display_order - b.display_order);
 
             const w = parseFloat(item.weight) || 0;
 
-            let autoOptions = '';
-            if (options.length > 0) {
-              autoOptions = options.map(option =>
+            let autoOptions = &#x27;&#x27;;
+            if (options.length &gt; 0) {
+              autoOptions = options.map(option =&gt;
                 `&lt;option value=&quot;${option.id}&quot; data-multiplier=&quot;${option.score_multiplier}&quot; data-option-key=&quot;${option.option_key}&quot;&gt;${option.display_label}&lt;/option&gt;`
-              ).join('');
-            } else if (item.scoring_type === 'critical') {
+              ).join(&#x27;&#x27;);
+            } else if (item.scoring_type === &#x27;critical&#x27;) {
               autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Sí cumple&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (EC)&lt;/option&gt;`;
-            } else if (item.scoring_type === 'bonus') {
+            } else if (item.scoring_type === &#x27;bonus&#x27;) {
               autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Sí aplica (+${w} pts)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No aplica&lt;/option&gt;`;
-            } else if (item.scoring_type === 'binary') {
+            } else if (item.scoring_type === &#x27;binary&#x27;) {
               autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Cumple (100%)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (0%)&lt;/option&gt;`;
             } else {
               autoOptions = `&lt;option value=&quot;pass&quot; data-multiplier=&quot;1&quot; data-option-key=&quot;pass&quot;&gt;Cumple (100%)&lt;/option&gt;&lt;option value=&quot;partial&quot; data-multiplier=&quot;0.5&quot; data-option-key=&quot;partial&quot;&gt;Parcial (50%)&lt;/option&gt;&lt;option value=&quot;fail&quot; data-multiplier=&quot;0&quot; data-option-key=&quot;fail&quot;&gt;No cumple (0%)&lt;/option&gt;`;
@@ -4906,7 +4912,7 @@ if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queue
                 id=&quot;rubric_${item.id}&quot; 
                 data-rubric-item-id=&quot;${item.id}&quot;
                 data-weight=&quot;${item.weight}&quot;
-                data-scoring-type=&quot;${item.scoring_type || 'standard'}&quot;
+                data-scoring-type=&quot;${item.scoring_type || &#x27;standard&#x27;}&quot;
                 data-is-bonus=&quot;${item.is_bonus || false}&quot;
                 class=&quot;dynamic-rubric-select&quot;
                 onchange=&quot;updateDynamicScore()&quot;
@@ -4976,7 +4982,7 @@ if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queue
             const selectedOption = select.options[select.selectedIndex];
         
             const val = select.value || null;
-            const isManualKey = val && ['pass','fail','partial'].includes(val);
+            const isManualKey = val &amp;&amp; [&#x27;pass&#x27;,&#x27;fail&#x27;,&#x27;partial&#x27;].includes(val);
             return {
               rubric_item_id: select.dataset.rubricItemId,
               selected_option_id: isManualKey ? null : val,
@@ -4995,10 +5001,14 @@ if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queue
 let echoEmbeddedAccessRole = null;
 let echoEmbeddedCampaignKey = null;
 let echoEmbeddedOrganization = null;
+let echoEmbeddedSession = null;
+let echoFormContextReady = false;
+let echoFormInitializationPromise = null;
 
 function getEvaluatorFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return echoEmbeddedEvaluatorEmail || params.get(&quot;username&quot;) || null;
+  // La identidad siempre viene de la sesión autenticada de Echo.
+  // No se acepta ?username= para evitar suplantaciones.
+  return echoEmbeddedEvaluatorEmail || null;
 }
 
 function isEchoExternalClient() {
@@ -5027,29 +5037,93 @@ function configureEchoClientScope() {
   updateLOBOptions();
 }
 
+function setAgentSelectStatus(message) {
+  const select = document.getElementById(&quot;agentName&quot;);
+  if (select) select.innerHTML = `&lt;option value=&quot;&quot;&gt;${message}&lt;/option&gt;`;
+}
+
+async function applyEchoSession() {
+  if (!echoEmbeddedSession?.access_token || !echoEmbeddedSession?.refresh_token) {
+    throw new Error(&quot;Echo no entregó una sesión autenticada al formulario.&quot;);
+  }
+
+  const { error } = await supabaseClient.auth.setSession({
+    access_token: echoEmbeddedSession.access_token,
+    refresh_token: echoEmbeddedSession.refresh_token
+  });
+  if (error) throw error;
+}
+
+async function initializeEchoForm() {
+  if (echoFormInitializationPromise) return echoFormInitializationPromise;
+
+  echoFormInitializationPromise = (async () =&gt; {
+    const evaluator = normalizeText(echoEmbeddedEvaluatorEmail);
+    if (!evaluator) {
+      setAgentSelectStatus(&quot;Esperando identidad desde Echo...&quot;);
+      return;
+    }
+
+    echoFormContextReady = false;
+    setAgentSelectStatus(&quot;Cargando agentes...&quot;);
+
+    try {
+      await applyEchoSession();
+
+      if (!contactTypesData || contactTypesData.length === 0) {
+        await loadContactTypesFromSheet();
+      }
+      if (!qaAssignments || qaAssignments.length === 0) {
+        await loadQAAssignments();
+      }
+
+      configureEchoClientScope();
+      await loadAgentNamesFromSheet();
+      echoFormContextReady = true;
+      window.parent?.postMessage?.({ type: &quot;echoFormInitialized&quot; }, &quot;*&quot;);
+    } catch (error) {
+      echoFormContextReady = false;
+      console.error(&quot;Error initializing Echo QA form:&quot;, error);
+      setAgentSelectStatus(&quot;Error cargando agentes. Recarga Echo.&quot;);
+      window.parent?.postMessage?.({
+        type: &quot;echoFormError&quot;,
+        message: error?.message || String(error),
+        code: error?.code || null
+      }, &quot;*&quot;);
+    } finally {
+      echoFormInitializationPromise = null;
+    }
+  })();
+
+  return echoFormInitializationPromise;
+}
+
 window.addEventListener(&quot;message&quot;, async (event) =&gt; {
-  if (!event.data || event.data.type !== &quot;echoEvaluator&quot;) return;
+  if (window.parent !== window &amp;&amp; event.source !== window.parent) return;
+  if (!event.data || ![&quot;echoEvaluator&quot;, &quot;echoEvaluatorSession&quot;].includes(event.data.type)) return;
 
   echoEmbeddedEvaluatorEmail = event.data.email || null;
   echoEmbeddedAccessRole = event.data.accessRole || null;
   echoEmbeddedCampaignKey = event.data.campaignKey || null;
   echoEmbeddedOrganization = event.data.organization || null;
+  echoEmbeddedSession = event.data.session || null;
 
-  try {
-    configureEchoClientScope();
-
-    if (typeof loadQAAssignments === &quot;function&quot; &amp;&amp; (!qaAssignments || qaAssignments.length === 0)) {
-      await loadQAAssignments();
-    }
-    if (typeof loadAgentNamesFromSheet === &quot;function&quot;) {
-      await loadAgentNamesFromSheet();
-    }
-  } catch (error) {
-    console.error(&quot;Error refreshing agents after evaluator sync:&quot;, error);
-  }
+  await initializeEchoForm();
 });
 
+function announceEchoFormReady() {
+  if (window.parent &amp;&amp; window.parent !== window) {
+    window.parent.postMessage({ type: &quot;echoFormReady&quot; }, &quot;*&quot;);
+  }
+}
+
 async function addEvaluation() {
+  if (!echoFormContextReady) {
+    alert(&quot;El formulario todavía está validando tu sesión. Espera unos segundos o recarga Echo.&quot;);
+    announceEchoFormReady();
+    return;
+  }
+
   const authenticatedEvaluator = normalizeText(getEvaluatorFromURL());
   if (!authenticatedEvaluator) {
     alert(&quot;No se pudo validar tu identidad desde Echo. Cierra sesión y vuelve a entrar.&quot;);
@@ -5213,20 +5287,13 @@ if (responsesError) {
   document.getElementById(&quot;interactionDate&quot;).value = localDate;
 }
         
-        document.addEventListener(&quot;DOMContentLoaded&quot;, async function () {
+        document.addEventListener(&quot;DOMContentLoaded&quot;, function () {
   setTodayDate();
-  await loadContactTypesFromSheet();
-  await loadQAAssignments();
-
-  const evaluator = normalizeText(getEvaluatorFromURL());
-  if (evaluator) {
-    await loadAgentNamesFromSheet();
-  } else {
-    const agentSelect = document.getElementById(&quot;agentName&quot;);
-    if (agentSelect) {
-      agentSelect.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;Validando acceso desde Echo...&lt;/option&gt;&#x27;;
-    }
-  }
+  setAgentSelectStatus(&quot;Validando acceso desde Echo...&quot;);
+  announceEchoFormReady();
+  // Reintentos breves cubren cargas lentas de srcdoc/Squarespace.
+  setTimeout(announceEchoFormReady, 300);
+  setTimeout(announceEchoFormReady, 1000);
 });
 
 function highlightEmptyFields() {
@@ -7537,18 +7604,28 @@ function resizeFormIframe() {
   iframe.style.height = Math.max(current, minHeight) + 'px';
 }
 
-function sendEvaluatorToForm() {
+async function sendEvaluatorToForm() {
   if (isAgentUser) return;
   const iframe = activateStaffIframe('qaFormIframe');
   if (!iframe || !iframe.contentWindow || !currentUser?.email) return;
 
+  const { data: { session }, error: sessionError } = await sb.auth.getSession();
+  if (sessionError) {
+    console.error('Unable to obtain Echo session for form:', sessionError);
+    return;
+  }
+
   iframe.contentWindow.postMessage({
-    type: 'echoEvaluator',
+    type: 'echoEvaluatorSession',
     email: currentUser.email,
     accessRole: isClientUser ? currentExternalAccess?.access_role : 'internal',
     campaignKey: isClientUser ? currentExternalAccess?.campaign_key : null,
     organization: isClientUser ? currentExternalAccess?.organization : null,
-    isExternal: isClientUser
+    isExternal: isClientUser,
+    session: session ? {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    } : null
   }, '*');
 }
 
@@ -7982,6 +8059,18 @@ document.getElementById('dispModal').addEventListener('click',e=>{ if(e.target.i
 // Ajusta la altura del Dashboard integrado según el contenido interno.
 window.addEventListener('message', event => {
   const type = event?.data?.type;
+
+  const formIframe = document.getElementById('qaFormIframe');
+  if (type === 'echoFormReady' && event.source === formIframe?.contentWindow) {
+    sendEvaluatorToForm();
+    return;
+  }
+  if (type === 'echoFormError' && event.source === formIframe?.contentWindow) {
+    console.error('Echo form initialization error:', event.data);
+    toast('No se pudieron cargar los desplegables del formulario. Recarga Echo.', true);
+    return;
+  }
+
   const iframeMap = {
     iframeHeight: 'qaDashboardIframe',
     formIframeHeight: 'qaFormIframe',
