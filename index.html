@@ -3902,7 +3902,7 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
     &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;echo-form-version&quot; content=&quot;native-dropdowns-secure-save-v8&quot;&gt;
+    &lt;meta name=&quot;echo-form-version&quot; content=&quot;employees-master-source-v10&quot;&gt;
     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
     &lt;title&gt;QA Evaluation Tool&lt;/title&gt;
     &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
@@ -4494,9 +4494,7 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
         let contactTypesData = [];
         
         const CONTACT_TYPES_API_URL = &quot;https://script.google.com/macros/s/AKfycbzc_rj2HY81s6lVJf4XhEp0Y3QPPf0WR-rIuTmuBf6lOw3YNcInvptYQ52Sw_qbgPOR/exec&quot;;
-        const AGENTS_SPREADSHEET_ID = &quot;1Iq3d_Q33Mp4wE3L8jp2ZqXAg07mZT2dkVpRKG5MgZA8&quot;;
         const AGENTS_API_KEY = &quot;AIzaSyA8z7eSriF7BQWe8_w4xANA3pG0gbYgNaM&quot;;
-        const HEADCOUNT_RANGE = &quot;Empleados!A2:ZZ&quot;;
         const QA_ASSIGNMENTS_SPREADSHEET_ID = &quot;186ugUBPAgsotqqaW3ynpzNAMwE_5IFE-iqZZsxtdY08&quot;;
 const QA_ASSIGNMENTS_RANGE = &quot;QA!A2:D&quot;;
 
@@ -4533,33 +4531,30 @@ function normalizeText(value) {
   return String(value || &quot;&quot;).trim().toLowerCase();
 }
 
-async function loadAgentNamesFromSheet() {
+async function loadAgentNamesFromSupabase() {
   const select = document.getElementById(&quot;agentName&quot;);
-  select.innerHTML = '&lt;option value=&quot;&quot;&gt;Cargando agentes...&lt;/option&gt;';
+  select.innerHTML = '&lt;option value=&quot;&quot;&gt;Cargando agentes desde Supabase...&lt;/option&gt;';
 
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${AGENTS_SPREADSHEET_ID}/values/${encodeURIComponent(HEADCOUNT_RANGE)}?key=${AGENTS_API_KEY}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const values = data.values || [];
-
     const evaluatorEmail = normalizeText(getEvaluatorFromURL());
 
-    let agents = values
+    const { data, error } = await supabaseClient.rpc(&quot;echo_get_qa_agents&quot;);
+
+    if (error) {
+      console.error(&quot;Error loading agents from Supabase:&quot;, error);
+      throw error;
+    }
+
+    let agents = (Array.isArray(data) ? data : [])
       .map(row =&gt; ({
-        id: row[0]?.trim(),                 // A
-        name: row[1]?.trim(),               // B
-        role: row[5]?.trim(),               // F
-        status: row[9]?.trim(),             // J
-        campaign: row[10]?.trim(),          // K
-        lob: row[11]?.trim(),               // L
-        queue: row[25]?.trim(),             // Z
-        supervisorEmail: normalizeText(row[28]) // AC
+        id: String(row.id || &quot;&quot;).trim(),
+        name: String(row.name || &quot;&quot;).trim(),
+        role: String(row.role || &quot;&quot;).trim(),
+        status: String(row.status || &quot;&quot;).trim(),
+        campaign: String(row.campaign || &quot;&quot;).trim(),
+        lob: String(row.lob || &quot;&quot;).trim(),
+        queue: String(row.queue || &quot;&quot;).trim(),
+        supervisorEmail: normalizeText(row.supervisor_email)
       }))
       .filter(agent =&gt;
         agent.id &amp;&amp;
@@ -4612,15 +4607,22 @@ async function loadAgentNamesFromSheet() {
       const option = document.createElement(&quot;option&quot;);
       option.value = agent.name;
       option.textContent = agent.name;
-      option.dataset.agentId = agent.id;
+      option.dataset.agentId = agent.id; // public.employees.id
       select.appendChild(option);
     });
 
+    console.log(
+      `Echo QA: ${agents.length} agentes cargados desde public.employees`
+    );
+
   } catch (error) {
-    console.error(&quot;Error loading agent names:&quot;, error);
-    select.innerHTML = '&lt;option value=&quot;&quot;&gt;Error cargando agentes&lt;/option&gt;';
+    console.error(&quot;Error loading agent names from Supabase:&quot;, error);
+    select.innerHTML =
+      '&lt;option value=&quot;&quot;&gt;Error cargando agentes desde Supabase&lt;/option&gt;';
+    throw error;
   }
 }
+
         const lobOptionsByCampaign = {
           &quot;Aplazo&quot;: [&quot;Soporte&quot;, &quot;Cobranza&quot;, &quot;Comercios&quot;, &quot;KAMs&quot;],
           &quot;iForex&quot;: [&quot;iForex&quot;],
@@ -5039,7 +5041,7 @@ async function initializeEchoForm() {
       await loadQAAssignments();
 
       configureEchoClientScope();
-      await loadAgentNamesFromSheet();
+      await loadAgentNamesFromSupabase();
 
       echoFormContextReady = true;
       notifyParentHeight();
