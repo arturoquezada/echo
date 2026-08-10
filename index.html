@@ -615,7 +615,9 @@ body.sidebar-collapsed .logout-btn {
 <div class="nav-item agent-only hidden-by-permission" data-page="mis-evaluaciones" id="navMisEvaluaciones" onclick="switchPage('mis-evaluaciones', this)" title="Mis evaluaciones">
 <span class="nav-icon">⭐</span> Mis evaluaciones
       </div>
-<div class="nav-item active staff-only" data-page="dashboard" onclick="switchPage('dashboard', this)" title="Dashboard">
+<div class="nav-item client-dashboard-only hidden-by-permission" data-page="cliente-dashboard" onclick="switchPage('cliente-dashboard', this)" title="Dashboard">
+<span class="nav-icon">📊</span> Dashboard
+</div><div class="nav-item active staff-only" data-page="dashboard" onclick="switchPage('dashboard', this)" title="Dashboard">
 <span class="nav-icon">📊</span> Dashboard
       </div>
 <div class="nav-item staff-only" data-page="formulario" onclick="switchPage('formulario', this)" title="Formulario de Evaluación">
@@ -649,7 +651,1466 @@ body.sidebar-collapsed .logout-btn {
 <iframe id="qaAgentIframe" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-modals" title="Mis evaluaciones de QA"></iframe>
 </div>
 <!-- PAGE: DASHBOARD -->
-<div class="page active" id="page-dashboard" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));">
+<div class="page" id="page-cliente-dashboard" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));"><iframe data-srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;es&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;/&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;/&gt;
+  &lt;title&gt;QA Portal — Aplazo&lt;/title&gt;
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js&quot;&gt;&lt;/script&gt;
+  &lt;style&gt;
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: auto;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background: #f4fbff;
+      color: #0f172a;
+    }
+    /* Tell Squarespace parent iframe to grow with content */
+    body { overflow-y: auto; }
+
+    .app {
+      max-width: 1400px;
+      margin: auto;
+      padding: 28px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      padding: 28px 32px;
+      border-radius: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { margin: 0; font-size: 30px; }
+    .header p  { margin: 6px 0 0; color: #cbd5e1; font-size: 14px; }
+    .header-meta { text-align: right; color: #94a3b8; font-size: 12px; }
+    .header-meta span { display: block; margin-top: 4px; }
+
+    /* ── SECTION TITLES ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94a3b8;
+      margin: 28px 0 12px;
+    }
+
+    /* ── FILTERS ── */
+    .filters-sticky-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      /* slight negative margin so it bleeds to app edges */
+      margin: 0 -4px 22px;
+      padding: 0 4px;
+    }
+    .filters {
+      background: white;
+      border-radius: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 24px rgba(15,23,42,.13);
+      margin-bottom: 0;
+    }
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 14px;
+    }
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      display: block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    select, input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 13px;
+      background: #f8fafc;
+      color: #0f172a;
+      transition: border-color .2s;
+    }
+    select:focus, input:focus { outline: none; border-color: #62d3f5; background: #fff; }
+    button {
+      padding: 11px 18px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #62d3f5, #38bdf8);
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 13px;
+      width: 100%;
+      transition: opacity .2s;
+    }
+    button:hover { opacity: .88; }
+
+    /* ── CARDS ── */
+    .card, .chart-card, .table-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(15,23,42,.07);
+      margin-bottom: 22px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .card { margin-bottom: 0; position: relative; overflow: hidden; }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #62d3f5, #38bdf8);
+      border-radius: 20px 20px 0 0;
+    }
+    .card.danger::before  { background: linear-gradient(90deg,#ef4444,#fb7185); }
+    .card.warn::before    { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .card.success::before { background: linear-gradient(90deg,#22c55e,#4ade80); }
+    .metric { font-size: 30px; font-weight: 800; margin: 8px 0 4px; }
+    .muted  { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .trend  { font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .trend.up   { color: #22c55e; }
+    .trend.down { color: #ef4444; }
+    .trend.flat { color: #94a3b8; }
+
+    /* ── INSIGHT ── */
+    .insight {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
+      color: #164e63;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── CHARTS GRID ── */
+    .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .charts-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+    .chart-card h3, .table-card h3 { margin: 0 0 16px; font-size: 15px; }
+
+    /* ── TABLES ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+    th { color: #475569; background: #f8fafc; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-red    { background: #fee2e2; color: #991b1b; }
+    .badge-green  { background: #dcfce7; color: #166534; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+
+    /* ── RISK PILL ── */
+    .risk-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .risk-high   { background: #fee2e2; color: #991b1b; }
+    .risk-medium { background: #fef9c3; color: #854d0e; }
+    .risk-low    { background: #dcfce7; color: #166534; }
+
+    /* ── CRITICAL CARDS ── */
+    .critical-list { display: flex; flex-direction: column; gap: 10px; }
+    .critical-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #ef4444;
+      border-radius: 14px;
+      padding: 12px 16px;
+    }
+    .critical-card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .critical-title { font-weight: 800; color: #0f172a; font-size: 13px; }
+    .critical-count { background: #fee2e2; color: #991b1b; border-radius: 999px; padding: 4px 10px; font-weight: 900; font-size: 11px; white-space: nowrap; }
+    .critical-bar { margin-top: 8px; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .critical-bar-fill { height: 100%; background: linear-gradient(90deg,#ef4444,#fb7185); border-radius: 999px; }
+    .critical-detail { margin-top: 6px; font-size: 11px; color: #64748b; }
+
+    /* ── COMMITMENT CELL ── */
+    .commitment-cell { position: relative; cursor: pointer; max-width: 240px; }
+    .commitment-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .commitment-tooltip {
+      visibility: hidden; opacity: 0;
+      position: absolute; left: 0; top: 100%; margin-top: 6px;
+      background: #0f172a; color: white;
+      padding: 10px 14px; border-radius: 10px; width: 300px;
+      white-space: normal; z-index: 9999; font-size: 12px; line-height: 1.4;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      transition: opacity .2s;
+    }
+    .commitment-cell:hover .commitment-tooltip { visibility: visible; opacity: 1; }
+
+    /* ── SPARKLINE (tendencia agente) ── */
+    .sparkline-cell canvas { display: block; }
+
+    /* ── WEEKLY COMPARE TABLE ── */
+    .delta-up   { color: #22c55e; font-weight: 700; }
+    .delta-down { color: #ef4444; font-weight: 700; }
+    .delta-flat { color: #94a3b8; }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab {
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      transition: all .2s;
+    }
+    .tab.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+    /* ── LOADING ── */
+    .loading-spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid #e2e8f0; border-top-color: #62d3f5;
+      border-radius: 50%; animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── EVAL DETAIL MODAL ── */
+    .eval-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
+      background: rgba(15,23,42,.55);
+      z-index: 99999;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px 20px;
+      overflow-y: auto;
+    }
+    .eval-modal-overlay.active { display: flex; }
+    .eval-modal {
+      background: white;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(15,23,42,.25);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn {
+      from { transform: translateY(20px); opacity:0; }
+      to   { transform: translateY(0);    opacity:1; }
+    }
+    .eval-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 24px 24px 0;
+      gap: 12px;
+    }
+    .eval-modal-header h2 { margin:0; font-size:18px; color:#0f172a; }
+    .eval-modal-close {
+      background: #f1f5f9;
+      border: none;
+      border-radius: 999px;
+      width: 32px; height: 32px;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #64748b;
+    }
+    .eval-modal-close:hover { background: #e2e8f0; }
+    .eval-modal-body { padding: 20px 24px 24px; }
+    .eval-modal-kpis {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .eval-modal-kpi {
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .eval-modal-kpi .label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+    .eval-modal-kpi .value { font-size:22px; font-weight:800; margin-top:4px; }
+    .eval-modal-section { margin-bottom:18px; }
+    .eval-modal-section h4 { margin:0 0 8px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; color:#94a3b8; }
+    .eval-modal-section p  { margin:0; font-size:14px; line-height:1.6; color:#0f172a; background:#f8fafc; border-radius:12px; padding:14px; }
+    .eval-modal-rubrics { width:100%; border-collapse:collapse; font-size:13px; }
+    .eval-modal-rubrics th { background:#f8fafc; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.5px; }
+    .eval-modal-rubrics td { padding:9px 10px; border-bottom:1px solid #f1f5f9; }
+    .eval-feedback-link { display:inline-block; margin-top:8px; color:#0284c7; font-size:13px; font-weight:700; text-decoration:none; }
+    .eval-feedback-link:hover { text-decoration:underline; }
+
+    /* ── RUBRIC TABLE ── */
+    .rubric-table { min-width: 900px; }
+    .rubric-table th { white-space: nowrap; }
+    .rubric-table td { white-space: nowrap; }
+    .rubric-cell-red    { background: #fee2e2; color: #991b1b; font-weight: 700; text-align: center; border-radius: 6px; }
+    .rubric-cell-yellow { background: #fef9c3; color: #854d0e; font-weight: 700; text-align: center; border-radius: 6px; }
+    .rubric-cell-green  { background: #dcfce7; color: #166534; font-weight: 700; text-align: center; border-radius: 6px; }
+    .rubric-cell-gray   { background: #f1f5f9; color: #94a3b8; text-align: center; }
+
+    /* ── CLIENT MODE ── */
+    .client-mode-banner {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .client-mode-banner.active { display: flex; }
+    .client-mode-banner span { flex:1; }
+
+    /* client view sections hidden by default */
+    .client-only { display: none; }
+    /* internal-only: visible normally, hidden in client-mode.
+       Do NOT set display here — let each element use its natural display value */
+    body.client-mode .client-only.tab-section { display: none; }
+    body.client-mode .client-only.tab-section.active { display: block; }
+    body.client-mode .internal-only  { display: none !important; }
+    /* Hide main tabs in client mode — navigation is via the tab bar which stays visible */
+    body.client-mode .main-tabs-wrap { display: none !important; }
+
+    .client-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .client-kpi-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(15,23,42,.07);
+      position: relative;
+      overflow: hidden;
+    }
+    .client-kpi-card::before {
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;height:3px;
+      border-radius:20px 20px 0 0;
+    }
+    .client-kpi-card.blue::before   { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
+    .client-kpi-card.teal::before   { background: linear-gradient(90deg,#14b8a6,#2dd4bf); }
+    .client-kpi-card.red::before    { background: linear-gradient(90deg,#ef4444,#fb7185); }
+    .client-kpi-card.green::before  { background: linear-gradient(90deg,#22c55e,#4ade80); }
+    .client-kpi-label  { font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px; }
+    .client-kpi-value  { font-size:28px;font-weight:800;margin:6px 0 2px; }
+    .client-kpi-sub    { font-size:11px;color:#94a3b8; }
+    .vs-badge {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      margin-left:6px;
+    }
+    .vs-up   { background:#dcfce7;color:#166534; }
+    .vs-down { background:#fee2e2;color:#991b1b; }
+    .vs-flat { background:#f1f5f9;color:#64748b; }
+
+    /* ── MAIN TABS ── */
+    .main-tabs-wrap {
+      margin-bottom: 22px;
+    }
+    .main-tabs {
+      display: flex;
+      gap: 6px;
+      background: white;
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: 0 4px 20px rgba(15,23,42,.07);
+      overflow-x: auto;
+    }
+    .main-tab {
+      flex: 1;
+      min-width: 110px;
+      padding: 11px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      text-align: center;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .main-tab:hover { background: #f1f5f9; color: #0f172a; }
+    .main-tab.active {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      box-shadow: 0 4px 12px rgba(15,23,42,.25);
+    }
+    .main-tab.active.tab-analisis  { background: linear-gradient(135deg,#0ea5e9,#38bdf8); color:#0f172a; }
+    .main-tab.active.tab-riesgos   { background: linear-gradient(135deg,#ef4444,#fb7185); color:white; }
+    .main-tab.active.tab-agentes   { background: linear-gradient(135deg,#8b5cf6,#a78bfa); color:white; }
+    .main-tab.active.tab-cliente   { background: linear-gradient(135deg,#0284c7,#0ea5e9); color:white; }
+
+    /* Tab sections */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    /* ── RESPONSIVE ── */    /* ── RESPONSIVE ── */
+    @media(max-width:1100px) {
+      .filters-grid, .cards { grid-template-columns: repeat(2,1fr); }
+      .charts-2, .charts-3  { grid-template-columns: 1fr; }
+    }
+    @media(max-width:640px) {
+      .filters-grid, .cards { grid-template-columns: 1fr; }
+    }
+  
+    /* ── PORTAL OVERRIDES ── */
+    /* Remove client-mode and internal-only logic — not needed here */
+    .client-only, .internal-only { display: block !important; }
+
+    /* ── CORRECTION PANEL ── */
+    .correction-panel { margin-top: 24px; border-top: 2px dashed #e2e8f0; padding-top: 20px; }
+    .correction-panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .correction-panel-title { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; color:#f59e0b; }
+    .btn-request-correction { width:auto; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a; font-weight:800; font-size:13px; border:none; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(245,158,11,.3); }
+    .btn-request-correction:hover { opacity:.9; transform:translateY(-1px); }
+    .correction-form { display:none; }
+    .correction-form.open { display:block; }
+    .corr-field { margin-bottom:14px; }
+    .corr-label { font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:6px; }
+    .corr-input, .corr-select, .corr-textarea { width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #e2e8f0; font-size:13px; background:#f8fafc; color:#0f172a; font-family:inherit; }
+    .corr-input:focus, .corr-select:focus, .corr-textarea:focus { outline:none; border-color:#f59e0b; background:#fff; }
+    .corr-textarea { resize:vertical; min-height:80px; }
+    .corr-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .corr-section-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; color:#94a3b8; margin:18px 0 10px; padding-bottom:6px; border-bottom:1px solid #f1f5f9; }
+    .rubric-edit-row { display:grid; grid-template-columns:1fr 80px; gap:8px; align-items:center; margin-bottom:8px; }
+    .rubric-edit-label { font-size:12px; color:#475569; font-weight:600; }
+    .rubric-edit-input { padding:7px 10px; border-radius:8px; border:1.5px solid #e2e8f0; font-size:12px; background:#f8fafc; color:#0f172a; text-align:center; font-family:inherit; }
+    .rubric-edit-input:focus { outline:none; border-color:#f59e0b; }
+    .corr-actions { display:flex; gap:10px; margin-top:18px; }
+    .btn-submit-correction { flex:1; padding:12px; border-radius:12px; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a; font-weight:800; font-size:14px; border:none; cursor:pointer; transition:all .2s; }
+    .btn-submit-correction:hover { opacity:.9; }
+    .btn-submit-correction:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-cancel-correction { padding:12px 20px; border-radius:12px; background:#f1f5f9; color:#475569; font-weight:700; font-size:13px; border:1.5px solid #e2e8f0; cursor:pointer; }
+    .btn-cancel-correction:hover { background:#e2e8f0; }
+    .correction-success { display:none; background:#dcfce7; border:1px solid #86efac; border-radius:14px; padding:16px 20px; color:#166534; font-weight:700; font-size:14px; text-align:center; margin-top:16px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;app&quot;&gt;
+
+  &lt;!-- HEADER --&gt;
+  &lt;div class=&quot;header&quot;&gt;
+    &lt;div&gt;
+      &lt;h1&gt;📋 Portal QA — Aplazo&lt;/h1&gt;
+      &lt;p&gt;Evaluaciones realizadas por evaluadores @aplazo.mx&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;header-meta&quot; style=&quot;display:flex;flex-direction:column;align-items:flex-end;gap:6px;&quot;&gt;
+      &lt;span id=&quot;lastUpdated&quot; style=&quot;color:#94a3b8;font-size:12px;&quot;&gt;–&lt;/span&gt;
+      &lt;span id=&quot;recordCount&quot; style=&quot;color:#62d3f5;font-weight:700;font-size:12px;&quot;&gt;–&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- FILTERS --&gt;
+  &lt;div class=&quot;filters-sticky-wrap&quot;&gt;
+    &lt;div class=&quot;filters&quot;&gt;
+      &lt;div class=&quot;filters-grid&quot; style=&quot;grid-template-columns: repeat(6,1fr);&quot;&gt;
+        &lt;div&gt;&lt;label&gt;Fecha inicio&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;startDate&quot;/&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;Fecha fin&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;endDate&quot;/&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;LOB&lt;/label&gt;&lt;select id=&quot;lobFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todos&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;Queue&lt;/label&gt;&lt;select id=&quot;queueFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todas&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;Agente&lt;/label&gt;&lt;select id=&quot;agentFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todos&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;&amp;nbsp;&lt;/label&gt;&lt;button id=&quot;btnRefresh&quot;&gt;🔄 Actualizar&lt;/button&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- MAIN TABS --&gt;
+  &lt;div class=&quot;main-tabs-wrap&quot;&gt;
+    &lt;div class=&quot;main-tabs&quot;&gt;
+      &lt;button class=&quot;main-tab active&quot;       data-tab=&quot;resumen&quot;&gt;📊 Resumen&lt;/button&gt;
+      &lt;button class=&quot;main-tab tab-analisis&quot; data-tab=&quot;analisis&quot;&gt;📈 Tendencias&lt;/button&gt;
+      &lt;button class=&quot;main-tab tab-riesgos&quot;  data-tab=&quot;fallas&quot;&gt;🔴 Fallas&lt;/button&gt;
+      &lt;button class=&quot;main-tab tab-agentes&quot;  data-tab=&quot;agentes&quot;&gt;👤 Agentes&lt;/button&gt;
+      &lt;button class=&quot;main-tab&quot;              data-tab=&quot;evaluaciones&quot;&gt;📝 Evaluaciones&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ══════════ TAB: RESUMEN ══════════ --&gt;
+  &lt;div class=&quot;tab-section active&quot; id=&quot;tab-resumen&quot;&gt;
+    &lt;div class=&quot;section-title&quot;&gt;Resumen ejecutivo&lt;/div&gt;
+    &lt;div class=&quot;cards&quot;&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;muted&quot;&gt;Avg QA Score&lt;/div&gt;
+        &lt;div class=&quot;metric&quot; id=&quot;kAvgScore&quot;&gt;–&lt;/div&gt;
+        &lt;div class=&quot;trend flat&quot; id=&quot;kTrendScore&quot;&gt;–&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;muted&quot;&gt;Evaluaciones&lt;/div&gt;
+        &lt;div class=&quot;metric&quot; id=&quot;kTotal&quot;&gt;–&lt;/div&gt;
+        &lt;div class=&quot;trend flat&quot; id=&quot;kTrendTotal&quot;&gt;–&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card danger&quot;&gt;
+        &lt;div class=&quot;muted&quot;&gt;Critical Error Rate&lt;/div&gt;
+        &lt;div class=&quot;metric&quot; id=&quot;kCritRate&quot;&gt;–&lt;/div&gt;
+        &lt;div class=&quot;trend flat&quot; id=&quot;kTrendCrit&quot;&gt;–&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card warn&quot;&gt;
+        &lt;div class=&quot;muted&quot;&gt;Weekly Zero&lt;/div&gt;
+        &lt;div class=&quot;metric&quot; id=&quot;kZeros&quot;&gt;–&lt;/div&gt;
+        &lt;div class=&quot;trend flat&quot; id=&quot;kTrendZero&quot;&gt;–&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card success&quot;&gt;
+        &lt;div class=&quot;muted&quot;&gt;Agentes evaluados&lt;/div&gt;
+        &lt;div class=&quot;metric&quot; id=&quot;kAgents&quot;&gt;–&lt;/div&gt;
+        &lt;div class=&quot;trend flat&quot; id=&quot;kTrendAgents&quot;&gt;–&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;insight&quot; id=&quot;insightBar&quot;&gt;
+      &lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando insights...
+    &lt;/div&gt;
+    &lt;div class=&quot;charts-2&quot;&gt;
+      &lt;div class=&quot;chart-card&quot;&gt;
+        &lt;h3&gt;📅 Comparativa semana vs semana anterior&lt;/h3&gt;
+        &lt;table&gt;
+          &lt;thead&gt;&lt;tr&gt;
+            &lt;th&gt;Semana&lt;/th&gt;&lt;th&gt;Evaluaciones&lt;/th&gt;&lt;th&gt;Avg Score&lt;/th&gt;&lt;th&gt;Critical %&lt;/th&gt;&lt;th&gt;Δ Score&lt;/th&gt;
+          &lt;/tr&gt;&lt;/thead&gt;
+          &lt;tbody id=&quot;tblWeekly&quot;&gt;&lt;/tbody&gt;
+        &lt;/table&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;chart-card&quot;&gt;&lt;h3&gt;📊 Distribución de scores&lt;/h3&gt;&lt;canvas id=&quot;chartHisto&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ══════════ TAB: TENDENCIAS ══════════ --&gt;
+  &lt;div class=&quot;tab-section&quot; id=&quot;tab-analisis&quot;&gt;
+    &lt;div class=&quot;section-title&quot;&gt;Score semanal y rendimiento por grupo&lt;/div&gt;
+    &lt;div class=&quot;charts-2&quot;&gt;
+      &lt;div class=&quot;chart-card&quot;&gt;&lt;h3&gt;📈 Score semanal&lt;/h3&gt;&lt;canvas id=&quot;chartWeekly&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
+      &lt;div class=&quot;chart-card&quot;&gt;
+        &lt;h3&gt;🏢 Rendimiento por grupo&lt;/h3&gt;
+        &lt;div class=&quot;tabs&quot; id=&quot;groupTabs&quot;&gt;
+          &lt;div class=&quot;tab active&quot; data-group=&quot;lob_key&quot;&gt;LOB&lt;/div&gt;
+          &lt;div class=&quot;tab&quot; data-group=&quot;queue_key&quot;&gt;Queue&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;table&gt;
+          &lt;thead&gt;&lt;tr&gt;
+            &lt;th&gt;Grupo&lt;/th&gt;&lt;th&gt;Evals&lt;/th&gt;&lt;th&gt;Avg Score&lt;/th&gt;&lt;th&gt;Critical %&lt;/th&gt;&lt;th&gt;Weekly Zero&lt;/th&gt;
+          &lt;/tr&gt;&lt;/thead&gt;
+          &lt;tbody id=&quot;tblGroup&quot;&gt;&lt;/tbody&gt;
+        &lt;/table&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;chart-card&quot;&gt;
+      &lt;h3&gt;👤 Estadísticas por evaluador (@aplazo.mx)&lt;/h3&gt;
+      &lt;table&gt;
+        &lt;thead&gt;&lt;tr&gt;
+          &lt;th&gt;Evaluador&lt;/th&gt;&lt;th&gt;Evaluaciones&lt;/th&gt;&lt;th&gt;Score prom.&lt;/th&gt;&lt;th&gt;Críticos&lt;/th&gt;&lt;th&gt;Zeros&lt;/th&gt;&lt;th&gt;Agentes únicos&lt;/th&gt;
+        &lt;/tr&gt;&lt;/thead&gt;
+        &lt;tbody id=&quot;tblEvaluator&quot;&gt;&lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ══════════ TAB: FALLAS ══════════ --&gt;
+  &lt;div class=&quot;tab-section&quot; id=&quot;tab-fallas&quot;&gt;
+    &lt;div class=&quot;section-title&quot;&gt;Análisis de fallas&lt;/div&gt;
+    &lt;div class=&quot;charts-2&quot;&gt;
+      &lt;div class=&quot;chart-card&quot; id=&quot;paretoCard&quot;&gt;
+        &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
+          &lt;h3 style=&quot;margin:0;&quot; id=&quot;paretoCardTitle&quot;&gt;🔴 Pareto de fallas&lt;/h3&gt;
+          &lt;button id=&quot;paretoToggleBtn&quot; style=&quot;width:auto;padding:8px 16px;font-size:12px;border-radius:999px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;&quot;&gt;
+            📐 Ver detalle por rubro
+          &lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div id=&quot;paretoView&quot;&gt;&lt;canvas id=&quot;chartPareto&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
+        &lt;div id=&quot;rubricDetailView&quot; style=&quot;display:none;overflow-x:auto;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;chart-card&quot;&gt;
+        &lt;h3&gt;🚨 Top errores críticos&lt;/h3&gt;
+        &lt;div id=&quot;critList&quot; class=&quot;critical-list&quot;&gt;
+          &lt;div class=&quot;muted&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando...&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ══════════ TAB: AGENTES ══════════ --&gt;
+  &lt;div class=&quot;tab-section&quot; id=&quot;tab-agentes&quot;&gt;
+    &lt;div class=&quot;section-title&quot;&gt;Score promedio por rubro por agente&lt;/div&gt;
+    &lt;div class=&quot;table-card&quot; style=&quot;overflow-x:auto;&quot;&gt;
+      &lt;h3&gt;📐 Score promedio por rubro (filtrado por periodo seleccionado)&lt;/h3&gt;
+      &lt;div id=&quot;rubricTableWrapper&quot;&gt;
+        &lt;div class=&quot;muted&quot; style=&quot;padding:16px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando rubros...&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ══════════ TAB: EVALUACIONES ══════════ --&gt;
+  &lt;div class=&quot;tab-section&quot; id=&quot;tab-evaluaciones&quot;&gt;
+    &lt;div class=&quot;section-title&quot;&gt;Detalle de evaluaciones&lt;/div&gt;
+    &lt;div class=&quot;table-card&quot;&gt;
+      &lt;h3&gt;📝 Evaluaciones realizadas&lt;/h3&gt;
+      &lt;table&gt;
+        &lt;thead&gt;&lt;tr&gt;
+          &lt;th&gt;Fecha&lt;/th&gt;&lt;th&gt;Agente&lt;/th&gt;&lt;th&gt;LOB&lt;/th&gt;&lt;th&gt;Queue&lt;/th&gt;
+          &lt;th&gt;Score&lt;/th&gt;&lt;th&gt;EC&lt;/th&gt;&lt;th&gt;Evaluador&lt;/th&gt;&lt;th&gt;Feedback&lt;/th&gt;
+        &lt;/tr&gt;&lt;/thead&gt;
+        &lt;tbody id=&quot;tblEvals&quot;&gt;&lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- AGENT HISTORY MODAL --&gt;
+  &lt;div class=&quot;eval-modal-overlay&quot; id=&quot;agentHistoryOverlay&quot; style=&quot;z-index:100000;&quot;&gt;
+    &lt;div class=&quot;eval-modal&quot; style=&quot;max-width:900px;width:100%;&quot;&gt;
+      &lt;div class=&quot;eval-modal-header&quot;&gt;
+        &lt;div&gt;
+          &lt;h2 id=&quot;agentHistoryTitle&quot;&gt;Historial del agente&lt;/h2&gt;
+          &lt;div id=&quot;agentHistorySubtitle&quot; style=&quot;font-size:12px;color:#64748b;margin-top:2px;&quot;&gt;Últimos 3 meses&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;button class=&quot;eval-modal-close&quot; id=&quot;agentHistoryClose&quot;&gt;✕&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;eval-modal-body&quot; id=&quot;agentHistoryBody&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- EVAL DETAIL MODAL --&gt;
+  &lt;div class=&quot;eval-modal-overlay&quot; id=&quot;evalModalOverlay&quot;&gt;
+    &lt;div class=&quot;eval-modal&quot;&gt;
+      &lt;div class=&quot;eval-modal-header&quot;&gt;
+        &lt;h2 id=&quot;evalModalTitle&quot;&gt;Detalle de evaluación&lt;/h2&gt;
+        &lt;button class=&quot;eval-modal-close&quot; id=&quot;evalModalClose&quot;&gt;✕&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;eval-modal-body&quot; id=&quot;evalModalBody&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;&lt;!-- /app --&gt;
+&lt;script&gt;
+const SUPABASE_URL      = &quot;https://kpuqabxmpavxgbzxzlng.supabase.co&quot;;
+const SUPABASE_ANON_KEY = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdXFhYnhtcGF2eGdienh6bG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTk1NzAsImV4cCI6MjA4MDI3NTU3MH0.CoB4NA6Z8qtTrRzvIqfP-hm3T1m24WpRNI1Xc74all8&quot;;
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ── CLIENT SCOPE ── */
+const CLIENT_CAMPAIGN_KEY = &quot;aplazo&quot;;
+const APLAZO_DOMAIN = &quot;@aplazo.mx&quot;;
+
+let allData = [];
+let chartWeekly, chartHisto, chartPareto, agentHistoryChart, riskChart;
+const evalMap = {};
+let groupTabsGroup = &quot;lob_key&quot;;
+let paretoShowingDetail = false;
+let rubricDetailBuilt   = false;
+
+/* ── UTILS ── */
+async function fetchAll(q, ps=1000) {
+  let rows=[], from=0, go=true;
+  while(go){
+    const {data,error} = await q.range(from, from+ps-1);
+    if(error){console.error(error);break;}
+    rows=rows.concat(data||[]);
+    if(!data||data.length&lt;ps) go=false; else from+=ps;
+  }
+  return rows;
+}
+function scoreColor(s){ return s&gt;=90?'#22c55e':s&gt;=75?'#f59e0b':'#ef4444'; }
+function destroy(c){ if(c) c.destroy(); }
+function getFilters(){
+  return {
+    start: document.getElementById('startDate').value,
+    end:   document.getElementById('endDate').value,
+    lob:   document.getElementById('lobFilter').value,
+    queue: document.getElementById('queueFilter').value,
+    agent: document.getElementById('agentFilter').value,
+  };
+}
+function deltaArrow(val, prev) {
+  if (prev===null||prev===undefined) return {text:'—',cls:'flat'};
+  const d=val-prev;
+  if(Math.abs(d)&lt;0.01) return {text:'→ sin cambio',cls:'flat'};
+  return d&gt;0?{text:`▲ ${d.toFixed(2)} vs periodo ant.`,cls:'up'}:{text:`▼ ${Math.abs(d).toFixed(2)} vs periodo ant.`,cls:'down'};
+}
+
+/* ── FILTER OPTIONS (only @aplazo.mx evaluators) ── */
+let filterCache=[];
+async function loadFilters(){
+  const q = sb.from('qa_v_evaluations_base')
+    .select('lob_key,queue_key,agent_identifier,agent_name,evaluator_name')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .like('evaluator_name', '%' + APLAZO_DOMAIN + '%');
+  filterCache = await fetchAll(q);
+  refreshFilters();
+  ['lobFilter','queueFilter','agentFilter'].forEach(id=&gt;{
+    document.getElementById(id)?.addEventListener('change', refreshFilters);
+  });
+}
+function refreshFilters(){
+  const sel={lob:document.getElementById('lobFilter').value, queue:document.getElementById('queueFilter').value, agent:document.getElementById('agentFilter').value};
+  const filt=(excl)=&gt;filterCache.filter(r=&gt;{
+    if(excl!=='lob'   &amp;&amp; sel.lob   &amp;&amp; r.lob_key!==sel.lob)    return false;
+    if(excl!=='queue' &amp;&amp; sel.queue &amp;&amp; r.queue_key!==sel.queue) return false;
+    if(excl!=='agent' &amp;&amp; sel.agent &amp;&amp; r.agent_identifier!==sel.agent) return false;
+    return true;
+  });
+  const fill=(id,vals,label='Todos')=&gt;{
+    const el=document.getElementById(id); const cur=el.value;
+    el.innerHTML=`&lt;option value=&quot;&quot;&gt;${label}&lt;/option&gt;`;
+    [...new Set(vals)].filter(Boolean).sort().forEach(v=&gt;{ const o=document.createElement('option'); o.value=o.textContent=v; el.appendChild(o); });
+    if([...el.options].some(o=&gt;o.value===cur)) el.value=cur;
+  };
+  fill('lobFilter',   filt('lob').map(r=&gt;r.lob_key));
+  fill('queueFilter', filt('queue').map(r=&gt;r.queue_key));
+  const agents=filt('agent').filter(r=&gt;r.agent_identifier&amp;&amp;r.agent_name)
+    .reduce((a,r)=&gt;{a[r.agent_identifier]=r.agent_name;return a;},{});
+  const agSel=document.getElementById('agentFilter'); const curAg=agSel.value;
+  agSel.innerHTML='&lt;option value=&quot;&quot;&gt;Todos&lt;/option&gt;';
+  Object.entries(agents).sort((a,b)=&gt;a[1].localeCompare(b[1],'es')).forEach(([id,name])=&gt;{
+    const o=document.createElement('option'); o.value=id; o.textContent=`${name}`; agSel.appendChild(o);
+  });
+  if([...agSel.options].some(o=&gt;o.value===curAg)) agSel.value=curAg;
+}
+
+/* ── MAIN LOAD ── */
+async function load(){
+  const f=getFilters();
+  document.getElementById('lastUpdated').textContent='Cargando...';
+
+  /* KEY FILTER: only @aplazo.mx evaluators */
+  let q = sb.from('qa_v_evaluations_base').select('*')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .like('evaluator_name', '%' + APLAZO_DOMAIN + '%');
+  if(f.start) q=q.gte('created_date_cdmx',f.start);
+  if(f.end)   q=q.lte('created_date_cdmx',f.end);
+  if(f.lob)   q=q.eq('lob_key',f.lob);
+  if(f.queue) q=q.eq('queue_key',f.queue);
+  if(f.agent) q=q.eq('agent_identifier',f.agent);
+  allData = await fetchAll(q);
+
+  document.getElementById('lastUpdated').textContent=new Date().toLocaleString('es-MX');
+  document.getElementById('recordCount').textContent=`${allData.length} registros`;
+
+  renderKpis(f);
+  renderWeekly();
+  renderHisto();
+  renderWeeklyTable();
+  renderGroupTable();
+  renderEvaluatorTable();
+  renderPareto(f);
+  renderCriticals(f);
+  renderRubricAgent(f);
+  renderEvals();
+
+  /* reset pareto toggle on refresh */
+  paretoShowingDetail=false; rubricDetailBuilt=false;
+  const pv=document.getElementById('paretoView');
+  const dv=document.getElementById('rubricDetailView');
+  const btn=document.getElementById('paretoToggleBtn');
+  const ttl=document.getElementById('paretoCardTitle');
+  if(pv) pv.style.display='block';
+  if(dv){dv.style.display='none';dv.innerHTML='';}
+  if(btn){btn.textContent='📐 Ver detalle por rubro';btn.style.background='#f1f5f9';btn.style.borderColor='#e2e8f0';btn.style.color='#0f172a';}
+  if(ttl) ttl.textContent='🔴 Pareto de fallas';
+}
+
+/* ── KPIS ── */
+async function renderKpis(f){
+  const n=allData.length;
+  const avg=n?allData.reduce((s,r)=&gt;s+Number(r.score_final||0),0)/n:0;
+  const crits=allData.filter(r=&gt;r.critical_error_triggered).length;
+  const zeros=allData.filter(r=&gt;r.weekly_zero_triggered).length;
+  const agents=new Set(allData.map(r=&gt;r.agent_identifier||r.agent_name).filter(Boolean)).size;
+  const critRate=n?(crits/n)*100:0;
+
+  document.getElementById('kAvgScore').textContent=avg.toFixed(2)+'%';
+  document.getElementById('kTotal').textContent=n;
+  document.getElementById('kCritRate').textContent=critRate.toFixed(2)+'%';
+  document.getElementById('kZeros').textContent=zeros;
+  document.getElementById('kAgents').textContent=agents;
+
+  /* prev period */
+  let prevAvg=null,prevTotal=null,prevCritRate=null,prevZero=null;
+  try{
+    const start=new Date(f.start||new Date(Date.now()-7*86400000));
+    const end=new Date(f.end||new Date());
+    const dur=end-start;
+    const ps=new Date(start-dur).toISOString().split('T')[0];
+    const pe=new Date(start-1).toISOString().split('T')[0];
+    let pq=sb.from('qa_v_evaluations_base').select('score_final,critical_error_triggered,weekly_zero_triggered')
+      .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+      .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+      .gte('created_date_cdmx',ps).lte('created_date_cdmx',pe);
+    if(f.lob)   pq=pq.eq('lob_key',f.lob);
+    if(f.queue) pq=pq.eq('queue_key',f.queue);
+    if(f.agent) pq=pq.eq('agent_identifier',f.agent);
+    const pd=await fetchAll(pq);
+    if(pd.length){
+      prevTotal=pd.length;
+      prevAvg=pd.reduce((s,r)=&gt;s+Number(r.score_final||0),0)/pd.length;
+      prevCritRate=(pd.filter(r=&gt;r.critical_error_triggered).length/pd.length)*100;
+      prevZero=pd.filter(r=&gt;r.weekly_zero_triggered).length;
+    }
+  }catch(e){}
+
+  const t1=deltaArrow(avg,prevAvg);
+  const t2=deltaArrow(n,prevTotal);
+  const t3=deltaArrow(critRate,prevCritRate);
+  const t4=deltaArrow(zeros,prevZero);
+  function setTrend(id,t){const el=document.getElementById(id);el.textContent=t.text;el.className=`trend ${t.cls}`;}
+  setTrend('kTrendScore',t1); setTrend('kTrendTotal',t2);
+  setTrend('kTrendCrit',t3);  setTrend('kTrendZero',t4);
+  document.getElementById('kTrendAgents').textContent=`${agents} agentes únicos`;
+  document.getElementById('kTrendAgents').className='trend flat';
+
+  document.getElementById('insightBar').innerHTML=n
+    ?`En el periodo se realizaron &lt;strong&gt;${n}&lt;/strong&gt; evaluaciones (evaluadores @aplazo.mx) con un score promedio de &lt;strong&gt;${avg.toFixed(2)}%&lt;/strong&gt;. Se detectaron &lt;strong&gt;${crits}&lt;/strong&gt; error(es) crítico(s) y &lt;strong&gt;${zeros}&lt;/strong&gt; caso(s) de Weekly Zero. &lt;strong&gt;${agents}&lt;/strong&gt; agentes únicos evaluados.`
+    :'No hay evaluaciones para los filtros seleccionados.';
+}
+
+/* ── WEEKLY CHART ── */
+function getWeekMonday(d){
+  const dt=new Date(d+'T12:00:00'),dow=dt.getDay();
+  dt.setDate(dt.getDate()+(dow===0?-6:1-dow));
+  return dt.toISOString().split('T')[0];
+}
+function renderWeekly(){
+  const byW={};
+  allData.forEach(r=&gt;{
+    if(!r.created_date_cdmx)return;
+    const w=getWeekMonday(r.created_date_cdmx);
+    if(!byW[w]) byW[w]=[];
+    byW[w].push(Number(r.score_final||0));
+  });
+  const labels=Object.keys(byW).sort();
+  const vals=labels.map(w=&gt;{const a=byW[w];return a.reduce((s,v)=&gt;s+v,0)/a.length;});
+  destroy(chartWeekly);
+  chartWeekly=new Chart(document.getElementById('chartWeekly'),{
+    type:'line',
+    data:{labels,datasets:[{label:'Score',data:vals,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,.1)',borderWidth:3,tension:0.35,pointRadius:5,fill:true}]},
+    options:{responsive:true,plugins:{legend:{display:false},datalabels:{align:'top',anchor:'end',color:'#0f172a',font:{weight:'bold',size:11},formatter:v=&gt;v.toFixed(2)+'%'}},scales:{y:{beginAtZero:false,ticks:{callback:v=&gt;v+'%'}}}},
+    plugins:[ChartDataLabels]
+  });
+}
+
+/* ── HISTOGRAM ── */
+function renderHisto(){
+  const bins=['&lt;60','60–69','70–79','80–89','90–94','95–100'],counts=[0,0,0,0,0,0];
+  allData.forEach(r=&gt;{const s=Number(r.score_final||0);if(s&lt;60)counts[0]++;else if(s&lt;70)counts[1]++;else if(s&lt;80)counts[2]++;else if(s&lt;90)counts[3]++;else if(s&lt;95)counts[4]++;else counts[5]++;});
+  destroy(chartHisto);
+  chartHisto=new Chart(document.getElementById('chartHisto'),{
+    type:'bar',
+    data:{labels:bins,datasets:[{data:counts,backgroundColor:['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e','#16a34a'],borderRadius:8}]},
+    options:{responsive:true,plugins:{legend:{display:false},datalabels:{anchor:'end',align:'top',color:'#0f172a',font:{weight:'bold',size:11},formatter:v=&gt;v}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+    plugins:[ChartDataLabels]
+  });
+}
+
+/* ── WEEKLY TABLE ── */
+function renderWeeklyTable(){
+  const byW={};
+  allData.forEach(r=&gt;{
+    if(!r.created_date_cdmx)return;
+    const w=getWeekMonday(r.created_date_cdmx);
+    if(!byW[w]) byW[w]={scores:[],crits:0};
+    byW[w].scores.push(Number(r.score_final||0));
+    if(r.critical_error_triggered) byW[w].crits++;
+  });
+  const weeks=Object.keys(byW).sort().reverse().slice(0,8).reverse();
+  const rows=weeks.map(w=&gt;({week:w,evals:byW[w].scores.length,avg:byW[w].scores.reduce((a,b)=&gt;a+b,0)/byW[w].scores.length,critPct:(byW[w].crits/byW[w].scores.length)*100}));
+  document.getElementById('tblWeekly').innerHTML=rows.map((r,i)=&gt;{
+    const prev=i&gt;0?rows[i-1]:null;
+    const d=prev?deltaArrow(r.avg,prev.avg):null;
+    return `&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.week}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${r.evals}&lt;/td&gt;&lt;td style=&quot;color:${scoreColor(r.avg)};font-weight:700;&quot;&gt;${r.avg.toFixed(2)}%&lt;/td&gt;&lt;td&gt;${r.critPct.toFixed(1)}%&lt;/td&gt;&lt;td class=&quot;${d?`delta-${d.cls}`:'delta-flat'}&quot;&gt;${d?d.text:'—'}&lt;/td&gt;&lt;/tr&gt;`;
+  }).join('');
+}
+
+/* ── GROUP TABLE ── */
+function renderGroupTable(){
+  const grp={};
+  allData.forEach(r=&gt;{
+    const g=r[groupTabsGroup]||'Sin clasificar';
+    if(!grp[g]) grp[g]={scores:[],crits:0,zeros:0};
+    grp[g].scores.push(Number(r.score_final||0));
+    if(r.critical_error_triggered) grp[g].crits++;
+    if(r.weekly_zero_triggered)    grp[g].zeros++;
+  });
+  const rows=Object.entries(grp).map(([g,v])=&gt;({g,evals:v.scores.length,avg:v.scores.reduce((a,b)=&gt;a+b,0)/v.scores.length,critPct:(v.crits/v.scores.length)*100,zeros:v.zeros})).sort((a,b)=&gt;b.evals-a.evals);
+  document.getElementById('tblGroup').innerHTML=rows.map(r=&gt;`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.g}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${r.evals}&lt;/td&gt;&lt;td style=&quot;color:${scoreColor(r.avg)};font-weight:700;&quot;&gt;${r.avg.toFixed(2)}%&lt;/td&gt;&lt;td&gt;${r.critPct.toFixed(1)}%&lt;/td&gt;&lt;td&gt;${r.zeros}&lt;/td&gt;&lt;/tr&gt;`).join('');
+}
+
+/* ── EVALUATOR TABLE ── */
+function renderEvaluatorTable(){
+  const grp={};
+  allData.forEach(r=&gt;{
+    const ev=r.evaluator_name||'Sin evaluador';
+    if(!grp[ev]) grp[ev]={scores:[],crits:0,zeros:0,agents:new Set()};
+    grp[ev].scores.push(Number(r.score_final||0));
+    if(r.critical_error_triggered) grp[ev].crits++;
+    if(r.weekly_zero_triggered)    grp[ev].zeros++;
+    if(r.agent_identifier||r.agent_name) grp[ev].agents.add(r.agent_identifier||r.agent_name);
+  });
+  const rows=Object.entries(grp).map(([ev,v])=&gt;({evaluator:ev,evals:v.scores.length,avg:v.scores.reduce((a,b)=&gt;a+b,0)/v.scores.length,crits:v.crits,zeros:v.zeros,agents:v.agents.size})).sort((a,b)=&gt;b.evals-a.evals);
+  document.getElementById('tblEvaluator').innerHTML=rows.map(r=&gt;`
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;${r.evaluator}&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;${r.evals}&lt;/td&gt;
+      &lt;td style=&quot;color:${scoreColor(r.avg)};font-weight:700;&quot;&gt;${r.avg.toFixed(2)}%&lt;/td&gt;
+      &lt;td&gt;${r.crits} &lt;span class=&quot;badge badge-red&quot;&gt;${r.evals?((r.crits/r.evals)*100).toFixed(1):0}%&lt;/span&gt;&lt;/td&gt;
+      &lt;td&gt;${r.zeros}&lt;/td&gt;
+      &lt;td&gt;${r.agents}&lt;/td&gt;
+    &lt;/tr&gt;`).join('');
+}
+
+/* ── PARETO ── */
+async function renderPareto(f){
+  let q=sb.from('qa_v_evaluation_responses_detail').select('rubric_item,field_key')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .eq('failed_item',true)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+  if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
+  if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
+  if(f.lob)   q=q.eq('lob_key',f.lob);
+  if(f.queue) q=q.eq('queue_key',f.queue);
+  if(f.agent) q=q.eq('agent_identifier',f.agent);
+  const data=await fetchAll(q);
+  const grp={};
+  (data||[]).forEach(r=&gt;{const k=r.rubric_item||r.field_key||'Desconocido'; grp[k]=(grp[k]||0)+1;});
+  const total=Object.values(grp).reduce((s,c)=&gt;s+c,0);
+  const items=Object.entries(grp).map(([l,c])=&gt;({l,c})).sort((a,b)=&gt;b.c-a.c).slice(0,10);
+  let cum=0;
+  const cumPct=items.map(i=&gt;{cum+=i.c; return total?(cum/total*100):0;});
+  destroy(chartPareto);
+  chartPareto=new Chart(document.getElementById('chartPareto'),{
+    type:'bar',
+    data:{labels:items.map(i=&gt;i.l.length&gt;32?i.l.slice(0,32)+'…':i.l),datasets:[
+      {type:'bar',label:'Fallas',data:items.map(i=&gt;i.c),backgroundColor:'rgba(56,189,248,.7)',borderRadius:6,yAxisID:'y'},
+      {type:'line',label:'% acum',data:cumPct,borderColor:'#ef4444',borderWidth:2.5,pointRadius:4,tension:0.25,backgroundColor:'transparent',yAxisID:'y1'}
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true},datalabels:{display:ctx=&gt;ctx.dataset.type==='line',align:'top',anchor:'end',color:'#0f172a',font:{weight:'bold',size:10},formatter:v=&gt;v.toFixed(0)+'%'}},scales:{y:{beginAtZero:true,position:'left',ticks:{precision:0}},y1:{beginAtZero:true,max:100,position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=&gt;v+'%'}}}},
+    plugins:[ChartDataLabels]
+  });
+}
+
+/* ── PARETO TOGGLE (rubro detail) ── */
+async function toggleParetoView(){
+  paretoShowingDetail=!paretoShowingDetail;
+  const btn=document.getElementById('paretoToggleBtn');
+  const ttl=document.getElementById('paretoCardTitle');
+  const pv=document.getElementById('paretoView');
+  const dv=document.getElementById('rubricDetailView');
+  if(paretoShowingDetail){
+    pv.style.display='none'; dv.style.display='block';
+    ttl.textContent='📐 Score por rubro';
+    btn.textContent='🔴 Ver Pareto de fallas';
+    btn.style.background='#ecfeff'; btn.style.borderColor='#a5f3fc'; btn.style.color='#164e63';
+    if(!rubricDetailBuilt) await buildRubricDetail();
+  } else {
+    pv.style.display='block'; dv.style.display='none';
+    ttl.textContent='🔴 Pareto de fallas';
+    btn.textContent='📐 Ver detalle por rubro';
+    btn.style.background='#f1f5f9'; btn.style.borderColor='#e2e8f0'; btn.style.color='#0f172a';
+  }
+}
+async function buildRubricDetail(){
+  const dv=document.getElementById('rubricDetailView');
+  dv.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando...&lt;/div&gt;';
+  const f=getFilters();
+  let q=sb.from('qa_v_evaluation_responses_detail')
+    .select('rubric_item,field_key,calculated_score,weight,failed_item,is_bonus')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+  if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
+  if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
+  if(f.lob)   q=q.eq('lob_key',f.lob);
+  if(f.queue) q=q.eq('queue_key',f.queue);
+  if(f.agent) q=q.eq('agent_identifier',f.agent);
+  const raw=(await fetchAll(q)).filter(r=&gt;!r.is_bonus);
+  if(!raw.length){dv.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;Sin datos.&lt;/div&gt;';return;}
+  const rm={};
+  raw.forEach(r=&gt;{
+    const k=r.rubric_item||r.field_key||'Sin rubro';
+    const sc=Number(r.calculated_score||0),mx=Number(r.weight||0);
+    if(!rm[k]) rm[k]={sum:0,count:0,maxW:mx,fails:0};
+    rm[k].sum+=sc; rm[k].count++; if(r.failed_item) rm[k].fails++;
+    if(mx&gt;rm[k].maxW) rm[k].maxW=mx;
+  });
+  const rows=Object.entries(rm).map(([rub,v])=&gt;({rub,pct:v.maxW&gt;0?(v.sum/v.count)/v.maxW*100:0,count:v.count,fails:v.fails})).sort((a,b)=&gt;a.pct-b.pct);
+  function rc(p){return p&gt;=90?{bg:'#dcfce7',cl:'#166534'}:p&gt;=70?{bg:'#fef9c3',cl:'#854d0e'}:{bg:'#fee2e2',cl:'#991b1b'};}
+  dv.innerHTML=`&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:13px;&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style=&quot;min-width:200px;background:#f8fafc;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;&quot;&gt;Rubro&lt;/th&gt;&lt;th style=&quot;text-align:center;background:#f8fafc;padding:10px 12px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;&quot;&gt;Evaluaciones&lt;/th&gt;&lt;th style=&quot;text-align:center;background:#f8fafc;padding:10px 12px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;&quot;&gt;Penalizaciones&lt;/th&gt;&lt;th style=&quot;text-align:center;min-width:100px;background:#f8fafc;padding:10px 12px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;&quot;&gt;Score&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${rows.map(r=&gt;{const c=rc(r.pct);return `&lt;tr&gt;&lt;td style=&quot;padding:10px 12px;border-bottom:1px solid #f1f5f9;&quot;&gt;&lt;strong&gt;${r.rub}&lt;/strong&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center;padding:10px 12px;border-bottom:1px solid #f1f5f9;&quot;&gt;${r.count}&lt;/td&gt;&lt;td style=&quot;text-align:center;padding:10px 12px;border-bottom:1px solid #f1f5f9;&quot;&gt;${r.fails}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${c.bg};color:${c.cl};font-weight:800;border-radius:8px;padding:10px 12px;border-bottom:1px solid #f1f5f9;&quot;&gt;${r.pct.toFixed(2)}%&lt;/td&gt;&lt;/tr&gt;`;}).join('')}&lt;/tbody&gt;&lt;/table&gt;`;
+  rubricDetailBuilt=true;
+}
+
+/* ── RUBRIC PER AGENT ── */
+async function renderRubricAgent(f){
+  const wrapper=document.getElementById('rubricTableWrapper');
+  wrapper.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:16px;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando...&lt;/div&gt;';
+  if(!allData.length){wrapper.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:16px;&quot;&gt;Sin datos.&lt;/div&gt;';return;}
+  const agEvals={},agScores={},agNames={},validKeys=new Set();
+  allData.forEach(r=&gt;{
+    const k=r.agent_identifier||r.agent_name||'Unknown';
+    agEvals[k]=(agEvals[k]||0)+1; agScores[k]=(agScores[k]||0)+Number(r.score_final||0);
+    if(!agNames[k]) agNames[k]=r.agent_name||k; validKeys.add(k);
+  });
+  let q=sb.from('qa_v_evaluation_responses_detail')
+    .select('agent_identifier,agent_name,rubric_item,field_key,calculated_score,weight,is_bonus')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+  if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
+  if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
+  if(f.lob)   q=q.eq('lob_key',f.lob);
+  if(f.queue) q=q.eq('queue_key',f.queue);
+  if(f.agent) q=q.eq('agent_identifier',f.agent);
+  const raw=(await fetchAll(q)).filter(r=&gt;!r.is_bonus&amp;&amp;validKeys.has(r.agent_identifier||r.agent_name||'Unknown'));
+  const rubSet=new Set(),agMap={};
+  raw.forEach(r=&gt;{
+    const k=r.agent_identifier||r.agent_name||'Unknown',rub=r.rubric_item||r.field_key||'Sin rubro';
+    const sc=Number(r.calculated_score||0),mx=Number(r.weight||0);
+    rubSet.add(rub);
+    if(!agMap[k]) agMap[k]={};
+    if(!agMap[k][rub]) agMap[k][rub]={sum:0,count:0,maxW:mx};
+    agMap[k][rub].sum+=sc; agMap[k][rub].count++;
+    if(mx&gt;agMap[k][rub].maxW) agMap[k][rub].maxW=mx;
+  });
+  const rubrics=[...rubSet].sort();
+  const agents=[...validKeys].map(k=&gt;({k,name:agNames[k]||k,evals:agEvals[k]||0,avg:agEvals[k]?(agScores[k]/agEvals[k]):0,rubs:agMap[k]||{}})).sort((a,b)=&gt;b.avg-a.avg);
+  function rcCls(avg,mx){if(!mx)return 'rubric-cell-gray';const p=(avg/mx)*100;return p&gt;=90?'rubric-cell-green':p&gt;=70?'rubric-cell-yellow':'rubric-cell-red';}
+  const ths=rubrics.map(r=&gt;`&lt;th title=&quot;${r}&quot; style=&quot;min-width:80px;&quot;&gt;${r.length&gt;22?r.slice(0,22)+'…':r}&lt;/th&gt;`).join('');
+  const tbody=agents.map(a=&gt;{
+    const cells=rubrics.map(r=&gt;{
+      const d=a.rubs[r]; if(!d||!d.count) return '&lt;td class=&quot;rubric-cell-gray&quot;&gt;—&lt;/td&gt;';
+      const avg=d.sum/d.count,cls=rcCls(avg,d.maxW);
+      return `&lt;td class=&quot;${cls}&quot;&gt;${avg.toFixed(2)}&lt;/td&gt;`;
+    }).join('');
+    return `&lt;tr&gt;
+      &lt;td&gt;&lt;span onclick=&quot;openAgentHistory('${a.k.replace(/'/g,&quot;\'&quot;)}','${a.name.replace(/'/g,&quot;\'&quot;)}' )&quot; style=&quot;cursor:pointer;color:#0284c7;font-weight:700;text-decoration:underline;&quot; title=&quot;Ver historial&quot;&gt;${a.name}&lt;/span&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align:center;&quot;&gt;${a.evals}&lt;/td&gt;
+      &lt;td style=&quot;text-align:center;color:${scoreColor(a.avg)};font-weight:700;&quot;&gt;${a.avg.toFixed(2)}%&lt;/td&gt;
+      ${cells}
+    &lt;/tr&gt;`;
+  }).join('');
+  wrapper.innerHTML=`&lt;div style=&quot;overflow-x:auto;&quot;&gt;&lt;table class=&quot;rubric-table&quot; style=&quot;width:100%;border-collapse:collapse;font-size:13px;&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style=&quot;min-width:160px;&quot;&gt;Agente&lt;/th&gt;&lt;th style=&quot;text-align:center;min-width:60px;&quot;&gt;# Evals&lt;/th&gt;&lt;th style=&quot;text-align:center;min-width:80px;&quot;&gt;Score&lt;/th&gt;${ths}&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${tbody}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
+}
+
+/* ── CRITICALS ── */
+async function renderCriticals(f){
+  let q=sb.from('qa_v_policy_flags_detail').select('policy_flag,display_label,field_key')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+  if(f.start) q=q.gte('created_date_cdmx',f.start);
+  if(f.end)   q=q.lte('created_date_cdmx',f.end);
+  if(f.lob)   q=q.eq('lob_key',f.lob);
+  if(f.queue) q=q.eq('queue_key',f.queue);
+  if(f.agent) q=q.eq('agent_identifier',f.agent);
+  const data=await fetchAll(q);
+  const grp={};
+  (data||[]).forEach(r=&gt;{const k=r.policy_flag||r.display_label||r.field_key||'Unknown'; grp[k]=(grp[k]||0)+1;});
+  const items=Object.entries(grp).map(([l,c])=&gt;({l,c})).sort((a,b)=&gt;b.c-a.c).slice(0,8);
+  const mx=items.length?Math.max(...items.map(i=&gt;i.c)):0;
+  document.getElementById('critList').innerHTML=items.length?items.map(i=&gt;`
+    &lt;div class=&quot;critical-card&quot; title=&quot;${i.l}&quot;&gt;
+      &lt;div class=&quot;critical-card-header&quot;&gt;
+        &lt;div class=&quot;critical-title&quot;&gt;${i.l.length&gt;40?i.l.slice(0,40)+'…':i.l}&lt;/div&gt;
+        &lt;div class=&quot;critical-count&quot;&gt;${i.c}&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;critical-bar&quot;&gt;&lt;div class=&quot;critical-bar-fill&quot; style=&quot;width:${mx?(i.c/mx*100):0}%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;`).join('')
+  :'&lt;div class=&quot;muted&quot; style=&quot;padding:8px;&quot;&gt;Sin errores críticos en este periodo.&lt;/div&gt;';
+}
+
+/* ── EVALS TABLE ── */
+function renderEvals(){
+  const rows=[...allData].sort((a,b)=&gt;(b.created_date_cdmx||'').localeCompare(a.created_date_cdmx||''));
+  document.getElementById('tblEvals').innerHTML=rows.map((r,i)=&gt;{
+    const k='ev_'+i; evalMap[k]=r;
+    const sc=Number(r.score_final||0);
+    const fb=r.feedback?(r.feedback.length&gt;50?r.feedback.slice(0,50)+'…':r.feedback):'Sin feedback';
+    return `&lt;tr style=&quot;cursor:pointer;&quot; onclick=&quot;openEvalModal('${k}')&quot; title=&quot;Ver detalle completo&quot;&gt;
+      &lt;td&gt;${r.created_date_cdmx||''}&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;${r.agent_name||''}&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;${r.lob_key||''}&lt;/td&gt;
+      &lt;td&gt;${r.queue_key||''}&lt;/td&gt;
+      &lt;td style=&quot;color:${scoreColor(sc)};font-weight:700;&quot;&gt;${sc}%&lt;/td&gt;
+      &lt;td&gt;${r.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/td&gt;
+      &lt;td style=&quot;font-size:12px;color:#64748b;&quot;&gt;${r.evaluator_name||'–'}&lt;/td&gt;
+      &lt;td style=&quot;color:#475569;&quot;&gt;${fb}&lt;/td&gt;
+    &lt;/tr&gt;`;
+  }).join('');
+}
+
+/* ── EVAL MODAL ── */
+let currentEvalRow = null;
+let currentRubricData = [];
+
+async function openEvalModal(key){
+  const row=evalMap[key]; if(!row)return;
+  currentEvalRow = row;
+  currentRubricData = [];
+
+  const overlay=document.getElementById('evalModalOverlay');
+  const body=document.getElementById('evalModalBody');
+  document.getElementById('evalModalTitle').textContent=row.agent_name||'Detalle';
+  body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:20px;text-align:center;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando...&lt;/div&gt;';
+  overlay.classList.add('active');
+  const sc=Number(row.score_final||0);
+  const kpis=`
+    &lt;div class=&quot;eval-modal-kpis&quot;&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Fecha&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:16px;&quot;&gt;${row.created_date_cdmx||'–'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(sc)}&quot;&gt;${sc}%&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Error Crítico&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:15px;&quot;&gt;${row.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;eval-modal-kpis&quot; style=&quot;grid-template-columns:repeat(4,1fr);&quot;&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;LOB&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:13px;&quot;&gt;${row.lob_key||'–'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Queue&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:13px;&quot;&gt;${row.queue_key||'–'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Evaluador&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:12px;&quot;&gt;${row.evaluator_name||'–'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Weekly Zero&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:13px;&quot;&gt;${row.weekly_zero_triggered?'&lt;span class=&quot;badge badge-yellow&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;`;
+  const feedback=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;💬 Feedback&lt;/h4&gt;&lt;p&gt;${row.feedback||'Sin feedback registrado.'}&lt;/p&gt;${row.interaction_link?`&lt;a href=&quot;${row.interaction_link}&quot; target=&quot;_blank&quot; class=&quot;eval-feedback-link&quot;&gt;🔗 Ver interacción&lt;/a&gt;`:''}&lt;/div&gt;`;
+  const commitment=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📋 Compromiso del agente&lt;/h4&gt;&lt;p&gt;${row.agent_commitment||'Sin compromiso registrado.'}&lt;/p&gt;&lt;/div&gt;`;
+  let rubricHtml='';
+  try{
+    const evalId=row.evaluation_id||row.id;
+    if(evalId){
+      const {data:rd}=await sb.from('qa_v_evaluation_responses_detail')
+        .select('rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,rubric_item_id')
+        .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+        .eq('evaluation_id',evalId);
+      currentRubricData=(rd||[]).filter(r=&gt;!r.is_bonus);
+      if(currentRubricData.length){
+        const rubricRows=currentRubricData.map(r=&gt;{
+          const rub=r.rubric_item||r.field_key||'Sin rubro';
+          const sc2=Number(r.calculated_score||0),mx=Number(r.weight||0),pct=mx&gt;0?(sc2/mx)*100:0;
+          const bg=pct&gt;=90?'#dcfce7':pct&gt;=70?'#fef9c3':'#fee2e2',cl=pct&gt;=90?'#166534':pct&gt;=70?'#854d0e':'#991b1b';
+          return `&lt;tr&gt;&lt;td&gt;${rub}&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${r.failed_item?'&lt;span class=&quot;badge badge-red&quot;&gt;Falla&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;OK&lt;/span&gt;'}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${bg};color:${cl};font-weight:700;border-radius:6px;&quot;&gt;${pct.toFixed(2)}%&lt;/td&gt;&lt;td style=&quot;text-align:center;color:#94a3b8;&quot;&gt;${sc2}/${mx}&lt;/td&gt;&lt;/tr&gt;`;
+        }).join('');
+        rubricHtml=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📐 Score por rubro&lt;/h4&gt;&lt;table class=&quot;eval-modal-rubrics&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Rubro&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Estado&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Score&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Pts&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${rubricRows}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
+      }
+    }
+  }catch(e){}
+
+  const corrPanel = `
+    &lt;div class=&quot;correction-panel&quot;&gt;
+      &lt;div class=&quot;correction-panel-header&quot;&gt;
+        &lt;div class=&quot;correction-panel-title&quot;&gt;✏️ Solicitar corrección&lt;/div&gt;
+        &lt;button class=&quot;btn-request-correction&quot; onclick=&quot;toggleCorrForm()&quot;&gt;✏️ Solicitar corrección&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;correction-form&quot; id=&quot;corrForm&quot;&gt;
+        &lt;div class=&quot;corr-field&quot;&gt;
+          &lt;label class=&quot;corr-label&quot;&gt;Tipo de corrección&lt;/label&gt;
+          &lt;select class=&quot;corr-select&quot; id=&quot;corrType&quot; onchange=&quot;onCorrTypeChange()&quot;&gt;
+            &lt;option value=&quot;&quot;&gt;Selecciona una opción&lt;/option&gt;
+            &lt;option value=&quot;Cambio de agente&quot;&gt;Cambio de agente (nombre / ID)&lt;/option&gt;
+            &lt;option value=&quot;Corrección de score&quot;&gt;Corrección de score y rubros&lt;/option&gt;
+            &lt;option value=&quot;Eliminar evaluación&quot;&gt;Eliminar evaluación&lt;/option&gt;
+          &lt;/select&gt;
+        &lt;/div&gt;
+
+        &lt;div id=&quot;corrSectionAgente&quot; style=&quot;display:none;&quot;&gt;
+          &lt;div class=&quot;corr-section-title&quot;&gt;Datos del agente correcto&lt;/div&gt;
+          &lt;div class=&quot;corr-grid-2&quot;&gt;
+            &lt;div class=&quot;corr-field&quot;&gt;
+              &lt;label class=&quot;corr-label&quot;&gt;Nombre correcto&lt;/label&gt;
+              &lt;input type=&quot;text&quot; class=&quot;corr-input&quot; id=&quot;corrNewAgentName&quot; placeholder=&quot;Nombre completo&quot;&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;corr-field&quot;&gt;
+              &lt;label class=&quot;corr-label&quot;&gt;ID correcto&lt;/label&gt;
+              &lt;input type=&quot;text&quot; class=&quot;corr-input&quot; id=&quot;corrNewAgentId&quot; placeholder=&quot;Ej. CX00712&quot;&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div id=&quot;corrSectionScore&quot; style=&quot;display:none;&quot;&gt;
+          &lt;div class=&quot;corr-section-title&quot;&gt;Nuevo score y rubros&lt;/div&gt;
+          &lt;div class=&quot;corr-field&quot;&gt;
+            &lt;label class=&quot;corr-label&quot;&gt;Nuevo score final (0–100)&lt;/label&gt;
+            &lt;input type=&quot;number&quot; class=&quot;corr-input&quot; id=&quot;corrNewScore&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;0.01&quot; placeholder=&quot;Ej. 87.5&quot; style=&quot;max-width:160px;&quot;&gt;
+          &lt;/div&gt;
+          &lt;div id=&quot;corrRubricRows&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;corr-field&quot; style=&quot;margin-top:16px;&quot;&gt;
+          &lt;label class=&quot;corr-label&quot;&gt;Razón de la corrección &lt;span style=&quot;color:#ef4444;&quot;&gt;*&lt;/span&gt;&lt;/label&gt;
+          &lt;textarea class=&quot;corr-textarea&quot; id=&quot;corrReason&quot; placeholder=&quot;Describe por qué se necesita esta corrección…&quot;&gt;&lt;/textarea&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;corr-actions&quot;&gt;
+          &lt;button class=&quot;btn-cancel-correction&quot; onclick=&quot;toggleCorrForm()&quot;&gt;Cancelar&lt;/button&gt;
+          &lt;button class=&quot;btn-submit-correction&quot; id=&quot;btnSubmitCorr&quot; onclick=&quot;submitCorrAplazo()&quot;&gt;
+            Enviar solicitud
+          &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;correction-success&quot; id=&quot;corrSuccess&quot;&gt;
+          ✅ Solicitud enviada correctamente. El manager la revisará pronto.
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;`;
+
+  body.innerHTML=kpis+feedback+commitment+rubricHtml+corrPanel;
+}
+
+function toggleCorrForm() {
+  const form = document.getElementById('corrForm');
+  const btn  = document.querySelector('.btn-request-correction');
+  const succ = document.getElementById('corrSuccess');
+  if (!form) return;
+  const open = form.classList.contains('open');
+  form.classList.toggle('open', !open);
+  if (btn) btn.textContent = open ? '✏️ Solicitar corrección' : '✕ Cerrar';
+  if (succ) succ.style.display = 'none';
+}
+
+function onCorrTypeChange() {
+  const type = document.getElementById('corrType')?.value;
+  const sA = document.getElementById('corrSectionAgente');
+  const sS = document.getElementById('corrSectionScore');
+  if (sA) sA.style.display = type === 'Cambio de agente' ? 'block' : 'none';
+  if (sS) sS.style.display = type === 'Corrección de score' ? 'block' : 'none';
+
+  if (type === 'Corrección de score') {
+    const container = document.getElementById('corrRubricRows');
+    if (!container) return;
+    if (currentRubricData.length &gt; 0) {
+      container.innerHTML = currentRubricData.map((r, i) =&gt; {
+        const rub = r.rubric_item || r.field_key || `Rubro ${i+1}`;
+        const sc  = Number(r.calculated_score || 0);
+        return `
+          &lt;div class=&quot;rubric-edit-row&quot;&gt;
+            &lt;div class=&quot;rubric-edit-label&quot;&gt;${rub}&lt;/div&gt;
+            &lt;input type=&quot;number&quot; class=&quot;rubric-edit-input&quot; id=&quot;corrRub_${i}&quot;
+              value=&quot;${sc}&quot; min=&quot;0&quot; max=&quot;${r.weight||10}&quot; step=&quot;0.01&quot;
+              placeholder=&quot;0–${r.weight||10}&quot;&gt;
+          &lt;/div&gt;`;
+      }).join('');
+    } else {
+      container.innerHTML = '&lt;p style=&quot;font-size:12px;color:#94a3b8;&quot;&gt;No hay rubros disponibles.&lt;/p&gt;';
+    }
+  }
+}
+
+async function submitCorrAplazo() {
+  const btn    = document.getElementById('btnSubmitCorr');
+  const type   = document.getElementById('corrType')?.value;
+  const reason = document.getElementById('corrReason')?.value?.trim();
+
+  if (!type)   { alert('Selecciona el tipo de corrección.'); return; }
+  if (!reason) { alert('La razón de corrección es obligatoria.'); return; }
+
+  const row = currentEvalRow;
+  if (!row) return;
+
+  const reqBy = row.evaluator_name || 'Sin evaluador';
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  let newRubricResponses = null;
+  if (type === 'Corrección de score' &amp;&amp; currentRubricData.length &gt; 0) {
+    newRubricResponses = currentRubricData.map((r, i) =&gt; ({
+      rubric_item_id : r.rubric_item_id || null,
+      rubric_item    : r.rubric_item || r.field_key || `Rubro ${i+1}`,
+      original_score : Number(r.calculated_score || 0),
+      new_score      : Number(document.getElementById(`corrRub_${i}`)?.value || 0),
+      weight         : Number(r.weight || 0)
+    }));
+  }
+
+  const payload = {
+    evaluation_id            : row.evaluation_id || row.id || null,
+    correction_type          : type,
+    status                   : 'Pendiente',
+    requested_by             : reqBy,
+    requested_at             : new Date().toISOString(),
+    original_agent_name      : row.agent_name || null,
+    original_agent_identifier: row.agent_identifier || null,
+    original_score_raw       : Number(row.score_raw || 0),
+    original_score_final     : Number(row.score_final || 0),
+    original_evaluator_name  : row.evaluator_name || null,
+    interaction_link         : row.interaction_link || null,
+    new_agent_name           : type === 'Cambio de agente' ? (document.getElementById('corrNewAgentName')?.value?.trim() || null) : null,
+    new_agent_identifier     : type === 'Cambio de agente' ? (document.getElementById('corrNewAgentId')?.value?.trim() || null) : null,
+    new_score_raw            : type === 'Corrección de score' ? (parseFloat(document.getElementById('corrNewScore')?.value) || null) : null,
+    new_score_final          : type === 'Corrección de score' ? (parseFloat(document.getElementById('corrNewScore')?.value) || null) : null,
+    new_rubric_responses     : newRubricResponses,
+    correction_reason        : reason,
+    corrected_by             : reqBy,
+    evaluator_name           : row.evaluator_name || null
+  };
+
+  try {
+    const { error } = await sb.from('qa_evaluation_corrections').insert([payload]);
+    if (error) throw error;
+    const succ = document.getElementById('corrSuccess');
+    if (succ) succ.style.display = 'block';
+    btn.textContent = '✅ Enviado';
+    succ?.scrollIntoView({ behavior:'smooth', block:'center' });
+  } catch(e) {
+    console.error('Correction error:', e);
+    alert('Error al enviar: ' + (e.message || e));
+    btn.disabled = false;
+    btn.textContent = 'Enviar solicitud';
+  }
+}
+
+/* ── AGENT HISTORY ── */
+async function openAgentHistory(agentId, agentName){
+  const overlay=document.getElementById('agentHistoryOverlay');
+  const body=document.getElementById('agentHistoryBody');
+  document.getElementById('agentHistoryTitle').textContent=agentName;
+  body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando historial...&lt;/div&gt;';
+  overlay.classList.add('active');
+  const today=new Date(), back=new Date(today); back.setMonth(today.getMonth()-3);
+  const dateFrom=back.toISOString().split('T')[0], dateTo=today.toISOString().split('T')[0];
+  document.getElementById('agentHistorySubtitle').textContent=`Historial: ${dateFrom} → ${dateTo}`;
+  const {data:evals}=await sb.from('qa_v_evaluations_base').select('*')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .eq('agent_identifier',agentId)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+    .gte('created_date_cdmx',dateFrom).lte('created_date_cdmx',dateTo)
+    .order('created_date_cdmx',{ascending:true});
+  if(!evals||!evals.length){body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;No hay evaluaciones en los últimos 3 meses.&lt;/div&gt;';return;}
+  const n=evals.length, avgSc=evals.reduce((s,r)=&gt;s+Number(r.score_final||0),0)/n;
+  const crits=evals.filter(r=&gt;r.critical_error_triggered).length, zeros=evals.filter(r=&gt;r.weekly_zero_triggered).length;
+  const kpis=`&lt;div class=&quot;eval-modal-kpis&quot; style=&quot;grid-template-columns:repeat(4,1fr);margin-bottom:20px;&quot;&gt;
+    &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Evaluaciones&lt;/div&gt;&lt;div class=&quot;value&quot;&gt;${n}&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Avg Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(avgSc)}&quot;&gt;${avgSc.toFixed(2)}%&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Errores Críticos&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${crits&gt;0?'#ef4444':'#22c55e'}&quot;&gt;${crits}&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Weekly Zeros&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${zeros&gt;0?'#f59e0b':'#22c55e'}&quot;&gt;${zeros}&lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;`;
+  const byW={};
+  evals.forEach(r=&gt;{if(!r.created_date_cdmx)return; const w=getWeekMonday(r.created_date_cdmx); if(!byW[w])byW[w]={scores:[],crits:0,count:0}; byW[w].scores.push(Number(r.score_final||0)); if(r.critical_error_triggered)byW[w].crits++; byW[w].count++;});
+  const weeks=Object.keys(byW).sort();
+  const wScores=weeks.map(w=&gt;{const g=byW[w];return g.scores.reduce((a,b)=&gt;a+b,0)/g.scores.length;});
+  const wCounts=weeks.map(w=&gt;byW[w].count), wCrits=weeks.map(w=&gt;byW[w].crits);
+  const cid='agentChart_'+Date.now();
+  const chartHtml=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📈 Tendencia semanal&lt;/h4&gt;&lt;canvas id=&quot;${cid}&quot; height=&quot;100&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;`;
+  const {data:rd}=await sb.from('qa_v_evaluation_responses_detail')
+    .select('rubric_item,field_key,calculated_score,weight,failed_item,is_bonus')
+    .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
+    .eq('agent_identifier',agentId)
+    .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+    .gte('created_at',dateFrom+'T00:00:00')
+    .lte('created_at',dateTo+'T23:59:59');
+  let rubricSection='';
+  if(rd&amp;&amp;rd.length){
+    const nb=rd.filter(r=&gt;!r.is_bonus),rm={};
+    nb.forEach(r=&gt;{const k=r.rubric_item||r.field_key||'Sin rubro',sc=Number(r.calculated_score||0),mx=Number(r.weight||0);if(!rm[k])rm[k]={sum:0,count:0,maxW:mx,fails:0};rm[k].sum+=sc;rm[k].count++;if(r.failed_item)rm[k].fails++;if(mx&gt;rm[k].maxW)rm[k].maxW=mx;});
+    const rubRows=Object.entries(rm).map(([rub,v])=&gt;({rub,pct:v.maxW&gt;0?(v.sum/v.count)/v.maxW*100:0,count:v.count,fails:v.fails})).sort((a,b)=&gt;a.pct-b.pct).map(r=&gt;{const bg=r.pct&gt;=90?'#dcfce7':r.pct&gt;=70?'#fef9c3':'#fee2e2',cl=r.pct&gt;=90?'#166534':r.pct&gt;=70?'#854d0e':'#991b1b';return `&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.rub}&lt;/strong&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${r.count}&lt;/td&gt;&lt;td style=&quot;text-align:center;color:#ef4444;font-weight:700;&quot;&gt;${r.fails}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${bg};color:${cl};font-weight:800;border-radius:6px;&quot;&gt;${r.pct.toFixed(2)}%&lt;/td&gt;&lt;/tr&gt;`;}).join('');
+    rubricSection=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📐 Score por rubro (3 meses)&lt;/h4&gt;&lt;table class=&quot;eval-modal-rubrics&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Rubro&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Evals&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Fallas&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Score&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${rubRows}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
+  }
+  const evalLog=[...evals].reverse().map((r,i)=&gt;{const k=`agEv_${i}`;evalMap[k]=r;const sc=Number(r.score_final||0);return `&lt;tr style=&quot;cursor:pointer;&quot; onclick=&quot;openEvalModal('${k}')&quot; title=&quot;Ver detalle&quot;&gt;&lt;td&gt;${r.created_date_cdmx||''}&lt;/td&gt;&lt;td style=&quot;color:${scoreColor(sc)};font-weight:700;&quot;&gt;${sc}%&lt;/td&gt;&lt;td&gt;${r.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/td&gt;&lt;td style=&quot;font-size:12px;color:#64748b;&quot;&gt;${r.evaluator_name||'–'}&lt;/td&gt;&lt;td style=&quot;color:#475569;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;&quot;&gt;${r.feedback?(r.feedback.length&gt;60?r.feedback.slice(0,60)+'...':r.feedback):'Sin feedback'}&lt;/td&gt;&lt;/tr&gt;`;}).join('');
+  const evalLogSection=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📝 Historial &lt;span style=&quot;color:#94a3b8;font-weight:400;&quot;&gt;(click para ver detalle)&lt;/span&gt;&lt;/h4&gt;&lt;table class=&quot;eval-modal-rubrics&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Fecha&lt;/th&gt;&lt;th&gt;Score&lt;/th&gt;&lt;th&gt;EC&lt;/th&gt;&lt;th&gt;Evaluador&lt;/th&gt;&lt;th&gt;Feedback&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${evalLog}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
+  body.innerHTML=kpis+chartHtml+rubricSection+evalLogSection;
+  if(agentHistoryChart){agentHistoryChart.destroy();agentHistoryChart=null;}
+  agentHistoryChart=new Chart(document.getElementById(cid),{
+    type:'line',
+    data:{labels:weeks,datasets:[
+      {type:'bar',label:'# Evals',data:wCounts,backgroundColor:'rgba(56,189,248,.3)',borderRadius:6,yAxisID:'yCount'},
+      {type:'line',label:'Score',data:wScores,borderColor:'#0284c7',backgroundColor:'rgba(2,132,199,.1)',borderWidth:3,pointRadius:5,tension:0.3,fill:true,yAxisID:'yScore'},
+      {type:'bar',label:'Errores Críticos',data:wCrits,backgroundColor:'rgba(239,68,68,.6)',borderRadius:4,yAxisID:'yCount'}
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true},datalabels:{display:ctx=&gt;ctx.dataset.label==='Score',align:'top',anchor:'end',color:'#0284c7',font:{weight:'bold',size:11},formatter:v=&gt;v?v.toFixed(1)+'%':''}},scales:{yScore:{type:'linear',position:'left',min:0,max:100,title:{display:true,text:'Score %'}},yCount:{type:'linear',position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'# Evals'}}}},
+    plugins:[ChartDataLabels]
+  });
+}
+
+/* ── TABS ── */
+document.querySelectorAll('.main-tab').forEach(btn=&gt;{
+  btn.addEventListener('click',()=&gt;{
+    document.querySelectorAll('.main-tab').forEach(b=&gt;b.classList.remove('active'));
+    document.querySelectorAll('.tab-section').forEach(s=&gt;s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    setTimeout(()=&gt;window.dispatchEvent(new Event('resize')),50);
+  });
+});
+
+/* ── GROUP TABS ── */
+document.addEventListener('DOMContentLoaded',()=&gt;{
+  document.querySelectorAll('#groupTabs .tab').forEach(tab=&gt;{
+    tab.addEventListener('click',()=&gt;{
+      document.querySelectorAll('#groupTabs .tab').forEach(t=&gt;t.classList.remove('active'));
+      tab.classList.add('active');
+      groupTabsGroup=tab.dataset.group;
+      renderGroupTable();
+    });
+  });
+});
+
+/* ── MODAL CLOSE ── */
+document.getElementById('evalModalClose').addEventListener('click',()=&gt;document.getElementById('evalModalOverlay').classList.remove('active'));
+document.getElementById('evalModalOverlay').addEventListener('click',e=&gt;{if(e.target.id==='evalModalOverlay')document.getElementById('evalModalOverlay').classList.remove('active');});
+document.getElementById('agentHistoryClose').addEventListener('click',()=&gt;document.getElementById('agentHistoryOverlay').classList.remove('active'));
+document.getElementById('agentHistoryOverlay').addEventListener('click',e=&gt;{if(e.target.id==='agentHistoryOverlay')document.getElementById('agentHistoryOverlay').classList.remove('active');});
+document.getElementById('paretoToggleBtn').addEventListener('click',()=&gt;toggleParetoView());
+document.getElementById('btnRefresh').addEventListener('click',()=&gt;load());
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded',async()=&gt;{
+  const today=new Date(),dow=today.getDay();
+  const mon=new Date(today); mon.setDate(today.getDate()+(dow===0?-6:1-dow));
+  const sun=new Date(mon);   sun.setDate(mon.getDate()+6);
+  document.getElementById('startDate').value=mon.toISOString().split('T')[0];
+  document.getElementById('endDate').value=sun.toISOString().split('T')[0];
+  await loadFilters();
+  await load();
+
+  function notifyEchoClientHeight(){
+    const h = document.documentElement.scrollHeight;
+    if(window.parent &amp;&amp; window.parent !== window){
+      window.parent.postMessage({type:'echoClientDashboardHeight',height:h},'*');
+    }
+  }
+
+  notifyEchoClientHeight();
+  new MutationObserver(notifyEchoClientHeight).observe(document.body,{
+    childList:true,
+    subtree:true,
+    attributes:false
+  });
+  window.addEventListener('resize',notifyEchoClientHeight);
+});
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;" id="qaClientDashboardIframe" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:720px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Portal QA — Aplazo"></iframe></div><div class="page active" id="page-dashboard" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));">
 <iframe data-srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;es&quot;&gt;
 &lt;head&gt;
@@ -7395,6 +8856,7 @@ let currentExternalAccess = null;
 let canAccessCorrections = false;
 let isAgentUser = false;
 let isClientUser = false;
+let clientDashboardEnabled = false;
 let agentViewMessageBound = false;
 let currentRubric = [];
 let rubricResponses = {};
@@ -7447,6 +8909,7 @@ async function bootApp(user) {
   currentExternalAccess = null;
   isAgentUser = false;
   isClientUser = false;
+  clientDashboardEnabled = false;
   canAccessCorrections = false;
 
   // 1) Internal users continue resolving through employees.
@@ -7503,6 +8966,11 @@ async function bootApp(user) {
     : String(currentEmployee.system_role || '').trim().toLowerCase();
 
   isAgentUser = !isClientUser && AGENT_ROLES.includes(normalizedRole);
+
+  clientDashboardEnabled =
+    isClientUser &&
+    String(currentExternalAccess?.campaign_key || '').trim().toLowerCase() === 'aplazo';
+
   canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
 
   // Shared user card.
@@ -7512,7 +8980,7 @@ async function bootApp(user) {
 
   document.getElementById('sidebarName').textContent = String(name || 'Usuario').split(' ').slice(0,2).join(' ');
   document.getElementById('sidebarRole').textContent = isClientUser
-    ? 'Cliente · Formulario'
+    ? (clientDashboardEnabled ? 'Cliente · Portal QA' : 'Cliente · Formulario')
     : (normalizedRole.replace(/_/g, ' ') || 'usuario');
   document.getElementById('sidebarAvatar').textContent = String(name || 'U').charAt(0).toUpperCase();
 
@@ -7526,6 +8994,13 @@ async function bootApp(user) {
     el.classList.toggle('hidden-by-permission', hidden);
     el.setAttribute('aria-hidden', String(hidden));
   });
+
+  const navClientDashboard = document.querySelector('.nav-item[data-page="cliente-dashboard"]');
+  if (navClientDashboard) {
+    const hideClientDashboard = !clientDashboardEnabled;
+    navClientDashboard.classList.toggle('hidden-by-permission', hideClientDashboard);
+    navClientDashboard.setAttribute('aria-hidden', String(hideClientDashboard));
+  }
 
   const navAgent = document.getElementById('navMisEvaluaciones');
   if (navAgent) {
@@ -7559,9 +9034,15 @@ async function bootApp(user) {
   }
 
   if (isClientUser) {
-    const navForm = document.querySelector('.nav-item[data-page="formulario"]');
-    switchPage('formulario', navForm);
-    setTimeout(sendEvaluatorToForm, 250);
+    if (clientDashboardEnabled) {
+      const navClientDashboard = document.querySelector('.nav-item[data-page="cliente-dashboard"]');
+      switchPage('cliente-dashboard', navClientDashboard);
+      loadClientDashboard();
+    } else {
+      const navForm = document.querySelector('.nav-item[data-page="formulario"]');
+      switchPage('formulario', navForm);
+      setTimeout(sendEvaluatorToForm, 250);
+    }
     return;
   }
 
@@ -7650,6 +9131,7 @@ async function handleLogout() {
   document.getElementById('loginPassword').value = '';
   isAgentUser = false;
   isClientUser = false;
+  clientDashboardEnabled = false;
   canAccessCorrections = false;
   currentUser = null;
   currentEmployee = null;
@@ -7669,9 +9151,28 @@ window.addEventListener('DOMContentLoaded', async () => {
 function switchPage(page, el) {
   // Hard client-side route guard. Database RLS remains the final security layer.
   if (isAgentUser && page !== 'mis-evaluaciones') page = 'mis-evaluaciones';
-  if (isClientUser && page !== 'formulario') page = 'formulario';
-  if (!isAgentUser && page === 'mis-evaluaciones') page = isClientUser ? 'formulario' : 'dashboard';
-  if (page === 'correcciones' && !canAccessCorrections) page = isClientUser ? 'formulario' : 'dashboard';
+
+  if (isClientUser) {
+    const allowedClientPages = clientDashboardEnabled
+      ? ['cliente-dashboard', 'formulario']
+      : ['formulario'];
+
+    if (!allowedClientPages.includes(page)) {
+      page = clientDashboardEnabled ? 'cliente-dashboard' : 'formulario';
+    }
+  }
+
+  if (!isAgentUser && page === 'mis-evaluaciones') {
+    page = isClientUser
+      ? (clientDashboardEnabled ? 'cliente-dashboard' : 'formulario')
+      : 'dashboard';
+  }
+
+  if (page === 'correcciones' && !canAccessCorrections) {
+    page = isClientUser
+      ? (clientDashboardEnabled ? 'cliente-dashboard' : 'formulario')
+      : 'dashboard';
+  }
 
   const target = document.getElementById('page-' + page);
   if (!target) return;
@@ -7685,6 +9186,7 @@ function switchPage(page, el) {
 
   const titles = {
     dashboard: 'Dashboard',
+    'cliente-dashboard': 'Dashboard',
     formulario: 'Formulario de Evaluación',
     correcciones: 'Correcciones',
     'mis-evaluaciones': 'Mis evaluaciones'
@@ -7692,6 +9194,7 @@ function switchPage(page, el) {
   document.getElementById('topbarTitle').textContent = titles[page] || page;
 
   if (page === 'dashboard') loadDashboard();
+  if (page === 'cliente-dashboard') loadClientDashboard();
   if (page === 'formulario') { activateStaffIframe('qaFormIframe'); sendEvaluatorToForm(); resizeFormIframe(); }
   if (page === 'correcciones') { activateStaffIframe('qaCorreccionesIframe'); resizeCorreccionesIframe(); }
   if (page === 'mis-evaluaciones') ensureAgentViewLoaded();
@@ -7730,6 +9233,32 @@ function resizeAgentIframe() {
 async function loadDashboard() {
   const iframe = activateStaffIframe('qaDashboardIframe');
   if (!iframe) return;
+  const minHeight = Math.max(720, window.innerHeight - 64);
+  const current = parseInt(iframe.style.height, 10) || 0;
+  iframe.style.height = Math.max(current, minHeight) + 'px';
+}
+
+function activateClientDashboardIframe() {
+  if (!isClientUser || !clientDashboardEnabled) return null;
+
+  const iframe = document.getElementById('qaClientDashboardIframe');
+  if (!iframe) return null;
+
+  if (!iframe.getAttribute('srcdoc')) {
+    const deferred = iframe.getAttribute('data-srcdoc');
+    if (deferred) {
+      iframe.setAttribute('srcdoc', deferred);
+      iframe.removeAttribute('data-srcdoc');
+    }
+  }
+
+  return iframe;
+}
+
+async function loadClientDashboard() {
+  const iframe = activateClientDashboardIframe();
+  if (!iframe) return;
+
   const minHeight = Math.max(720, window.innerHeight - 64);
   const current = parseInt(iframe.style.height, 10) || 0;
   iframe.style.height = Math.max(current, minHeight) + 'px';
@@ -8218,6 +9747,17 @@ window.addEventListener('message', event => {
     return;
   }
 
+  const clientDashboardIframe = document.getElementById('qaClientDashboardIframe');
+  if (
+    type === 'echoClientDashboardHeight' &&
+    event.source === clientDashboardIframe?.contentWindow
+  ) {
+    const minHeight = Math.max(720, window.innerHeight - 64);
+    clientDashboardIframe.style.height =
+      Math.max(Number(event.data.height) || 0, minHeight) + 'px';
+    return;
+  }
+
   const iframeMap = {
     iframeHeight: 'qaDashboardIframe',
     formIframeHeight: 'qaFormIframe',
@@ -8233,6 +9773,7 @@ window.addEventListener('message', event => {
 
 window.addEventListener('resize', () => {
   loadDashboard();
+  loadClientDashboard();
   resizeFormIframe();
   resizeCorreccionesIframe();
 });
