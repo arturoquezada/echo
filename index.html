@@ -3902,7 +3902,7 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
     &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;echo-form-version&quot; content=&quot;qa-legacy-sheet-bridge-v14&quot;&gt;
+    &lt;meta name=&quot;echo-form-version&quot; content=&quot;supervisor-or-qa-auto-v15&quot;&gt;
     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
     &lt;title&gt;QA Evaluation Tool&lt;/title&gt;
     &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
@@ -4708,6 +4708,7 @@ async function loadAgentNamesFromSupabase() {
     }
 
     const viewerRole = normalizeText(viewerContext?.role);
+    const viewerHasDirectReports = viewerContext?.has_direct_reports === true;
 
     if (error) {
       console.error(&quot;Error loading agents from Supabase:&quot;, error);
@@ -4731,6 +4732,10 @@ async function loadAgentNamesFromSupabase() {
         [&quot;active&quot;, &quot;activo&quot;].includes(normalizeText(agent.status))
       );
 
+    const legacyQARules = qaAssignments.filter(rule =&gt;
+      rule.email === evaluatorEmail
+    );
+
     if (isEchoExternalClient()) {
       const allowedCampaign = normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
 
@@ -4738,17 +4743,29 @@ async function loadAgentNamesFromSupabase() {
         normalizeText(agent.campaign) === allowedCampaign
       );
 
-    } else if (viewerRole === &quot;supervisor&quot;) {
-      // The RPC already returned only employees.supervisor_id = supervisor CX.
+    } else if (
+      viewerRole === &quot;supervisor&quot; &amp;&amp;
+      viewerHasDirectReports
+    ) {
+      // V15: a user is treated as a supervisor only when they ACTUALLY
+      // have active direct reports linked by employees.supervisor_id.
+      // The RPC already returned only those direct reports.
       console.log(
         `Supervisor ${viewerContext?.employee_id || &quot;&quot;}: ` +
         `${agents.length} agentes cargados por supervisor_id`
       );
 
-    } else if (isQARole(viewerRole)) {
-      // TEMPORARY:
-      // QA scope stays exactly on the previous Google Sheets,
-      // while canonical IDs still come from public.employees.
+    } else if (
+      isQARole(viewerRole) ||
+      legacyQARules.length &gt; 0 ||
+      viewerRole === &quot;supervisor&quot;
+    ) {
+      // Mirrors the original QA behavior:
+      // if the person is not an actual supervisor with direct reports,
+      // use the legacy QA Sheet rules.
+      //
+      // This also supports QA users whose employees.system_role is still
+      // &quot;supervisor&quot;, which is what V14 was incorrectly blocking.
       agents = await filterSupabaseAgentsUsingLegacyQASheets(
         agents,
         evaluatorEmail
