@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="survey-trigger-rubric-fix-v4-2026-08-05" name="echo-version"/>
+<meta content="1.0.0" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -557,8 +557,119 @@ body.sidebar-collapsed .logout-btn {
 #page-mis-evaluaciones { padding: 0; background: #f4fbff; min-height: calc(100vh - var(--header-h)); }
 #qaAgentIframe { width: 100%; min-height: calc(100vh - var(--header-h)); border: 0; display: block; background: #f4fbff; }
 </style>
-</head>
-<body>
+<style id="echo-app-version-gate-style">
+/* ═══════════════════════════════════════════════════════════════════
+   ECHO APP VERSION GATE
+   Does not modify the existing Echo visual system.
+   ═══════════════════════════════════════════════════════════════════ */
+#echoUpdateGate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(7, 15, 29, .88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#echoUpdateGate.active { display: flex; }
+
+.echo-update-card {
+  width: min(440px, 100%);
+  background: #ffffff;
+  border: 1px solid rgba(98,211,245,.22);
+  border-radius: 22px;
+  box-shadow: 0 32px 90px rgba(0,0,0,.34);
+  padding: 28px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+.echo-update-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(98,211,245,.18), rgba(41,182,246,.08));
+  border: 1px solid rgba(98,211,245,.30);
+  color: #0ea5e9;
+  font-size: 28px;
+  font-weight: 900;
+}
+.echo-update-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.echo-update-copy {
+  margin: 10px auto 0;
+  max-width: 340px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.echo-update-versions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0;
+  flex-wrap: wrap;
+}
+.echo-update-pill {
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+.echo-update-pill strong { color: #0f172a; }
+#echoUpdateButton {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 16px;
+  background: linear-gradient(135deg, #62d3f5, #29b6f6);
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(41,182,246,.20);
+}
+#echoUpdateButton:hover { filter: brightness(.98); }
+#echoUpdateButton:disabled { opacity: .6; cursor: wait; }
+
+.echo-update-foot {
+  margin-top: 11px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+</style></head>
+<body><div aria-labelledby="echoUpdateTitle" aria-modal="true" id="echoUpdateGate" role="dialog">
+<div class="echo-update-card">
+<div class="echo-update-icon">↻</div>
+<h2 class="echo-update-title" id="echoUpdateTitle">Nueva versión disponible</h2>
+<div class="echo-update-copy">
+      Echo fue actualizado. Para continuar necesitas cargar la versión más reciente.
+    </div>
+<div class="echo-update-versions">
+<div class="echo-update-pill">Actual: <strong id="echoCurrentVersion">—</strong></div>
+<div class="echo-update-pill">Nueva: <strong id="echoRemoteVersion">—</strong></div>
+</div>
+<button id="echoUpdateButton" onclick="_echoReloadLatestVersion()" type="button">
+      Actualizar Echo
+    </button>
+<div class="echo-update-foot">
+      La actualización conserva tu sesión y vuelve a cargar la aplicación.
+    </div>
+</div>
+</div>
 <!-- ── LOGIN WALL ── -->
 <div id="loginWall">
 <div class="login-left">
@@ -8843,6 +8954,159 @@ function exportFQCSV() {
 const SB_URL = "https://kpuqabxmpavxgbzxzlng.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdXFhYnhtcGF2eGdienh6bG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTk1NzAsImV4cCI6MjA4MDI3NTU3MH0.CoB4NA6Z8qtTrRzvIqfP-hm3T1m24WpRNI1Xc74all8";
 const sb = supabase.createClient(SB_URL, SB_KEY);
+
+
+const ECHO_APP_VERSION = "1.0.0";
+const ECHO_VERSION_CONFIG_KEY = "echo_version";
+const ECHO_VERSION_CHECK_MS = 60 * 1000;
+
+let _echoVersionTimer = null;
+let _echoVersionCheckRunning = false;
+let _echoUpdateDetected = false;
+let _echoRemoteVersion = null;
+
+function _echoNormalizeVersion(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/^v/i, "");
+}
+
+function _echoShowUpdateGate(remoteVersion) {
+  _echoUpdateDetected = true;
+  _echoRemoteVersion = _echoNormalizeVersion(remoteVersion);
+
+  const gate = document.getElementById("echoUpdateGate");
+  const currentEl = document.getElementById("echoCurrentVersion");
+  const remoteEl = document.getElementById("echoRemoteVersion");
+
+  if (currentEl) currentEl.textContent = ECHO_APP_VERSION;
+  if (remoteEl) remoteEl.textContent = _echoRemoteVersion || "Nueva";
+  if (gate) gate.classList.add("active");
+
+  // Stop interaction behind the mandatory update gate.
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+
+  console.warn(
+    `[Echo] Update required: local=${ECHO_APP_VERSION} remote=${_echoRemoteVersion}`
+  );
+}
+
+function _echoHideUpdateGate() {
+  if (_echoUpdateDetected) return;
+
+  const gate = document.getElementById("echoUpdateGate");
+  if (gate) gate.classList.remove("active");
+
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+async function _echoCheckForAppUpdate({ silent = true } = {}) {
+  if (_echoVersionCheckRunning || _echoUpdateDetected) return;
+  _echoVersionCheckRunning = true;
+
+  try {
+    const { data, error } = await sb
+      .from("app_config")
+      .select("value, updated_at")
+      .eq("key", ECHO_VERSION_CONFIG_KEY)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("[Echo] Version check unavailable:", error.message || error);
+      return;
+    }
+
+    if (!data?.value) {
+      console.warn(
+        `[Echo] Missing public.app_config key "${ECHO_VERSION_CONFIG_KEY}".`
+      );
+      return;
+    }
+
+    const remote = _echoNormalizeVersion(data.value);
+    const local = _echoNormalizeVersion(ECHO_APP_VERSION);
+
+    if (remote && remote !== local) {
+      _echoShowUpdateGate(remote);
+      return;
+    }
+
+    if (!silent) {
+      console.log(`[Echo] Version OK: ${local}`);
+    }
+
+    _echoHideUpdateGate();
+
+  } catch (error) {
+    console.warn("[Echo] Version check failed:", error);
+  } finally {
+    _echoVersionCheckRunning = false;
+  }
+}
+
+function _echoReloadLatestVersion() {
+  const btn = document.getElementById("echoUpdateButton");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Actualizando…";
+  }
+
+  try {
+    const currentUrl = new URL(window.location.href);
+
+    // Different URL forces browser/CDN/GitHub Pages to request the latest HTML.
+    currentUrl.searchParams.set(
+      "_echo_v",
+      _echoRemoteVersion || String(Date.now())
+    );
+    currentUrl.searchParams.set("_echo_ts", String(Date.now()));
+
+    window.location.replace(currentUrl.toString());
+  } catch (_) {
+    window.location.reload();
+  }
+}
+
+function _echoStartVersionWatch() {
+  if (_echoVersionTimer) clearInterval(_echoVersionTimer);
+
+  // First check immediately.
+  _echoCheckForAppUpdate({ silent: false });
+
+  // Lightweight periodic check.
+  _echoVersionTimer = setInterval(
+    () => _echoCheckForAppUpdate({ silent: true }),
+    ECHO_VERSION_CHECK_MS
+  );
+}
+
+// Re-check whenever user returns to Echo.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    _echoCheckForAppUpdate({ silent: true });
+  }
+});
+
+window.addEventListener("focus", () => {
+  _echoCheckForAppUpdate({ silent: true });
+});
+
+window.addEventListener("online", () => {
+  _echoCheckForAppUpdate({ silent: true });
+});
+
+// Start as soon as the page DOM exists.
+// No login is required for the version gate itself.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", _echoStartVersionWatch, { once: true });
+} else {
+  _echoStartVersionWatch();
+}
+
+console.log(`[Echo] App version ${ECHO_APP_VERSION}`);
+
 
 // Roles with access to correcciones
 const CORRECTIONS_IDS = ['CX00001','CX00008','CX00009','CX00109','CX00286'];
