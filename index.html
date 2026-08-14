@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.1" name="echo-version"/>
+<meta content="1.0.2" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6019,7 +6019,7 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
 &lt;option value=&quot;&quot;&gt;Select Outcome&lt;/option&gt;
 &lt;/select&gt;
 &lt;label for=&quot;contactType&quot;&gt;Contact Type:&lt;/label&gt;
-&lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; required=&quot;&quot;&gt;
+&lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; onchange=&quot;loadRubricFromSupabase();&quot; required=&quot;&quot;&gt;
 &lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;
 &lt;/select&gt;
 &lt;label for=&quot;evaluationScore&quot;&gt;Score (%):&lt;/label&gt;
@@ -6210,7 +6210,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.1: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.2: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -6295,33 +6295,79 @@ async function loadAgentNamesFromSupabase() {
           }
         }
         
-        function updateContactTypeOptions() {
+        function isRaceContext(campaign, lob, queue) {
+  return (
+    normalizeKey(campaign) === &quot;aplazo&quot; &amp;&amp;
+    normalizeKey(lob) === &quot;soporte&quot; &amp;&amp;
+    normalizeKey(queue) === &quot;race&quot;
+  );
+}
+
+function getRaceRubricKeyFromContactType(contactType) {
+  const key = normalizeKey(contactType);
+  const allowed = new Set([
+    &quot;credito&quot;,
+    &quot;cuenta&quot;,
+    &quot;educacion_al_usuario&quot;
+  ]);
+  return allowed.has(key) ? key : &quot;&quot;;
+}
+
+function updateContactTypeOptions() {
   const campaign = document.getElementById(&quot;Campaign&quot;).value;
   const lob = document.getElementById(&quot;LOB&quot;).value;
   const queue = document.getElementById(&quot;Queue&quot;).value;
   const contactTypeSelect = document.getElementById(&quot;contactType&quot;);
 
-  contactTypeSelect.innerHTML = '&lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;';
+  contactTypeSelect.innerHTML =
+    '&lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;';
+
+  // RACE = Queue operativa.
+  // El QA clasifica la interacción dentro de RACE.
+  if (isRaceContext(campaign, lob, queue)) {
+    const raceTypes = [
+      &quot;Crédito&quot;,
+      &quot;Cuenta&quot;,
+      &quot;Educación al usuario&quot;
+    ];
+
+    contactTypeSelect.innerHTML =
+      '&lt;option value=&quot;&quot;&gt;Selecciona el tipo de interacción&lt;/option&gt;';
+
+    raceTypes.forEach(contactType =&gt; {
+      const option = document.createElement(&quot;option&quot;);
+      option.value = contactType;
+      option.textContent = contactType;
+      contactTypeSelect.appendChild(option);
+    });
+
+    clearDynamicRubric();
+    return;
+  }
 
   if (!campaign || !lob) return;
 
   const filteredContactTypes = contactTypesData
     .filter(item =&gt; {
-      const sameCampaign = normalizeText(item.campaign) === normalizeText(campaign);
-      const sameLob = normalizeText(item.lob) === normalizeText(lob);
+      const sameCampaign =
+        normalizeText(item.campaign) === normalizeText(campaign);
+      const sameLob =
+        normalizeText(item.lob) === normalizeText(lob);
 
       if (normalizeText(lob) === &quot;cashmind&quot;) {
         return sameCampaign &amp;&amp; sameLob;
       }
 
-      return sameCampaign &amp;&amp; sameLob &amp;&amp;
-        normalizeText(item.queue) === normalizeText(queue);
+      return (
+        sameCampaign &amp;&amp;
+        sameLob &amp;&amp;
+        normalizeText(item.queue) === normalizeText(queue)
+      );
     })
     .map(item =&gt; item.contactType);
 
   const uniqueTypes = [...new Set(filteredContactTypes)];
 
-  // Si no hay contact types, poner &quot;N/A&quot; como opción seleccionada automáticamente
   if (uniqueTypes.length === 0) {
     const option = document.createElement(&quot;option&quot;);
     option.value = &quot;N/A&quot;;
@@ -6338,103 +6384,137 @@ async function loadAgentNamesFromSupabase() {
     contactTypeSelect.appendChild(option);
   });
 }
-        
+
         async function loadRubricFromSupabase() {
-          clearDynamicRubric();
-        
-          const campaign = document.getElementById(&quot;Campaign&quot;).value;
-          const lob = document.getElementById(&quot;LOB&quot;).value;
-          const queue = document.getElementById(&quot;Queue&quot;).value;
-        
-          if (!campaign || !lob || !queue) return;
-        
-          const campaignKey = normalizeKey(campaign);
-const lobKey = normalizeKey(lob);
-const queueKey = normalizeKey(queue);
-        
-          const { data: group, error: groupError } = await supabaseClient
-            .from(&quot;qa_rubric_groups&quot;)
-            .select(&quot;*&quot;)
-            .eq(&quot;campaign_key&quot;, campaignKey)
-            .eq(&quot;lob_key&quot;, lobKey)
-            .eq(&quot;queue_key&quot;, queueKey)
-            .eq(&quot;is_active&quot;, true)
-            .maybeSingle();
-        
-          if (groupError || !group) {
-            document.getElementById(&quot;dynamicRubricContainer&quot;).innerHTML =
-              `&lt;div class=&quot;additional-fields&quot;&gt;&lt;strong&gt;No se encontró rúbrica para:&lt;/strong&gt;&lt;br&gt;${campaign} - ${lob} - ${queue}&lt;/div&gt;`;
-            console.error(groupError);
-            return;
-          }
-        
-          currentRubricGroup = group;
-        
-          const { data: items, error: itemsError } = await supabaseClient
-            .from(&quot;qa_rubric_items&quot;)
-            .select(`
-              *,
-              qa_rubric_options (*)
-            `)
-            .eq(&quot;rubric_group_id&quot;, group.id)
-            .eq(&quot;is_active&quot;, true)
-            .order(&quot;display_order&quot;, { ascending: true });
-        
-          if (itemsError) {
-            console.error(itemsError);
-            return;
-          }
-        
-          let { data: flags, error: flagsError } = await supabaseClient
-  .from(&quot;qa_rubric_policy_flags&quot;)
-  .select(&quot;*&quot;)
-  .eq(&quot;rubric_group_id&quot;, group.id)
-  .eq(&quot;is_active&quot;, true)
-  .order(&quot;display_order&quot;, { ascending: true });
+  clearDynamicRubric();
 
-if (flagsError) {
-  console.error(flagsError);
-  return;
-}
+  const campaign = document.getElementById(&quot;Campaign&quot;).value;
+  const lob = document.getElementById(&quot;LOB&quot;).value;
+  const queue = document.getElementById(&quot;Queue&quot;).value;
+  const contactType = document.getElementById(&quot;contactType&quot;).value;
 
-// Usar errores críticos de ACE para Cuenta, Crédito y Educación al Usuario
-const queuesUsingACEFlags = [&quot;cuenta&quot;, &quot;credito&quot;, &quot;educacion_al_usuario&quot;];
+  if (!campaign || !lob || !queue) return;
 
-if ((!flags || flags.length === 0) &amp;&amp; queuesUsingACEFlags.includes(queueKey)) {
-  const { data: aceGroup, error: aceGroupError } = await supabaseClient
+  const campaignKey = normalizeKey(campaign);
+  const lobKey = normalizeKey(lob);
+  const operationalQueueKey = normalizeKey(queue);
+
+  let rubricQueueKey = operationalQueueKey;
+  const raceContext = isRaceContext(campaign, lob, queue);
+
+  if (raceContext) {
+    rubricQueueKey = getRaceRubricKeyFromContactType(contactType);
+
+    if (!rubricQueueKey) {
+      document.getElementById(&quot;dynamicRubricContainer&quot;).innerHTML =
+        `&lt;div class=&quot;additional-fields&quot;&gt;
+          &lt;strong&gt;RACE&lt;/strong&gt;&lt;br&gt;
+          Selecciona Crédito, Cuenta o Educación al usuario para cargar la rúbrica.
+        &lt;/div&gt;`;
+      return;
+    }
+  }
+
+  const { data: group, error: groupError } = await supabaseClient
     .from(&quot;qa_rubric_groups&quot;)
     .select(&quot;*&quot;)
-    .eq(&quot;campaign_key&quot;, &quot;aplazo&quot;)
-    .eq(&quot;lob_key&quot;, &quot;soporte&quot;)
-    .eq(&quot;queue_key&quot;, &quot;ace&quot;)
+    .eq(&quot;campaign_key&quot;, campaignKey)
+    .eq(&quot;lob_key&quot;, lobKey)
+    .eq(&quot;queue_key&quot;, rubricQueueKey)
     .eq(&quot;is_active&quot;, true)
     .maybeSingle();
 
-  if (!aceGroupError &amp;&amp; aceGroup) {
-    const { data: aceFlags, error: aceFlagsError } = await supabaseClient
-      .from(&quot;qa_rubric_policy_flags&quot;)
-      .select(&quot;*&quot;)
-      .eq(&quot;rubric_group_id&quot;, aceGroup.id)
-      .eq(&quot;is_active&quot;, true)
-      .order(&quot;display_order&quot;, { ascending: true });
-
-    if (!aceFlagsError) {
-      flags = aceFlags || [];
-    }
-  }
-}
-        
-          if (flagsError) {
-            console.error(flagsError);
-            return;
-          }
-        
-          currentRubricItems = items || [];
-          currentPolicyFlags = flags || [];
-        
-          renderDynamicRubric();
+  if (groupError || !group) {
+    document.getElementById(&quot;dynamicRubricContainer&quot;).innerHTML =
+      `&lt;div class=&quot;additional-fields&quot;&gt;
+        &lt;strong&gt;No se encontró rúbrica para:&lt;/strong&gt;&lt;br&gt;
+        ${campaign} - ${lob} - ${
+          raceContext ? `${queue} / ${contactType}` : queue
         }
-        
+      &lt;/div&gt;`;
+    console.error(groupError);
+    return;
+  }
+
+  currentRubricGroup = group;
+
+  const { data: items, error: itemsError } = await supabaseClient
+    .from(&quot;qa_rubric_items&quot;)
+    .select(`
+      *,
+      qa_rubric_options (*)
+    `)
+    .eq(&quot;rubric_group_id&quot;, group.id)
+    .eq(&quot;is_active&quot;, true)
+    .order(&quot;display_order&quot;, { ascending: true });
+
+  if (itemsError) {
+    console.error(itemsError);
+    return;
+  }
+
+  let { data: flags, error: flagsError } = await supabaseClient
+    .from(&quot;qa_rubric_policy_flags&quot;)
+    .select(&quot;*&quot;)
+    .eq(&quot;rubric_group_id&quot;, group.id)
+    .eq(&quot;is_active&quot;, true)
+    .order(&quot;display_order&quot;, { ascending: true });
+
+  if (flagsError) {
+    console.error(flagsError);
+    return;
+  }
+
+  // Los tres tipos RACE comparten los Critical Errors del grupo RACE.
+  if (raceContext &amp;&amp; (!flags || flags.length === 0)) {
+    const { data: raceGroup, error: raceGroupError } =
+      await supabaseClient
+        .from(&quot;qa_rubric_groups&quot;)
+        .select(&quot;*&quot;)
+        .eq(&quot;campaign_key&quot;, &quot;aplazo&quot;)
+        .eq(&quot;lob_key&quot;, &quot;soporte&quot;)
+        .eq(&quot;queue_key&quot;, &quot;race&quot;)
+        .eq(&quot;is_active&quot;, true)
+        .maybeSingle();
+
+    if (raceGroupError || !raceGroup) {
+      console.error(
+        &quot;No se encontró el grupo RACE para cargar Critical Errors.&quot;,
+        raceGroupError
+      );
+      document.getElementById(&quot;dynamicRubricContainer&quot;).innerHTML =
+        `&lt;div class=&quot;additional-fields&quot;&gt;
+          &lt;strong&gt;Configuración RACE incompleta.&lt;/strong&gt;&lt;br&gt;
+          No se pudieron cargar los errores críticos.
+        &lt;/div&gt;`;
+      currentRubricGroup = null;
+      return;
+    }
+
+    const { data: raceFlags, error: raceFlagsError } =
+      await supabaseClient
+        .from(&quot;qa_rubric_policy_flags&quot;)
+        .select(&quot;*&quot;)
+        .eq(&quot;rubric_group_id&quot;, raceGroup.id)
+        .eq(&quot;is_active&quot;, true)
+        .order(&quot;display_order&quot;, { ascending: true });
+
+    if (raceFlagsError) {
+      console.error(raceFlagsError);
+      currentRubricGroup = null;
+      return;
+    }
+
+    flags = raceFlags || [];
+  }
+
+  currentRubricItems = items || [];
+  currentPolicyFlags = flags || [];
+
+  renderDynamicRubric();
+}
+
+
         function renderDynamicRubric() {
           const container = document.getElementById(&quot;dynamicRubricContainer&quot;);
         
@@ -6755,9 +6835,9 @@ async function addEvaluation() {
   const payload = {
     agent_name: selectedAgent.value,
     agent_identifier: selectedAgent.dataset.agentId || null,
-    campaign_key: currentRubricGroup.campaign_key,
-    lob_key: currentRubricGroup.lob_key,
-    queue_key: currentRubricGroup.queue_key,
+    campaign_key: normalizeKey(document.getElementById(&quot;Campaign&quot;).value),
+    lob_key: normalizeKey(document.getElementById(&quot;LOB&quot;).value),
+    queue_key: normalizeKey(document.getElementById(&quot;Queue&quot;).value),
     rubric_group_id: currentRubricGroup.id,
     interaction_date: document.getElementById(&quot;interactionDate&quot;).value,
     contact_type: document.getElementById(&quot;contactType&quot;).value,
@@ -8789,7 +8869,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.1";
+const ECHO_APP_VERSION = "1.0.2";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
