@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.3" name="echo-version"/>
+<meta content="1.0.4" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6210,7 +6210,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.3: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.4: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -6372,6 +6372,24 @@ async function loadAgentNamesFromSupabase() {
   });
 }
 
+        function getRubricLobKey(campaign, lob, queue) {
+  const campaignKey = normalizeKey(campaign);
+  const lobKey = normalizeKey(lob);
+  const queueKey = normalizeKey(queue);
+
+  // Operational structure was renamed to &quot;Key Account Manager&quot;,
+  // but the existing QA rubric groups intentionally remain under lob_key=&quot;kams&quot;.
+  if (
+    campaignKey === &quot;aplazo&quot; &amp;&amp;
+    lobKey === &quot;key_account_manager&quot; &amp;&amp;
+    [&quot;kams_rfto&quot;, &quot;kams_sams&quot;].includes(queueKey)
+  ) {
+    return &quot;kams&quot;;
+  }
+
+  return lobKey;
+}
+
         async function loadRubricFromSupabase() {
   clearDynamicRubric();
 
@@ -6382,7 +6400,7 @@ async function loadAgentNamesFromSupabase() {
   if (!campaign || !lob || !queue) return;
 
   const campaignKey = normalizeKey(campaign);
-  const lobKey = normalizeKey(lob);
+  const lobKey = getRubricLobKey(campaign, lob, queue);
   const queueKey = normalizeKey(queue);
 
   const { data: group, error: groupError } = await supabaseClient
@@ -8849,7 +8867,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.3";
+const ECHO_APP_VERSION = "1.0.4";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
