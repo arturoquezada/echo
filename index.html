@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.0" name="echo-version"/>
+<meta content="1.0.1" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -5471,16 +5471,17 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
 <!-- PAGE: FORMULARIO -->
 <div class="page" id="page-formulario" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));">
 <iframe data-srcdoc="&lt;!DOCTYPE html&gt;
+
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;echo-form-version&quot; content=&quot;supervisor-or-qa-auto-v15&quot;&gt;
-    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-    &lt;title&gt;QA Evaluation Tool&lt;/title&gt;
-    &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-    &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
-    &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-    &lt;style&gt;
+&lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;meta content=&quot;supervisor-or-qa-auto-v15&quot; name=&quot;echo-form-version&quot;/&gt;
+&lt;meta content=&quot;width=device-width, initial-scale=1.0&quot; name=&quot;viewport&quot;/&gt;
+&lt;title&gt;QA Evaluation Tool&lt;/title&gt;
+&lt;link href=&quot;https://fonts.googleapis.com&quot; rel=&quot;preconnect&quot;/&gt;
+&lt;link crossorigin=&quot;&quot; href=&quot;https://fonts.gstatic.com&quot; rel=&quot;preconnect&quot;/&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;amp;display=swap&quot; rel=&quot;stylesheet&quot;/&gt;
+&lt;style&gt;
         * {
             margin: 0;
             padding: 0;
@@ -5989,67 +5990,57 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
             background: var(--primary-dark);
         }
     &lt;/style&gt;
-    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
-    &lt;div id=&quot;container&quot;&gt;
-        &lt;h2&gt;Herramienta de QA&lt;/h2&gt;
-        &lt;p class=&quot;subtitle&quot;&gt;Completa la evaluación usando el formulario para evaluar el desempeño del agente.&lt;/p&gt;
-
-
-    &lt;!----------------------- Formlario de calidad de Evolve CX --------------------------&gt;
-            &lt;form id=&quot;FORM_ID&quot;&gt;
-                &lt;select id=&quot;agentName&quot; name=&quot;Agent&quot; required&gt;
-                &lt;option value=&quot;&quot;&gt;Agent Name&lt;/option&gt;
-                &lt;/select&gt;
-        
-                &lt;label for=&quot;Campaign&quot;&gt;Campaña:&lt;/label&gt;
-                &lt;select id=&quot;Campaign&quot; name=&quot;Campaign&quot; onchange=&quot;updateLOBOptions(); updateQueueOptions(); updateContactTypeOptions(); clearDynamicRubric();&quot; required&gt;
-                  &lt;option value=&quot;&quot;&gt;Selecciona la campaña&lt;/option&gt;
-                  &lt;option value=&quot;Aplazo&quot;&gt;Aplazo&lt;/option&gt;
-                  &lt;option value=&quot;iForex&quot;&gt;iForex&lt;/option&gt;
-                  &lt;option value=&quot;Clivi&quot;&gt;Clivi&lt;/option&gt;
-                  &lt;option value=&quot;Cashmind&quot;&gt;Cashmind&lt;/option&gt;
-                  &lt;option value=&quot;Casap&quot;&gt;Casap&lt;/option&gt;
-                &lt;/select&gt;
-
-                &lt;label for=&quot;LOB&quot;&gt;LOB:&lt;/label&gt;
-                &lt;select id=&quot;LOB&quot; name=&quot;LOB&quot; onchange=&quot;updateQueueOptions(); updateContactTypeOptions(); clearDynamicRubric();&quot; required&gt;
-                &lt;option value=&quot;&quot;&gt;Selecciona el LOB&lt;/option&gt;
-                &lt;/select&gt;
-
-                &lt;label for=&quot;Queue&quot;&gt;Queue:&lt;/label&gt;
-                &lt;select id=&quot;Queue&quot; name=&quot;Queue&quot; onchange=&quot;updateContactTypeOptions(); loadRubricFromSupabase();&quot; required&gt;
-                &lt;option value=&quot;&quot;&gt;Select Outcome&lt;/option&gt;
-                &lt;/select&gt;
-
-                &lt;label for=&quot;contactType&quot;&gt;Contact Type:&lt;/label&gt;
-                &lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; required&gt;
-                &lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;
-                &lt;/select&gt;
-
-                &lt;label for=&quot;evaluationScore&quot;&gt;Score (%):&lt;/label&gt;
-                &lt;input type=&quot;number&quot; id=&quot;evaluationScore&quot; name=&quot;Score&quot;min=&quot;0&quot; max=&quot;120&quot; value=&quot;0&quot; readonly&gt;
-                &lt;label for=&quot;feedback&quot;&gt;Feedback:&lt;/label&gt;
-                &lt;textarea id=&quot;feedback&quot; name=&quot;Feedback&quot;rows=&quot;1&quot; cols=&quot;10&quot;&gt;&lt;/textarea&gt;
-                &lt;label for=&quot;Link&quot;&gt;Link:&lt;/label&gt;
-                &lt;textarea id=&quot;link&quot; name=&quot;Link&quot;rows=&quot;1&quot; cols=&quot;10&quot;&gt;&lt;/textarea&gt;
-                &lt;label for=&quot;conversation&quot;&gt;Conversation:&lt;/label&gt;
-                &lt;textarea id=&quot;conversation&quot; name=&quot;Conversation&quot; rows=&quot;1&quot; cols=&quot;10&quot;&gt;&lt;/textarea&gt;
-                &lt;label for=&quot;interactionDate&quot;&gt;Interaction Date:&lt;/label&gt;
-                &lt;input type=&quot;date&quot; id=&quot;interactionDate&quot; name=&quot;Interaction Date&quot; required&gt;
-                &lt;div id=&quot;dynamicRubricContainer&quot;&gt;&lt;/div&gt;
-        
-            &lt;div class=&quot;button-container&quot;&gt;
-                &lt;button type=&quot;button&quot; onclick=&quot;addEvaluation()&quot; style=&quot;background-color: #8e84ed; color: white; border-radius: 8px; padding: 5px 15px; border: none;&quot;&gt;
+&lt;div id=&quot;container&quot;&gt;
+&lt;h2&gt;Herramienta de QA&lt;/h2&gt;
+&lt;p class=&quot;subtitle&quot;&gt;Completa la evaluación usando el formulario para evaluar el desempeño del agente.&lt;/p&gt;
+&lt;!----------------------- Formlario de calidad de Evolve CX --------------------------&gt;
+&lt;form id=&quot;FORM_ID&quot;&gt;
+&lt;select id=&quot;agentName&quot; name=&quot;Agent&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Agent Name&lt;/option&gt;
+&lt;/select&gt;
+&lt;label for=&quot;Campaign&quot;&gt;Campaña:&lt;/label&gt;
+&lt;select id=&quot;Campaign&quot; name=&quot;Campaign&quot; onchange=&quot;updateLOBOptions(); updateQueueOptions(); updateContactTypeOptions(); clearDynamicRubric();&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Selecciona la campaña&lt;/option&gt;
+&lt;option value=&quot;Aplazo&quot;&gt;Aplazo&lt;/option&gt;
+&lt;option value=&quot;iForex&quot;&gt;iForex&lt;/option&gt;
+&lt;option value=&quot;Clivi&quot;&gt;Clivi&lt;/option&gt;
+&lt;option value=&quot;Cashmind&quot;&gt;Cashmind&lt;/option&gt;
+&lt;option value=&quot;Casap&quot;&gt;Casap&lt;/option&gt;
+&lt;/select&gt;
+&lt;label for=&quot;LOB&quot;&gt;LOB:&lt;/label&gt;
+&lt;select id=&quot;LOB&quot; name=&quot;LOB&quot; onchange=&quot;updateQueueOptions(); updateContactTypeOptions(); clearDynamicRubric();&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Selecciona el LOB&lt;/option&gt;
+&lt;/select&gt;
+&lt;label for=&quot;Queue&quot;&gt;Queue:&lt;/label&gt;
+&lt;select id=&quot;Queue&quot; name=&quot;Queue&quot; onchange=&quot;updateContactTypeOptions(); loadRubricFromSupabase();&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Select Outcome&lt;/option&gt;
+&lt;/select&gt;
+&lt;label for=&quot;contactType&quot;&gt;Contact Type:&lt;/label&gt;
+&lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;
+&lt;/select&gt;
+&lt;label for=&quot;evaluationScore&quot;&gt;Score (%):&lt;/label&gt;
+&lt;input id=&quot;evaluationScore&quot; max=&quot;120&quot; min=&quot;0&quot; name=&quot;Score&quot; readonly=&quot;&quot; type=&quot;number&quot; value=&quot;0&quot;/&gt;
+&lt;label for=&quot;feedback&quot;&gt;Feedback:&lt;/label&gt;
+&lt;textarea cols=&quot;10&quot; id=&quot;feedback&quot; name=&quot;Feedback&quot; rows=&quot;1&quot;&gt;&lt;/textarea&gt;
+&lt;label for=&quot;Link&quot;&gt;Link:&lt;/label&gt;
+&lt;textarea cols=&quot;10&quot; id=&quot;link&quot; name=&quot;Link&quot; rows=&quot;1&quot;&gt;&lt;/textarea&gt;
+&lt;label for=&quot;conversation&quot;&gt;Conversation:&lt;/label&gt;
+&lt;textarea cols=&quot;10&quot; id=&quot;conversation&quot; name=&quot;Conversation&quot; rows=&quot;1&quot;&gt;&lt;/textarea&gt;
+&lt;label for=&quot;interactionDate&quot;&gt;Interaction Date:&lt;/label&gt;
+&lt;input id=&quot;interactionDate&quot; name=&quot;Interaction Date&quot; required=&quot;&quot; type=&quot;date&quot;/&gt;
+&lt;div id=&quot;dynamicRubricContainer&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;button-container&quot;&gt;
+&lt;button onclick=&quot;addEvaluation()&quot; style=&quot;background-color: #8e84ed; color: white; border-radius: 8px; padding: 5px 15px; border: none;&quot; type=&quot;button&quot;&gt;
                     Add Evaluation
                 &lt;/button&gt;
-            &lt;/div&gt;
-
-        &lt;/form&gt;
-    &lt;br&gt;
-    
-    &lt;script&gt;
+&lt;/div&gt;
+&lt;/form&gt;
+&lt;br/&gt;
+&lt;script&gt;
         const SUPABASE_URL = &quot;https://kpuqabxmpavxgbzxzlng.supabase.co&quot;;
         const SUPABASE_ANON_KEY = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdXFhYnhtcGF2eGdienh6bG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTk1NzAsImV4cCI6MjA4MDI3NTU3MH0.CoB4NA6Z8qtTrRzvIqfP-hm3T1m24WpRNI1Xc74all8&quot;;
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -6068,42 +6059,140 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
         const CONTACT_TYPES_API_URL = &quot;https://script.google.com/macros/s/AKfycbzc_rj2HY81s6lVJf4XhEp0Y3QPPf0WR-rIuTmuBf6lOw3YNcInvptYQ52Sw_qbgPOR/exec&quot;;
         const AGENTS_API_KEY = &quot;AIzaSyA8z7eSriF7BQWe8_w4xANA3pG0gbYgNaM&quot;;
 
-        // V14 temporal:
-        // QA visibility stays on the legacy Sheets.
-        // Canonical agent IDs still come from public.employees.
-        const AGENTS_SPREADSHEET_ID = &quot;1Iq3d_Q33Mp4wE3L8jp2ZqXAg07mZT2dkVpRKG5MgZA8&quot;;
-        const HEADCOUNT_RANGE = &quot;Empleados!A2:ZZ&quot;;
-
+        // V1.0.1:
+        // public.employees is now the ONLY source of agent visibility.
+        // The legacy QA Sheet remains only as a one-time migration bridge
+        // for QA assignment rows not yet copied to Supabase.
         const QA_ASSIGNMENTS_SPREADSHEET_ID = &quot;186ugUBPAgsotqqaW3ynpzNAMwE_5IFE-iqZZsxtdY08&quot;;
-const QA_ASSIGNMENTS_RANGE = &quot;QA!A2:D&quot;;
+        const QA_ASSIGNMENTS_RANGE = &quot;QA!A2:D&quot;;
 
         let qaAssignments = [];
+        let qaAssignmentsSource = &quot;uninitialized&quot;;
 
-        async function loadQAAssignments() {
-  try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${QA_ASSIGNMENTS_SPREADSHEET_ID}/values/${encodeURIComponent(QA_ASSIGNMENTS_RANGE)}?key=${AGENTS_API_KEY}`;
-    const response = await fetch(url);
+        async function loadMyQAAssignmentsFromSupabase() {
+  const { data, error } = await supabaseClient.rpc(&quot;echo_get_my_qa_assignments&quot;);
 
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const values = data.values || [];
-
-    qaAssignments = values
-      .map(row =&gt; ({
-        email: normalizeText(row[0]),
-        campaign: row[1]?.trim(),
-        lob: row[2]?.trim(),
-        queue: row[3]?.trim()
-      }))
-      .filter(rule =&gt; rule.email &amp;&amp; rule.campaign &amp;&amp; rule.lob &amp;&amp; rule.queue);
-
-  } catch (error) {
-    console.error(&quot;Error loading QA assignments:&quot;, error);
-    qaAssignments = [];
+  if (error) {
+    console.error(&quot;Error loading QA assignments from Supabase:&quot;, error);
+    throw error;
   }
+
+  qaAssignments = (Array.isArray(data) ? data : [])
+    .map(row =&gt; ({
+      email: normalizeText(row.email),
+      campaign: String(row.campaign || &quot;&quot;).trim(),
+      lob: String(row.lob || &quot;&quot;).trim(),
+      queue: String(row.queue || &quot;&quot;).trim()
+    }))
+    .filter(rule =&gt;
+      rule.email &amp;&amp;
+      rule.campaign &amp;&amp;
+      rule.lob &amp;&amp;
+      rule.queue
+    );
+
+  qaAssignmentsSource = &quot;supabase&quot;;
+  return qaAssignments;
+}
+
+async function loadLegacyMyQAAssignmentsForMigration(evaluatorEmail) {
+  const normalizedEmail = normalizeText(evaluatorEmail);
+
+  const url =
+    `https://sheets.googleapis.com/v4/spreadsheets/${QA_ASSIGNMENTS_SPREADSHEET_ID}` +
+    `/values/${encodeURIComponent(QA_ASSIGNMENTS_RANGE)}?key=${AGENTS_API_KEY}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`QA assignment migration Sheet HTTP Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const values = data.values || [];
+
+  return values
+    .map(row =&gt; ({
+      email: normalizeText(row[0]),
+      campaign: row[1]?.trim(),
+      lob: row[2]?.trim(),
+      queue: row[3]?.trim()
+    }))
+    .filter(rule =&gt;
+      rule.email === normalizedEmail &amp;&amp;
+      rule.campaign &amp;&amp;
+      rule.lob &amp;&amp;
+      rule.queue
+    );
+}
+
+async function ensureMyQAAssignmentsInSupabase(evaluatorEmail, viewerContext) {
+  if (isEchoExternalClient()) {
+    qaAssignments = [];
+    qaAssignmentsSource = &quot;not-applicable&quot;;
+    return qaAssignments;
+  }
+
+  const viewerRole = normalizeText(viewerContext?.role);
+  const viewerHasDirectReports = viewerContext?.has_direct_reports === true;
+  const shouldUseQAAssignments =
+    isQARole(viewerRole) ||
+    (viewerRole === &quot;supervisor&quot; &amp;&amp; !viewerHasDirectReports);
+
+  if (!shouldUseQAAssignments) {
+    qaAssignments = [];
+    qaAssignmentsSource = &quot;not-applicable&quot;;
+    return qaAssignments;
+  }
+
+  const existing = await loadMyQAAssignmentsFromSupabase();
+
+  if (existing.length &gt; 0) {
+    console.log(
+      `Echo QA: ${existing.length} reglas cargadas desde public.qa_assignments`
+    );
+    return existing;
+  }
+
+  console.warn(
+    &quot;Echo QA: no hay reglas en Supabase para este QA; ejecutando migración única desde QA!A:D.&quot;
+  );
+
+  const legacyRules = await loadLegacyMyQAAssignmentsForMigration(evaluatorEmail);
+
+  if (legacyRules.length === 0) {
+    qaAssignments = [];
+    qaAssignmentsSource = &quot;legacy-confirmed-empty&quot;;
+    console.warn(
+      &quot;Echo QA: no hay reglas explícitas para este usuario; se conserva el catálogo interno permitido por el RPC.&quot;
+    );
+    return qaAssignments;
+  }
+
+  const payload = legacyRules.map(rule =&gt; ({
+    campaign: rule.campaign,
+    lob: rule.lob,
+    queue: rule.queue
+  }));
+
+  const { error: seedError } = await supabaseClient.rpc(
+    &quot;echo_seed_my_qa_assignments&quot;,
+    { p_assignments: payload }
+  );
+
+  if (seedError) {
+    console.error(&quot;Error migrating QA assignments to Supabase:&quot;, seedError);
+    throw seedError;
+  }
+
+  const migrated = await loadMyQAAssignmentsFromSupabase();
+  qaAssignmentsSource = &quot;supabase-migrated&quot;;
+
+  console.log(
+    `Echo QA: ${migrated.length} reglas migradas a public.qa_assignments`
+  );
+
+  return migrated;
 }
 
 function normalizeText(value) {
@@ -6124,168 +6213,38 @@ function isQARole(role) {
   return normalizedRole === &quot;qa&quot; || normalizedRole.startsWith(&quot;qa_&quot;);
 }
 
-/**
- * TEMPORARY V14 QA BRIDGE
- *
- * Visibility/routing comes from the exact legacy Sheets that the old QA form used:
- *   - Headcount: Empleados!A2:ZZ
- *   - QA rules:  QA!A2:D
- *
- * But the returned agents are ALWAYS the objects coming from public.employees,
- * so option.dataset.agentId remains the canonical Supabase CX.
- */
-async function filterSupabaseAgentsUsingLegacyQASheets(supabaseAgents, evaluatorEmail) {
-  const qaRules = qaAssignments.filter(rule =&gt;
-    rule.email === normalizeText(evaluatorEmail)
-  );
-
-  console.log(&quot;Evaluator:&quot;, evaluatorEmail);
-  console.log(&quot;QA Assignments loaded:&quot;, qaAssignments);
-  console.log(&quot;QA Rules for evaluator:&quot;, qaRules);
-
-  // Same behavior as the old QA tool:
-  // a QA without explicit rules is not reduced to zero agents.
-  if (qaRules.length === 0) {
-    console.warn(
-      &quot;Echo QA V14: no legacy QA rules found; keeping active Supabase agents.&quot;
-    );
-    return supabaseAgents;
-  }
-
-  const url =
-    `https://sheets.googleapis.com/v4/spreadsheets/${AGENTS_SPREADSHEET_ID}` +
-    `/values/${encodeURIComponent(HEADCOUNT_RANGE)}?key=${AGENTS_API_KEY}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Legacy headcount Sheet HTTP Error: ${response.status}`);
-  }
-
-  const payload = await response.json();
-  const values = payload.values || [];
-
-  // This mapping mirrors the original standalone QA tool.
-  const legacyVisibleAgents = values
-    .map(row =&gt; ({
-      legacyId: row[0]?.trim(),                    // A
-      name: row[1]?.trim(),                        // B
-      role: row[5]?.trim(),                        // F
-      status: row[9]?.trim(),                      // J
-      campaign: row[10]?.trim(),                   // K
-      lob: row[11]?.trim(),                        // L
-      queue: row[25]?.trim(),                      // Z
-      supervisorEmail: normalizeText(row[28])      // AC
-    }))
-    .filter(agent =&gt;
-      agent.name &amp;&amp;
-      normalizeText(agent.status) === &quot;activo&quot;
-    )
-    .filter(agent =&gt;
-      qaRules.some(rule =&gt;
-        normalizeText(agent.campaign) === normalizeText(rule.campaign) &amp;&amp;
-        normalizeText(agent.lob) === normalizeText(rule.lob) &amp;&amp;
-        normalizeText(agent.queue) === normalizeText(rule.queue)
-      )
-    );
-
-  // Index public.employees agents by normalized full name.
-  const byName = new Map();
-
-  supabaseAgents.forEach(agent =&gt; {
-    const key = normalizePersonName(agent.name);
-    if (!byName.has(key)) byName.set(key, []);
-    byName.get(key).push(agent);
-  });
-
-  const selectedById = new Map();
-  const unmatchedLegacy = [];
-
-  legacyVisibleAgents.forEach(legacyAgent =&gt; {
-    const candidates =
-      byName.get(normalizePersonName(legacyAgent.name)) || [];
-
-    if (candidates.length === 0) {
-      unmatchedLegacy.push(legacyAgent);
-      return;
-    }
-
-    let selected = null;
-
-    // Most names are unique: use public.employees directly.
-    if (candidates.length === 1) {
-      selected = candidates[0];
-    } else {
-      // Duplicate names: disambiguate with campaign/lob/queue.
-      const exactScope = candidates.filter(candidate =&gt;
-        normalizeText(candidate.campaign) === normalizeText(legacyAgent.campaign) &amp;&amp;
-        normalizeText(candidate.lob) === normalizeText(legacyAgent.lob) &amp;&amp;
-        normalizeText(candidate.queue) === normalizeText(legacyAgent.queue)
-      );
-
-      if (exactScope.length === 1) {
-        selected = exactScope[0];
-      } else {
-        // Safe final fallback only when legacy ID already equals a real Supabase ID.
-        const exactCanonicalId = candidates.find(candidate =&gt;
-          String(candidate.id || &quot;&quot;).trim() ===
-          String(legacyAgent.legacyId || &quot;&quot;).trim()
-        );
-
-        if (exactCanonicalId) selected = exactCanonicalId;
-      }
-    }
-
-    if (selected?.id) {
-      selectedById.set(selected.id, selected);
-    } else {
-      unmatchedLegacy.push(legacyAgent);
-    }
-  });
-
-  const selectedAgents = Array.from(selectedById.values());
-
-  console.log(
-    `Echo QA V14: ${legacyVisibleAgents.length} agentes visibles según Sheets; ` +
-    `${selectedAgents.length} vinculados a public.employees.`
-  );
-
-  if (unmatchedLegacy.length &gt; 0) {
-    console.warn(
-      &quot;Echo QA V14: agentes del Sheet sin vínculo canónico único en employees:&quot;,
-      unmatchedLegacy
-    );
-  }
-
-  return selectedAgents;
-}
-
 async function loadAgentNamesFromSupabase() {
   const select = document.getElementById(&quot;agentName&quot;);
-  select.innerHTML = '&lt;option value=&quot;&quot;&gt;Cargando agentes desde Supabase...&lt;/option&gt;';
+  select.innerHTML =
+    '&lt;option value=&quot;&quot;&gt;Cargando agentes desde Supabase...&lt;/option&gt;';
 
   try {
     const evaluatorEmail = normalizeText(getEvaluatorFromURL());
 
-    const [
-      { data, error },
-      { data: viewerContext, error: viewerContextError }
-    ] = await Promise.all([
-      supabaseClient.rpc(&quot;echo_get_qa_agents&quot;),
-      supabaseClient.rpc(&quot;echo_get_qa_viewer_context&quot;)
-    ]);
+    const {
+      data: viewerContext,
+      error: viewerContextError
+    } = await supabaseClient.rpc(&quot;echo_get_qa_viewer_context&quot;);
 
     if (viewerContextError) {
       console.error(&quot;Error loading Echo viewer context:&quot;, viewerContextError);
+      throw viewerContextError;
     }
 
-    const viewerRole = normalizeText(viewerContext?.role);
-    const viewerHasDirectReports = viewerContext?.has_direct_reports === true;
+    await ensureMyQAAssignmentsInSupabase(
+      evaluatorEmail,
+      viewerContext
+    );
+
+    const { data, error } = await supabaseClient.rpc(&quot;echo_get_qa_agents&quot;);
 
     if (error) {
       console.error(&quot;Error loading agents from Supabase:&quot;, error);
       throw error;
     }
+
+    const viewerRole = normalizeText(viewerContext?.role);
+    const viewerHasDirectReports = viewerContext?.has_direct_reports === true;
 
     let agents = (Array.isArray(data) ? data : [])
       .map(row =&gt; ({
@@ -6304,50 +6263,12 @@ async function loadAgentNamesFromSupabase() {
         [&quot;active&quot;, &quot;activo&quot;].includes(normalizeText(agent.status))
       );
 
-    const legacyQARules = qaAssignments.filter(rule =&gt;
-      rule.email === evaluatorEmail
-    );
-
     if (isEchoExternalClient()) {
-      const allowedCampaign = normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
+      const allowedCampaign =
+        normalizeText(echoEmbeddedCampaignKey || &quot;aplazo&quot;);
 
       agents = agents.filter(agent =&gt;
         normalizeText(agent.campaign) === allowedCampaign
-      );
-
-    } else if (
-      viewerRole === &quot;supervisor&quot; &amp;&amp;
-      viewerHasDirectReports
-    ) {
-      // V15: a user is treated as a supervisor only when they ACTUALLY
-      // have active direct reports linked by employees.supervisor_id.
-      // The RPC already returned only those direct reports.
-      console.log(
-        `Supervisor ${viewerContext?.employee_id || &quot;&quot;}: ` +
-        `${agents.length} agentes cargados por supervisor_id`
-      );
-
-    } else if (
-      isQARole(viewerRole) ||
-      legacyQARules.length &gt; 0 ||
-      viewerRole === &quot;supervisor&quot;
-    ) {
-      // Mirrors the original QA behavior:
-      // if the person is not an actual supervisor with direct reports,
-      // use the legacy QA Sheet rules.
-      //
-      // This also supports QA users whose employees.system_role is still
-      // &quot;supervisor&quot;, which is what V14 was incorrectly blocking.
-      agents = await filterSupabaseAgentsUsingLegacyQASheets(
-        agents,
-        evaluatorEmail
-      );
-
-    } else {
-      // Other authorized internal roles keep the active Supabase catalog.
-      console.log(
-        `Echo internal role ${viewerRole || &quot;unknown&quot;}: ` +
-        `${agents.length} agentes activos desde public.employees`
       );
     }
 
@@ -6361,12 +6282,20 @@ async function loadAgentNamesFromSupabase() {
       const option = document.createElement(&quot;option&quot;);
       option.value = agent.name;
       option.textContent = agent.name;
-      option.dataset.agentId = agent.id; // public.employees.id
+      option.dataset.agentId = agent.id;
       select.appendChild(option);
     });
 
     console.log(
-      `Echo QA: ${agents.length} agentes cargados desde public.employees`
+      &quot;Echo QA V1.0.1:&quot;,
+      {
+        evaluator: evaluatorEmail,
+        viewerRole,
+        viewerHasDirectReports,
+        qaAssignmentsSource,
+        qaAssignments: qaAssignments.length,
+        agents: agents.length
+      }
     );
 
   } catch (error) {
@@ -6792,7 +6721,6 @@ async function initializeEchoForm() {
     try {
       await applyEchoSession();
       await loadContactTypesFromSheet();
-      await loadQAAssignments();
 
       configureEchoClientScope();
       await loadAgentNamesFromSupabase();
@@ -7070,7 +6998,7 @@ if (typeof ResizeObserver !== &quot;undefined&quot;) {
   new ResizeObserver(notifyParentHeight).observe(document.documentElement);
 }
     &lt;/script&gt;
-&lt;/body&gt;
+&lt;/div&gt;&lt;/body&gt;
 &lt;/html&gt;" id="qaFormIframe" onload="window.sendEvaluatorToForm &amp;&amp; window.sendEvaluatorToForm();" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:760px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Herramienta de QA"></iframe>
 </div>
 <!-- PAGE: CORRECCIONES -->
@@ -8956,7 +8884,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.0";
+const ECHO_APP_VERSION = "1.0.1";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
