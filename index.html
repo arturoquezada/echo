@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.4" name="echo-version"/>
+<meta content="1.0.5" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6210,7 +6210,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.4: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.5: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -6275,26 +6275,53 @@ async function loadAgentNamesFromSupabase() {
   const operationalQueues = getOperationalQueues(campaign, lob);
   const qaOutcomes = [];
 
+  const addOutcome = (outcome) =&gt; {
+    if (!qaOutcomes.some(
+      x =&gt; normalizeKey(x) === normalizeKey(outcome)
+    )) {
+      qaOutcomes.push(outcome);
+    }
+  };
+
   operationalQueues.forEach(queue =&gt; {
+    const campaignKey = normalizeKey(campaign);
+    const lobKey = normalizeKey(lob);
+    const operationalQueueKey = normalizeKey(queue);
+
     const isRaceOperationalQueue =
-      normalizeKey(campaign) === &quot;aplazo&quot; &amp;&amp;
-      normalizeKey(lob) === &quot;soporte&quot; &amp;&amp;
-      normalizeKey(queue) === &quot;race&quot;;
+      campaignKey === &quot;aplazo&quot; &amp;&amp;
+      lobKey === &quot;soporte&quot; &amp;&amp;
+      operationalQueueKey === &quot;race&quot;;
 
     if (isRaceOperationalQueue) {
-      // RACE is the employee's operational Queue.
-      // Evaluators keep the three QA outcomes used before ACE/RACE.
-      [&quot;Crédito&quot;, &quot;Educación al Usuario&quot;, &quot;Cuenta&quot;].forEach(outcome =&gt; {
-        if (!qaOutcomes.some(x =&gt; normalizeKey(x) === normalizeKey(outcome))) {
-          qaOutcomes.push(outcome);
-        }
-      });
+      // RACE remains the employee's operational Queue.
+      // QA evaluates one of its three historical Outcomes.
+      [
+        &quot;Crédito&quot;,
+        &quot;Educación al Usuario&quot;,
+        &quot;Cuenta&quot;
+      ].forEach(addOutcome);
       return;
     }
 
-    if (!qaOutcomes.some(x =&gt; normalizeKey(x) === normalizeKey(queue))) {
-      qaOutcomes.push(queue);
+    const isCashmindOperationalQueue =
+      campaignKey === &quot;cashmind&quot; &amp;&amp;
+      lobKey === &quot;cashmind&quot; &amp;&amp;
+      operationalQueueKey === &quot;cashmind&quot;;
+
+    if (isCashmindOperationalQueue) {
+      // Cashmind remains the employee's operational Queue.
+      // QA keeps the four historical Outcomes/rubrics.
+      [
+        &quot;Llamadas Salida&quot;,
+        &quot;Llamadas Entrada&quot;,
+        &quot;Chats&quot;,
+        &quot;Correos&quot;
+      ].forEach(addOutcome);
+      return;
     }
+
+    addOutcome(queue);
   });
 
   qaOutcomes.forEach(queue =&gt; {
@@ -8867,7 +8894,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.4";
+const ECHO_APP_VERSION = "1.0.5";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
