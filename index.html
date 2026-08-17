@@ -1252,8 +1252,8 @@ body.sidebar-collapsed .logout-btn {
   &lt;!-- HEADER --&gt;
   &lt;div class=&quot;header&quot;&gt;
     &lt;div&gt;
-      &lt;h1&gt;📋 Portal QA — Aplazo&lt;/h1&gt;
-      &lt;p&gt;Evaluaciones realizadas por evaluadores @aplazo.mx&lt;/p&gt;
+      &lt;h1 id=&quot;clientPortalTitle&quot;&gt;📋 Portal QA&lt;/h1&gt;
+      &lt;p id=&quot;clientPortalSubtitle&quot;&gt;Métricas de QA de tu operación&lt;/p&gt;
     &lt;/div&gt;
     &lt;div class=&quot;header-meta&quot; style=&quot;display:flex;flex-direction:column;align-items:flex-end;gap:6px;&quot;&gt;
       &lt;span id=&quot;lastUpdated&quot; style=&quot;color:#94a3b8;font-size:12px;&quot;&gt;–&lt;/span&gt;
@@ -1353,7 +1353,7 @@ body.sidebar-collapsed .logout-btn {
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;chart-card&quot;&gt;
-      &lt;h3&gt;👤 Estadísticas por evaluador (@aplazo.mx)&lt;/h3&gt;
+      &lt;h3&gt;👤 Estadísticas por evaluador&lt;/h3&gt;
       &lt;table&gt;
         &lt;thead&gt;&lt;tr&gt;
           &lt;th&gt;Evaluador&lt;/th&gt;&lt;th&gt;Evaluaciones&lt;/th&gt;&lt;th&gt;Score prom.&lt;/th&gt;&lt;th&gt;Críticos&lt;/th&gt;&lt;th&gt;Zeros&lt;/th&gt;&lt;th&gt;Agentes únicos&lt;/th&gt;
@@ -1444,8 +1444,11 @@ const SUPABASE_ANON_KEY = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ── CLIENT SCOPE ── */
-const CLIENT_CAMPAIGN_KEY = &quot;aplazo&quot;;
-const APLAZO_DOMAIN = &quot;@aplazo.mx&quot;;
+let CLIENT_CAMPAIGN_KEY = null;
+let CLIENT_ORGANIZATION = &quot;&quot;;
+let CLIENT_ACCESS_ROLE = null;
+let CLIENT_SESSION = null;
+let CLIENT_CONTEXT_READY = false;
 
 let allData = [];
 let chartWeekly, chartHisto, chartPareto, agentHistoryChart, riskChart;
@@ -1483,13 +1486,14 @@ function deltaArrow(val, prev) {
   return d&gt;0?{text:`▲ ${d.toFixed(2)} vs periodo ant.`,cls:'up'}:{text:`▼ ${Math.abs(d).toFixed(2)} vs periodo ant.`,cls:'down'};
 }
 
-/* ── FILTER OPTIONS (only @aplazo.mx evaluators) ── */
+/* ── FILTER OPTIONS (campaign-scoped) ── */
 let filterCache=[];
 async function loadFilters(){
+  if (!CLIENT_CONTEXT_READY || !CLIENT_CAMPAIGN_KEY) return;
   const q = sb.from('qa_v_evaluations_base')
     .select('lob_key,queue_key,agent_identifier,agent_name,evaluator_name')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-    .like('evaluator_name', '%' + APLAZO_DOMAIN + '%');
+    ;
   filterCache = await fetchAll(q);
   refreshFilters();
   ['lobFilter','queueFilter','agentFilter'].forEach(id=&gt;{
@@ -1524,13 +1528,14 @@ function refreshFilters(){
 
 /* ── MAIN LOAD ── */
 async function load(){
+  if (!CLIENT_CONTEXT_READY || !CLIENT_CAMPAIGN_KEY) return;
   const f=getFilters();
   document.getElementById('lastUpdated').textContent='Cargando...';
 
-  /* KEY FILTER: only @aplazo.mx evaluators */
+  /* SECURITY SCOPE: only the campaign authorized by Echo */
   let q = sb.from('qa_v_evaluations_base').select('*')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-    .like('evaluator_name', '%' + APLAZO_DOMAIN + '%');
+    ;
   if(f.start) q=q.gte('created_date_cdmx',f.start);
   if(f.end)   q=q.lte('created_date_cdmx',f.end);
   if(f.lob)   q=q.eq('lob_key',f.lob);
@@ -1589,7 +1594,7 @@ async function renderKpis(f){
     const pe=new Date(start-1).toISOString().split('T')[0];
     let pq=sb.from('qa_v_evaluations_base').select('score_final,critical_error_triggered,weekly_zero_triggered')
       .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-      .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+      
       .gte('created_date_cdmx',ps).lte('created_date_cdmx',pe);
     if(f.lob)   pq=pq.eq('lob_key',f.lob);
     if(f.queue) pq=pq.eq('queue_key',f.queue);
@@ -1614,7 +1619,7 @@ async function renderKpis(f){
   document.getElementById('kTrendAgents').className='trend flat';
 
   document.getElementById('insightBar').innerHTML=n
-    ?`En el periodo se realizaron &lt;strong&gt;${n}&lt;/strong&gt; evaluaciones (evaluadores @aplazo.mx) con un score promedio de &lt;strong&gt;${avg.toFixed(2)}%&lt;/strong&gt;. Se detectaron &lt;strong&gt;${crits}&lt;/strong&gt; error(es) crítico(s) y &lt;strong&gt;${zeros}&lt;/strong&gt; caso(s) de Weekly Zero. &lt;strong&gt;${agents}&lt;/strong&gt; agentes únicos evaluados.`
+    ?`En el periodo se realizaron &lt;strong&gt;${n}&lt;/strong&gt; evaluaciones con un score promedio de &lt;strong&gt;${avg.toFixed(2)}%&lt;/strong&gt;. Se detectaron &lt;strong&gt;${crits}&lt;/strong&gt; error(es) crítico(s) y &lt;strong&gt;${zeros}&lt;/strong&gt; caso(s) de Weekly Zero. &lt;strong&gt;${agents}&lt;/strong&gt; agentes únicos evaluados.`
     :'No hay evaluaciones para los filtros seleccionados.';
 }
 
@@ -1717,7 +1722,7 @@ async function renderPareto(f){
   let q=sb.from('qa_v_evaluation_responses_detail').select('rubric_item,field_key')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
     .eq('failed_item',true)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+    ;
   if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
   if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
   if(f.lob)   q=q.eq('lob_key',f.lob);
@@ -1769,7 +1774,7 @@ async function buildRubricDetail(){
   let q=sb.from('qa_v_evaluation_responses_detail')
     .select('rubric_item,field_key,calculated_score,weight,failed_item,is_bonus')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+    ;
   if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
   if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
   if(f.lob)   q=q.eq('lob_key',f.lob);
@@ -1805,7 +1810,7 @@ async function renderRubricAgent(f){
   let q=sb.from('qa_v_evaluation_responses_detail')
     .select('agent_identifier,agent_name,rubric_item,field_key,calculated_score,weight,is_bonus')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+    ;
   if(f.start) q=q.gte('created_at',f.start+'T00:00:00');
   if(f.end)   q=q.lte('created_at',f.end+'T23:59:59');
   if(f.lob)   q=q.eq('lob_key',f.lob);
@@ -1846,7 +1851,7 @@ async function renderRubricAgent(f){
 async function renderCriticals(f){
   let q=sb.from('qa_v_policy_flags_detail').select('policy_flag,display_label,field_key')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%');
+    ;
   if(f.start) q=q.gte('created_date_cdmx',f.start);
   if(f.end)   q=q.lte('created_date_cdmx',f.end);
   if(f.lob)   q=q.eq('lob_key',f.lob);
@@ -2114,7 +2119,7 @@ async function openAgentHistory(agentId, agentName){
   const {data:evals}=await sb.from('qa_v_evaluations_base').select('*')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
     .eq('agent_identifier',agentId)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+    
     .gte('created_date_cdmx',dateFrom).lte('created_date_cdmx',dateTo)
     .order('created_date_cdmx',{ascending:true});
   if(!evals||!evals.length){body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;No hay evaluaciones en los últimos 3 meses.&lt;/div&gt;';return;}
@@ -2137,7 +2142,7 @@ async function openAgentHistory(agentId, agentName){
     .select('rubric_item,field_key,calculated_score,weight,failed_item,is_bonus')
     .eq('campaign_key', CLIENT_CAMPAIGN_KEY)
     .eq('agent_identifier',agentId)
-    .like('evaluator_name','%'+APLAZO_DOMAIN+'%')
+    
     .gte('created_at',dateFrom+'T00:00:00')
     .lte('created_at',dateTo+'T23:59:59');
   let rubricSection='';
@@ -2195,33 +2200,92 @@ document.getElementById('paretoToggleBtn').addEventListener('click',()=&gt;toggl
 document.getElementById('btnRefresh').addEventListener('click',()=&gt;load());
 
 /* ── INIT ── */
-document.addEventListener('DOMContentLoaded',async()=&gt;{
-  const today=new Date(),dow=today.getDay();
-  const mon=new Date(today); mon.setDate(today.getDate()+(dow===0?-6:1-dow));
-  const sun=new Date(mon);   sun.setDate(mon.getDate()+6);
-  document.getElementById('startDate').value=mon.toISOString().split('T')[0];
-  document.getElementById('endDate').value=sun.toISOString().split('T')[0];
-  await loadFilters();
-  await load();
+let clientDashboardInitPromise = null;
 
-  function notifyEchoClientHeight(){
-    const h = document.documentElement.scrollHeight;
-    if(window.parent &amp;&amp; window.parent !== window){
-      window.parent.postMessage({type:'echoClientDashboardHeight',height:h},'*');
+function notifyEchoClientHeight(){
+  const h = document.documentElement.scrollHeight;
+  if(window.parent &amp;&amp; window.parent !== window){
+    window.parent.postMessage({type:'echoClientDashboardHeight',height:h},'*');
+  }
+}
+
+async function initializeClientDashboard(){
+  if (clientDashboardInitPromise) return clientDashboardInitPromise;
+
+  clientDashboardInitPromise = (async()=&gt;{
+    if (!CLIENT_CAMPAIGN_KEY || !CLIENT_SESSION?.access_token || !CLIENT_SESSION?.refresh_token) {
+      throw new Error('Echo no entregó un contexto válido para el dashboard del cliente.');
     }
+
+    const { error } = await sb.auth.setSession({
+      access_token: CLIENT_SESSION.access_token,
+      refresh_token: CLIENT_SESSION.refresh_token
+    });
+    if (error) throw error;
+
+    CLIENT_CONTEXT_READY = true;
+
+    const title = document.getElementById('clientPortalTitle');
+    const subtitle = document.getElementById('clientPortalSubtitle');
+    const label = CLIENT_ORGANIZATION || CLIENT_CAMPAIGN_KEY;
+    if (title) title.textContent = `📋 Portal QA — ${label}`;
+    if (subtitle) subtitle.textContent = `Métricas de QA · Campaña ${CLIENT_CAMPAIGN_KEY}`;
+
+    const today=new Date(),dow=today.getDay();
+    const mon=new Date(today); mon.setDate(today.getDate()+(dow===0?-6:1-dow));
+    const sun=new Date(mon);   sun.setDate(mon.getDate()+6);
+    document.getElementById('startDate').value=mon.toISOString().split('T')[0];
+    document.getElementById('endDate').value=sun.toISOString().split('T')[0];
+
+    await loadFilters();
+    await load();
+
+    notifyEchoClientHeight();
+    new MutationObserver(notifyEchoClientHeight).observe(document.body,{
+      childList:true,
+      subtree:true,
+      attributes:false
+    });
+    window.addEventListener('resize',notifyEchoClientHeight);
+  })();
+
+  try {
+    await clientDashboardInitPromise;
+  } finally {
+    clientDashboardInitPromise = null;
+  }
+}
+
+window.addEventListener('message', async(event)=&gt;{
+  if (window.parent !== window &amp;&amp; event.source !== window.parent) return;
+  if (!event.data || event.data.type !== 'echoClientDashboardSession') return;
+
+  CLIENT_CAMPAIGN_KEY = String(event.data.campaignKey || '').trim().toLowerCase();
+  CLIENT_ORGANIZATION = String(event.data.organization || '').trim();
+  CLIENT_ACCESS_ROLE = String(event.data.accessRole || '').trim().toLowerCase();
+  CLIENT_SESSION = event.data.session || null;
+
+  if (CLIENT_ACCESS_ROLE !== 'client_form') {
+    console.error('Acceso de cliente no autorizado para dashboard.');
+    return;
   }
 
-  notifyEchoClientHeight();
-  new MutationObserver(notifyEchoClientHeight).observe(document.body,{
-    childList:true,
-    subtree:true,
-    attributes:false
-  });
-  window.addEventListener('resize',notifyEchoClientHeight);
+  try {
+    await initializeClientDashboard();
+  } catch (error) {
+    CLIENT_CONTEXT_READY = false;
+    console.error('Error inicializando dashboard de cliente:', error);
+    document.getElementById('lastUpdated').textContent='No se pudo cargar el dashboard';
+  }
 });
-&lt;/script&gt;
+
+document.addEventListener('DOMContentLoaded',()=&gt;{
+  if(window.parent &amp;&amp; window.parent !== window){
+    window.parent.postMessage({type:'echoClientDashboardReady'},'*');
+  }
+});&lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;" id="qaClientDashboardIframe" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:720px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Portal QA — Aplazo"></iframe></div><div class="page active" id="page-dashboard" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));">
+&lt;/html&gt;" id="qaClientDashboardIframe" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:720px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Portal QA — Cliente"></iframe></div><div class="page active" id="page-dashboard" style="padding:0;overflow:visible;background:#f4fbff;min-height:calc(100vh - var(--header-h));">
 <iframe data-srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;es&quot;&gt;
 &lt;head&gt;
@@ -6210,7 +6274,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.5: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.4: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -6275,53 +6339,26 @@ async function loadAgentNamesFromSupabase() {
   const operationalQueues = getOperationalQueues(campaign, lob);
   const qaOutcomes = [];
 
-  const addOutcome = (outcome) =&gt; {
-    if (!qaOutcomes.some(
-      x =&gt; normalizeKey(x) === normalizeKey(outcome)
-    )) {
-      qaOutcomes.push(outcome);
-    }
-  };
-
   operationalQueues.forEach(queue =&gt; {
-    const campaignKey = normalizeKey(campaign);
-    const lobKey = normalizeKey(lob);
-    const operationalQueueKey = normalizeKey(queue);
-
     const isRaceOperationalQueue =
-      campaignKey === &quot;aplazo&quot; &amp;&amp;
-      lobKey === &quot;soporte&quot; &amp;&amp;
-      operationalQueueKey === &quot;race&quot;;
+      normalizeKey(campaign) === &quot;aplazo&quot; &amp;&amp;
+      normalizeKey(lob) === &quot;soporte&quot; &amp;&amp;
+      normalizeKey(queue) === &quot;race&quot;;
 
     if (isRaceOperationalQueue) {
-      // RACE remains the employee's operational Queue.
-      // QA evaluates one of its three historical Outcomes.
-      [
-        &quot;Crédito&quot;,
-        &quot;Educación al Usuario&quot;,
-        &quot;Cuenta&quot;
-      ].forEach(addOutcome);
+      // RACE is the employee's operational Queue.
+      // Evaluators keep the three QA outcomes used before ACE/RACE.
+      [&quot;Crédito&quot;, &quot;Educación al Usuario&quot;, &quot;Cuenta&quot;].forEach(outcome =&gt; {
+        if (!qaOutcomes.some(x =&gt; normalizeKey(x) === normalizeKey(outcome))) {
+          qaOutcomes.push(outcome);
+        }
+      });
       return;
     }
 
-    const isCashmindOperationalQueue =
-      campaignKey === &quot;cashmind&quot; &amp;&amp;
-      lobKey === &quot;cashmind&quot; &amp;&amp;
-      operationalQueueKey === &quot;cashmind&quot;;
-
-    if (isCashmindOperationalQueue) {
-      // Cashmind remains the employee's operational Queue.
-      // QA keeps the four historical Outcomes/rubrics.
-      [
-        &quot;Llamadas Salida&quot;,
-        &quot;Llamadas Entrada&quot;,
-        &quot;Chats&quot;,
-        &quot;Correos&quot;
-      ].forEach(addOutcome);
-      return;
+    if (!qaOutcomes.some(x =&gt; normalizeKey(x) === normalizeKey(queue))) {
+      qaOutcomes.push(queue);
     }
-
-    addOutcome(queue);
   });
 
   qaOutcomes.forEach(queue =&gt; {
@@ -8894,7 +8931,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.5";
+const ECHO_APP_VERSION = "1.0.4";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -9171,7 +9208,7 @@ async function bootApp(user) {
 
   clientDashboardEnabled =
     isClientUser &&
-    String(currentExternalAccess?.campaign_key || '').trim().toLowerCase() === 'aplazo';
+    Boolean(String(currentExternalAccess?.campaign_key || '').trim());
 
   canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
 
@@ -9457,6 +9494,30 @@ function activateClientDashboardIframe() {
   return iframe;
 }
 
+async function sendClientDashboardContext() {
+  if (!isClientUser || !clientDashboardEnabled) return;
+
+  const iframe = activateClientDashboardIframe();
+  if (!iframe || !iframe.contentWindow) return;
+
+  const { data: { session }, error: sessionError } = await sb.auth.getSession();
+  if (sessionError) {
+    console.error('Unable to obtain Echo session for client dashboard:', sessionError);
+    return;
+  }
+
+  iframe.contentWindow.postMessage({
+    type: 'echoClientDashboardSession',
+    accessRole: currentExternalAccess?.access_role || null,
+    campaignKey: currentExternalAccess?.campaign_key || null,
+    organization: currentExternalAccess?.organization || null,
+    session: session ? {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    } : null
+  }, '*');
+}
+
 async function loadClientDashboard() {
   const iframe = activateClientDashboardIframe();
   if (!iframe) return;
@@ -9464,6 +9525,8 @@ async function loadClientDashboard() {
   const minHeight = Math.max(720, window.innerHeight - 64);
   const current = parseInt(iframe.style.height, 10) || 0;
   iframe.style.height = Math.max(current, minHeight) + 'px';
+
+  await sendClientDashboardContext();
 }
 
 function resizeCorreccionesIframe() {
@@ -9950,6 +10013,13 @@ window.addEventListener('message', event => {
   }
 
   const clientDashboardIframe = document.getElementById('qaClientDashboardIframe');
+  if (
+    type === 'echoClientDashboardReady' &&
+    event.source === clientDashboardIframe?.contentWindow
+  ) {
+    sendClientDashboardContext();
+    return;
+  }
   if (
     type === 'echoClientDashboardHeight' &&
     event.source === clientDashboardIframe?.contentWindow
