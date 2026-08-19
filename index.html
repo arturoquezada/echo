@@ -2054,7 +2054,18 @@ async function submitCorrAplazo() {
   const row = currentEvalRow;
   if (!row) return;
 
-  const reqBy = row.evaluator_name || 'Sin evaluador';
+  // The dashboard runs inside its own iframe. Use the authenticated
+  // Supabase session already transferred to this iframe instead of
+  // parent-window globals such as currentUser/supabaseClient.
+  const { data: authUserData, error: authUserError } = await sb.auth.getUser();
+  const reqBy = String(authUserData?.user?.email || '').trim().toLowerCase();
+
+  if (authUserError || !reqBy) {
+    console.error('Correction auth error:', authUserError);
+    alert('No se pudo identificar tu sesión para enviar la corrección. Cierra sesión y vuelve a entrar a Echo.');
+    return;
+  }
+  
   btn.disabled = true;
   btn.textContent = 'Enviando...';
 
@@ -2087,7 +2098,9 @@ async function submitCorrAplazo() {
     new_score_final          : type === 'Corrección de score' ? (parseFloat(document.getElementById('corrNewScore')?.value) || null) : null,
     new_rubric_responses     : newRubricResponses,
     correction_reason        : reason,
-    corrected_by             : reqBy,
+    // requested_by = quien solicita. corrected_by se llena al aprobar/aplicar.
+    corrected_by             : null,
+    corrected_at             : null,
     evaluator_name           : row.evaluator_name || null
   };
 
@@ -4140,8 +4153,16 @@ async function submitCorrection() {
   const row = currentEvalForCorrection;
   if (!row) return;
 
-  // Evaluator comes automatically from the evaluation — no need to ask
-  const reqBy = row.evaluator_name || &quot;Sin evaluador&quot;;
+  // requested_by must be the authenticated user who is requesting the change,
+  // not the evaluator who originally created the evaluation.
+  const { data: authUserData, error: authUserError } = await supabaseClient.auth.getUser();
+  const reqBy = String(authUserData?.user?.email || &quot;&quot;).trim().toLowerCase();
+
+  if (authUserError || !reqBy) {
+    console.error(&quot;Correction auth error:&quot;, authUserError);
+    alert(&quot;No se pudo identificar tu sesión para enviar la corrección. Cierra sesión y vuelve a entrar a Echo.&quot;);
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = &quot;Enviando...&quot;;
@@ -4177,7 +4198,9 @@ async function submitCorrection() {
     new_score_final          : type === &quot;Corrección de score&quot; ? (parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value) || null) : null,
     new_rubric_responses     : newRubricResponses,
     correction_reason        : reason,
-    corrected_by             : reqBy,
+    // requested_by identifies the requester. corrected_by is set when approved/applied.
+    corrected_by             : null,
+    corrected_at             : null,
     evaluator_name           : row.evaluator_name || null
   };
 
