@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.5" name="echo-version"/>
+<meta content="1.0.6" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2259,7 +2259,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     .card, .chart-card, .table-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(15,23,42,.07); margin-bottom: 22px; }
     .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 22px; }
     .card { margin-bottom: 0; position: relative; overflow: hidden; }
-    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #62d3f5, #38bdf8); border-radius: 20px 20px 0 0; }
+    .card::before { content: &#x27;&#x27;; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #62d3f5, #38bdf8); border-radius: 20px 20px 0 0; }
     .card.danger::before  { background: linear-gradient(90deg,#ef4444,#fb7185); }
     .card.warn::before    { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
     .card.success::before { background: linear-gradient(90deg,#22c55e,#4ade80); }
@@ -2500,7 +2500,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     body.client-mode .main-tabs-wrap { display: none !important; }
     .client-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 22px; }
     .client-kpi-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(15,23,42,.07); position: relative; overflow: hidden; }
-    .client-kpi-card::before { content:''; position:absolute; top:0;left:0;right:0;height:3px; border-radius:20px 20px 0 0; }
+    .client-kpi-card::before { content:&#x27;&#x27;; position:absolute; top:0;left:0;right:0;height:3px; border-radius:20px 20px 0 0; }
     .client-kpi-card.blue::before   { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
     .client-kpi-card.teal::before   { background: linear-gradient(90deg,#14b8a6,#2dd4bf); }
     .client-kpi-card.red::before    { background: linear-gradient(90deg,#ef4444,#fb7185); }
@@ -2661,7 +2661,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div class=&quot;chart-card&quot;&gt;
         &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
           &lt;h3 style=&quot;margin:0;&quot;&gt;📅 Comparativa semana vs semana anterior&lt;/h3&gt;
-          &lt;button onclick=&quot;exportTableById('weeklyCompareTable','comparativa_semanal')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+          &lt;button onclick=&quot;exportTableById(&#x27;weeklyCompareTable&#x27;,&#x27;comparativa_semanal&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
         &lt;/div&gt;
         &lt;table id=&quot;weeklyCompareTableEl&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Semana&lt;/th&gt;&lt;th&gt;Evaluaciones&lt;/th&gt;&lt;th&gt;Avg Score&lt;/th&gt;&lt;th&gt;Critical %&lt;/th&gt;&lt;th&gt;Δ Score&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;weeklyCompareTable&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
       &lt;/div&gt;
@@ -2687,7 +2687,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div class=&quot;chart-card&quot;&gt;
         &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
           &lt;h3 style=&quot;margin:0;&quot;&gt;🏢 Rendimiento por Campaña / LOB / Queue&lt;/h3&gt;
-          &lt;button onclick=&quot;exportTableById('groupTable','rendimiento_campana_lob_queue')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+          &lt;button onclick=&quot;exportTableById(&#x27;groupTable&#x27;,&#x27;rendimiento_campana_lob_queue&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
         &lt;/div&gt;
         &lt;div class=&quot;tabs&quot; id=&quot;groupTabs&quot;&gt;
           &lt;div class=&quot;tab active&quot; data-group=&quot;campaign_key&quot;&gt;Campaña&lt;/div&gt;
@@ -2699,7 +2699,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div class=&quot;chart-card&quot;&gt;
         &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
           &lt;h3 style=&quot;margin:0;&quot;&gt;👤 Estadísticas por evaluador&lt;/h3&gt;
-          &lt;button onclick=&quot;exportTableById('evaluatorTable','estadisticas_por_evaluador')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+          &lt;button onclick=&quot;exportTableById(&#x27;evaluatorTable&#x27;,&#x27;estadisticas_por_evaluador&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
         &lt;/div&gt;
         &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Evaluador&lt;/th&gt;&lt;th&gt;Evals&lt;/th&gt;&lt;th&gt;Score prom.&lt;/th&gt;&lt;th&gt;Críticos&lt;/th&gt;&lt;th&gt;Zeros&lt;/th&gt;&lt;th&gt;Agentes&lt;/th&gt;&lt;th title=&quot;% de evaluaciones con feedback enviado en menos de 48 hrs&quot;&gt;⏱️ Feedback On Time&lt;/th&gt;&lt;th title=&quot;% de evaluaciones con compromiso del agente registrado&quot;&gt;🤝 Commitment Rate&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;evaluatorTable&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
       &lt;/div&gt;
@@ -2716,7 +2716,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     &lt;div class=&quot;table-card&quot;&gt;
       &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
         &lt;h3 style=&quot;margin:0;&quot;&gt;🏆 Agent Risk Ranking&lt;/h3&gt;
-        &lt;button onclick=&quot;exportTableById('riskTable','agent_risk_ranking')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+        &lt;button onclick=&quot;exportTableById(&#x27;riskTable&#x27;,&#x27;agent_risk_ranking&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
       &lt;/div&gt;
       &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Agente&lt;/th&gt;&lt;th&gt;Campaña&lt;/th&gt;&lt;th&gt;LOB&lt;/th&gt;&lt;th&gt;Queue&lt;/th&gt;&lt;th&gt;Avg Score&lt;/th&gt;&lt;th&gt;ECs&lt;/th&gt;&lt;th&gt;Weekly Zero&lt;/th&gt;&lt;th&gt;Risk Score&lt;/th&gt;&lt;th&gt;Nivel&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;riskTable&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
     &lt;/div&gt;
@@ -2728,7 +2728,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     &lt;div class=&quot;table-card&quot; style=&quot;overflow-x:auto;&quot;&gt;
       &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
         &lt;h3 style=&quot;margin:0;&quot;&gt;📐 Score promedio por rubro&lt;/h3&gt;
-        &lt;button onclick=&quot;exportTableToCSV(document.querySelector('#rubricTableWrapper table'),'score_por_rubro')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;flex-shrink:0;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+        &lt;button onclick=&quot;exportTableToCSV(document.querySelector(&#x27;#rubricTableWrapper table&#x27;),&#x27;score_por_rubro&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;flex-shrink:0;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
       &lt;/div&gt;
       &lt;div id=&quot;rubricTableWrapper&quot;&gt;&lt;div class=&quot;muted&quot; style=&quot;padding:16px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando rubros...&lt;/div&gt;&lt;/div&gt;
     &lt;/div&gt;
@@ -2820,7 +2820,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div class=&quot;table-card&quot; style=&quot;margin-bottom:0;&quot;&gt;
         &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
           &lt;h3 style=&quot;margin:0;&quot;&gt;✏️ Correcciones recientes&lt;/h3&gt;
-          &lt;button onclick=&quot;exportTableById('corr-recent-tbody','correcciones_recientes')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+          &lt;button onclick=&quot;exportTableById(&#x27;corr-recent-tbody&#x27;,&#x27;correcciones_recientes&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
         &lt;/div&gt;
         &lt;table&gt;
           &lt;thead&gt;&lt;tr&gt;
@@ -2834,7 +2834,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div class=&quot;table-card&quot; style=&quot;margin-bottom:0;&quot;&gt;
         &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
           &lt;h3 style=&quot;margin:0;&quot;&gt;🥊 Disputas recientes&lt;/h3&gt;
-          &lt;button onclick=&quot;exportTableById('disp-recent-tbody','disputas_recientes')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+          &lt;button onclick=&quot;exportTableById(&#x27;disp-recent-tbody&#x27;,&#x27;disputas_recientes&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
         &lt;/div&gt;
         &lt;table&gt;
           &lt;thead&gt;&lt;tr&gt;
@@ -2874,7 +2874,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     &lt;div class=&quot;table-card&quot;&gt;
       &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;&quot;&gt;
         &lt;h3 style=&quot;margin:0;&quot;&gt;📋 Detalle de fallas por rubro&lt;/h3&gt;
-        &lt;button onclick=&quot;exportTableById('fallasTable','detalle_fallas_por_rubro')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+        &lt;button onclick=&quot;exportTableById(&#x27;fallasTable&#x27;,&#x27;detalle_fallas_por_rubro&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
       &lt;/div&gt;
       &lt;table&gt;
         &lt;thead&gt;&lt;tr&gt;
@@ -2919,7 +2919,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
     &lt;div class=&quot;table-card&quot;&gt;
       &lt;div style=&quot;display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0;&quot;&gt;
         &lt;h3 style=&quot;margin:0;font-size:15px;font-weight:700;&quot;&gt;⭐ Ranking de calidad de feedback por evaluador&lt;/h3&gt;
-        &lt;button onclick=&quot;exportTableById('fq-tbody','feedback_quality_ranking')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
+        &lt;button onclick=&quot;exportTableById(&#x27;fq-tbody&#x27;,&#x27;feedback_quality_ranking&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;&quot;&gt;⬇️ Exportar CSV&lt;/button&gt;
       &lt;/div&gt;
       &lt;div style=&quot;padding:16px 20px;&quot;&gt;
         &lt;table style=&quot;width:100%;border-collapse:collapse;font-size:13px;&quot;&gt;
@@ -2981,7 +2981,120 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
 ═══════════════════════════════════════════════ */
 const SUPABASE_URL      = &quot;https://kpuqabxmpavxgbzxzlng.supabase.co&quot;;
 const SUPABASE_ANON_KEY = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdXFhYnhtcGF2eGdienh6bG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTk1NzAsImV4cCI6MjA4MDI3NTU3MH0.CoB4NA6Z8qtTrRzvIqfP-hm3T1m24WpRNI1Xc74all8&quot;;
-const supabaseClient    = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient    = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   ECHO DASHBOARD CONTEXT
+   External Aplazo clients receive the same Intelligence Center,
+   but every data path is locked to campaign_key = aplazo.
+═══════════════════════════════════════════════ */
+const ECHO_APLAZO_CAMPAIGN = &quot;aplazo&quot;;
+const ECHO_APLAZO_DOMAIN = &quot;@aplazo.mx&quot;;
+let echoDashboardContext = {
+  isExternal: false,
+  campaignKey: null,
+  email: null,
+  accessRole: null
+};
+let echoDashboardInitialized = false;
+let echoDashboardInitializing = false;
+
+function normalizeDashboardText(value) {
+  return String(value || &quot;&quot;).trim().toLowerCase();
+}
+
+function isExternalAplazoDashboard() {
+  return echoDashboardContext.isExternal === true &amp;&amp;
+    normalizeDashboardText(echoDashboardContext.campaignKey) === ECHO_APLAZO_CAMPAIGN &amp;&amp;
+    normalizeDashboardText(echoDashboardContext.email).endsWith(ECHO_APLAZO_DOMAIN);
+}
+
+function getDashboardCampaign() {
+  if (isExternalAplazoDashboard()) return ECHO_APLAZO_CAMPAIGN;
+  return document.getElementById(&quot;campaignFilter&quot;)?.value || &quot;&quot;;
+}
+
+function lockExternalAplazoDashboardUI() {
+  if (!isExternalAplazoDashboard()) return;
+
+  const campaignSelect = document.getElementById(&quot;campaignFilter&quot;);
+  if (campaignSelect) {
+    campaignSelect.innerHTML = &#x27;&lt;option value=&quot;aplazo&quot;&gt;Aplazo&lt;/option&gt;&#x27;;
+    campaignSelect.value = ECHO_APLAZO_CAMPAIGN;
+    campaignSelect.disabled = true;
+    campaignSelect.title = &quot;Tu acceso está limitado a la campaña Aplazo&quot;;
+  }
+
+  // External Aplazo clients already have the complete Intelligence Center.
+  // The old simplified &quot;Vista Cliente&quot; would hide modules, so it is disabled here.
+  const clientModeBtn = document.getElementById(&quot;clientModeBtn&quot;);
+  if (clientModeBtn) clientModeBtn.style.display = &quot;none&quot;;
+  const clientBanner = document.getElementById(&quot;clientBanner&quot;);
+  if (clientBanner) clientBanner.classList.remove(&quot;active&quot;);
+  document.body.classList.remove(&quot;client-mode&quot;);
+  if (typeof clientModeActive !== &quot;undefined&quot;) clientModeActive = false;
+}
+
+async function applyEchoDashboardContext(data) {
+  const nextContext = {
+    isExternal: data?.isExternal === true,
+    campaignKey: normalizeDashboardText(data?.campaignKey),
+    email: normalizeDashboardText(data?.email),
+    accessRole: normalizeDashboardText(data?.accessRole)
+  };
+
+  if (nextContext.isExternal) {
+    const isAllowed =
+      nextContext.campaignKey === ECHO_APLAZO_CAMPAIGN &amp;&amp;
+      nextContext.email.endsWith(ECHO_APLAZO_DOMAIN) &amp;&amp;
+      nextContext.accessRole === &quot;client_form&quot;;
+
+    if (!isAllowed) {
+      document.body.innerHTML = &#x27;&lt;div style=&quot;font-family:Inter,Arial,sans-serif;padding:48px;text-align:center;color:#991b1b;&quot;&gt;&lt;h2&gt;Acceso no autorizado&lt;/h2&gt;&lt;p&gt;El QA Intelligence Center externo está disponible únicamente para clientes autorizados de Aplazo.&lt;/p&gt;&lt;/div&gt;&#x27;;
+      return;
+    }
+  }
+
+  if (data?.session?.access_token &amp;&amp; data?.session?.refresh_token) {
+    const { error } = await supabaseClient.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token
+    });
+    if (error) throw error;
+  }
+
+  echoDashboardContext = nextContext;
+  lockExternalAplazoDashboardUI();
+
+  if (!echoDashboardInitialized) {
+    await initializeEchoDashboard();
+  } else {
+    await loadFilterOptions();
+    lockExternalAplazoDashboardUI();
+    await loadDashboard();
+  }
+}
+
+window.addEventListener(&quot;message&quot;, async event =&gt; {
+  if (window.parent !== window &amp;&amp; event.source !== window.parent) return;
+  if (event.data?.type !== &quot;echoDashboardContext&quot;) return;
+  try {
+    await applyEchoDashboardContext(event.data);
+  } catch (error) {
+    console.error(&quot;Echo dashboard context error:&quot;, error);
+    window.parent?.postMessage?.({
+      type: &quot;echoDashboardError&quot;,
+      message: error?.message || String(error),
+      code: error?.code || null
+    }, &quot;*&quot;);
+  }
+});
 
 let weeklyChart, paretoChart, histogramChart, riskChart;
 let filterOptionsData = [];
@@ -3010,7 +3123,7 @@ function getFilters() {
   return {
     startDate : document.getElementById(&quot;startDate&quot;).value,
     endDate   : document.getElementById(&quot;endDate&quot;).value,
-    campaign  : document.getElementById(&quot;campaignFilter&quot;).value,
+    campaign  : getDashboardCampaign(),
     lob       : document.getElementById(&quot;lobFilter&quot;).value,
     supervisors: getSelectedSupervisorIds(),
     supervisor : getSelectedSupervisorIds().length === 1 ? getSelectedSupervisorIds()[0] : &quot;&quot;,
@@ -3119,23 +3232,56 @@ function scoreColor(score) {
    FILTER OPTIONS
 ═══════════════════════════════════════════════ */
 async function loadFilterOptions() {
+  let evalQuery = supabaseClient
+    .from(&quot;qa_v_evaluations_base&quot;)
+    .select(&quot;campaign_key,lob_key,queue_key,agent_identifier,agent_name,evaluator_name,created_date_cdmx&quot;);
+  let employeeQuery = supabaseClient
+    .from(&quot;employees&quot;)
+    .select(&quot;id,full_name,email,status,system_role,supervisor_id,supervisor_name,supervisor_email,campaign_id,lob,queue&quot;);
+
+  if (isExternalAplazoDashboard()) {
+    evalQuery = evalQuery.eq(&quot;campaign_key&quot;, ECHO_APLAZO_CAMPAIGN);
+    employeeQuery = employeeQuery.ilike(&quot;campaign_id&quot;, ECHO_APLAZO_CAMPAIGN);
+  }
+
   const [evalRows, employeeRows] = await Promise.all([
-    fetchAllRows(supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;campaign_key,lob_key,queue_key,agent_identifier,agent_name,evaluator_name,created_date_cdmx&quot;)),
-    fetchAllRows(supabaseClient.from(&quot;employees&quot;).select(&quot;id,full_name,email,status,system_role,supervisor_id,supervisor_name,supervisor_email,campaign_id,lob,queue&quot;))
+    fetchAllRows(evalQuery),
+    fetchAllRows(employeeQuery)
   ]);
-  filterOptionsData = evalRows || [];
-  employeeSupervisorData = (employeeRows || []).filter(emp =&gt; emp.id);
+
+  filterOptionsData = (evalRows || []).filter(row =&gt;
+    !isExternalAplazoDashboard() || normalizeDashboardText(row.campaign_key) === ECHO_APLAZO_CAMPAIGN
+  );
+  employeeSupervisorData = (employeeRows || []).filter(emp =&gt;
+    emp.id &amp;&amp; (!isExternalAplazoDashboard() || normalizeDashboardText(emp.campaign_id) === ECHO_APLAZO_CAMPAIGN)
+  );
+
+  lockExternalAplazoDashboardUI();
   refreshAllFilterOptions();
+  lockExternalAplazoDashboardUI();
+
   [&quot;startDate&quot;,&quot;endDate&quot;,&quot;campaignFilter&quot;,&quot;lobFilter&quot;].forEach(id =&gt; {
     const el = document.getElementById(id);
-    if (el) el.addEventListener(&quot;change&quot;, refreshAllFilterOptions);
+    if (el &amp;&amp; !el.dataset.echoFilterBound) {
+      el.addEventListener(&quot;change&quot;, refreshAllFilterOptions);
+      el.dataset.echoFilterBound = &quot;true&quot;;
+    }
   });
 }
 
 function fillSelect(id, values) {
   const select = document.getElementById(id);
+  if (!select) return;
+
+  if (id === &quot;campaignFilter&quot; &amp;&amp; isExternalAplazoDashboard()) {
+    select.innerHTML = &#x27;&lt;option value=&quot;aplazo&quot;&gt;Aplazo&lt;/option&gt;&#x27;;
+    select.value = ECHO_APLAZO_CAMPAIGN;
+    select.disabled = true;
+    return;
+  }
+
   const current = select.value;
-  select.innerHTML = '&lt;option value=&quot;&quot;&gt;Todas&lt;/option&gt;';
+  select.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;Todas&lt;/option&gt;&#x27;;
   values.sort().forEach(v =&gt; { const o = document.createElement(&quot;option&quot;); o.value = v; o.textContent = v; select.appendChild(o); });
   select.value = current;
 }
@@ -3202,7 +3348,7 @@ function buildSupervisorCheckboxes(rows) {
     ? sorted.map(sup =&gt; {
         const text = sup.email ? `${sup.name} (${sup.email})` : sup.name;
         return `
-          &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background='#f8fafc'&quot; onmouseout=&quot;this.style.background=''&quot; class=&quot;supervisor-checkbox-item&quot; data-name=&quot;${escHtml(text.toLowerCase())}&quot;&gt;
+          &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;supervisor-checkbox-item&quot; data-name=&quot;${escHtml(text.toLowerCase())}&quot;&gt;
             &lt;input type=&quot;checkbox&quot; value=&quot;${escHtml(sup.id)}&quot; onchange=&quot;onSupervisorCheckboxChange(this)&quot; ${selectedSupervisors.has(sup.id)?&quot;checked&quot;:&quot;&quot;} style=&quot;width:13px;height:13px;accent-color:#62d3f5;cursor:pointer;&quot;&gt;
             &lt;span&gt;${escHtml(sup.name)}${sup.email ? ` &lt;span style=&quot;color:#94a3b8;font-size:10px;&quot;&gt;(${escHtml(sup.email)})&lt;/span&gt;` : &quot;&quot;}&lt;/span&gt;
           &lt;/label&gt;`;
@@ -3227,7 +3373,7 @@ function getCurrentFilterValues() {
   return {
     startDate: document.getElementById(&quot;startDate&quot;)?.value || &quot;&quot;,
     endDate: document.getElementById(&quot;endDate&quot;)?.value || &quot;&quot;,
-    campaign: document.getElementById(&quot;campaignFilter&quot;)?.value || &quot;&quot;,
+    campaign: getDashboardCampaign(),
     lob: document.getElementById(&quot;lobFilter&quot;)?.value || &quot;&quot;,
     supervisors: getSelectedSupervisorIds(),
     supervisor: getSelectedSupervisorIds().length === 1 ? getSelectedSupervisorIds()[0] : &quot;&quot;,
@@ -3463,18 +3609,18 @@ function toggleParetoView() {
 function resetParetoToggle() {
   paretoShowingDetail=false; rubricDetailBuilt=false;
   const parView=document.getElementById(&quot;paretoView&quot;), detView=document.getElementById(&quot;rubricDetailView&quot;), btn=document.getElementById(&quot;paretoToggleBtn&quot;), title=document.getElementById(&quot;paretoCardTitle&quot;);
-  if(parView) parView.style.display=&quot;block&quot;; if(detView){detView.style.display=&quot;none&quot;;detView.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;Cargando...&lt;/div&gt;';}
+  if(parView) parView.style.display=&quot;block&quot;; if(detView){detView.style.display=&quot;none&quot;;detView.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;Cargando...&lt;/div&gt;&#x27;;}
   if(btn){btn.textContent=&quot;📐 Ver detalle por rubro&quot;;btn.style.background=&quot;#f1f5f9&quot;;btn.style.borderColor=&quot;#e2e8f0&quot;;btn.style.color=&quot;#0f172a&quot;;}
   if(title) title.textContent=&quot;🔴 Pareto de fallas&quot;;
 }
 async function buildRubricDetailTable() {
   const detView = document.getElementById(&quot;rubricDetailView&quot;);
-  detView.innerHTML = '&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando detalle...&lt;/div&gt;';
+  detView.innerHTML = &#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando detalle...&lt;/div&gt;&#x27;;
   const filters = getFilters();
   let q = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,rubric_item,field_key,calculated_score,weight,failed_item,is_bonus&quot;);
   if (filters.startDate) q=q.gte(&quot;created_at&quot;,filters.startDate+&quot;T00:00:00&quot;); if(filters.endDate) q=q.lte(&quot;created_at&quot;,filters.endDate+&quot;T23:59:59&quot;); if(filters.campaign) q=q.eq(&quot;campaign_key&quot;,filters.campaign); if(filters.lob) q=q.eq(&quot;lob_key&quot;,filters.lob); q = applyQueueFilter(q, filters); q = applyAgentFilter(q, filters); q = applyEvaluatorFilter(q, filters);
   const rawData = await fetchAllRows(q);
-  if (!rawData||rawData.length===0){detView.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;No hay datos de rubros para este periodo.&lt;/div&gt;';return;}
+  if (!rawData||rawData.length===0){detView.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;No hay datos de rubros para este periodo.&lt;/div&gt;&#x27;;return;}
   const data=rawData.filter(r=&gt;!r.is_bonus);
   const rubricMap={};
   data.forEach(row=&gt;{const rub=row.rubric_item||row.field_key||&quot;Sin rubro&quot;;const sc=Number(row.calculated_score||0);const mx=Number(row.weight||0);const fail=!!row.failed_item;if(!rubricMap[rub])rubricMap[rub]={sum:0,count:0,maxWeight:mx,failures:0};rubricMap[rub].sum+=sc;rubricMap[rub].count+=1;rubricMap[rub].failures+=fail?1:0;if(mx&gt;rubricMap[rub].maxWeight)rubricMap[rub].maxWeight=mx;});
@@ -3494,7 +3640,7 @@ function loadWeeklyCompare() {
   data.forEach(row=&gt;{if(!row.created_date_cdmx)return;const w=getWeekMonday(row.created_date_cdmx);if(!byWeek[w])byWeek[w]={scores:[],criticals:0,total:0};byWeek[w].scores.push(Number(row.score_final||0));if(row.critical_error_triggered)byWeek[w].criticals++;byWeek[w].total++;});
   const weeks=Object.keys(byWeek).sort().reverse().slice(0,8).reverse();
   const rows=weeks.map(w=&gt;{const g=byWeek[w];return{week:w,evals:g.total,avg:g.scores.reduce((a,b)=&gt;a+b,0)/g.scores.length,critPct:(g.criticals/g.total)*100};});
-  document.getElementById(&quot;weeklyCompareTable&quot;).innerHTML=rows.map((r,i)=&gt;{const prev=i&gt;0?rows[i-1]:null;const d=prev?deltaArrow(r.avg,prev.avg):null;return`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.week}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${r.evals}&lt;/td&gt;&lt;td style=&quot;color:${scoreColor(r.avg)};font-weight:700;&quot;&gt;${r.avg.toFixed(2)}%&lt;/td&gt;&lt;td&gt;${r.critPct.toFixed(1)}%&lt;/td&gt;&lt;td class=&quot;${d?`delta-${d.cls}`:''}&quot;&gt;${d?d.text:&quot;—&quot;}&lt;/td&gt;&lt;/tr&gt;`;}).join(&quot;&quot;);
+  document.getElementById(&quot;weeklyCompareTable&quot;).innerHTML=rows.map((r,i)=&gt;{const prev=i&gt;0?rows[i-1]:null;const d=prev?deltaArrow(r.avg,prev.avg):null;return`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.week}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${r.evals}&lt;/td&gt;&lt;td style=&quot;color:${scoreColor(r.avg)};font-weight:700;&quot;&gt;${r.avg.toFixed(2)}%&lt;/td&gt;&lt;td&gt;${r.critPct.toFixed(1)}%&lt;/td&gt;&lt;td class=&quot;${d?`delta-${d.cls}`:&#x27;&#x27;}&quot;&gt;${d?d.text:&quot;—&quot;}&lt;/td&gt;&lt;/tr&gt;`;}).join(&quot;&quot;);
 }
 
 /* ═══════════════════════════════════════════════
@@ -3691,7 +3837,7 @@ function loadEvaluationsTable() {
     const key=`eval_${i}`; evalRowMap[key]=row;
     const feedbackPreview=row.feedback?(row.feedback.length&gt;50?row.feedback.slice(0,50)+&quot;...&quot;:row.feedback):&quot;Sin feedback&quot;;
     const commitPreview=row.agent_commitment?(row.agent_commitment.length&gt;50?row.agent_commitment.slice(0,50)+&quot;...&quot;:row.agent_commitment):&quot;Sin compromiso&quot;;
-    return `&lt;tr style=&quot;cursor:pointer;&quot; onclick=&quot;openEvalModal('${key}')&quot; title=&quot;Click para ver detalle y solicitar corrección&quot;&gt;
+    return `&lt;tr style=&quot;cursor:pointer;&quot; onclick=&quot;openEvalModal(&#x27;${key}&#x27;)&quot; title=&quot;Click para ver detalle y solicitar corrección&quot;&gt;
       &lt;td&gt;${row.created_date_cdmx||&quot;&quot;}&lt;/td&gt;
       &lt;td style=&quot;font-weight:700;&quot;&gt;${row.agent_name||&quot;&quot;}&lt;/td&gt;
       &lt;td style=&quot;color:#475569;&quot;&gt;${feedbackPreview}&lt;/td&gt;
@@ -3699,7 +3845,7 @@ function loadEvaluationsTable() {
       &lt;td&gt;${row.lob_key||&quot;&quot;}&lt;/td&gt;
       &lt;td&gt;${row.queue_key||&quot;&quot;}&lt;/td&gt;
       &lt;td style=&quot;color:${scoreColor(Number(row.score_final||0))};font-weight:700;&quot;&gt;${row.score_final||&quot;&quot;}&lt;/td&gt;
-      &lt;td&gt;${row.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/td&gt;
+      &lt;td&gt;${row.critical_error_triggered?&#x27;&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;&#x27;}&lt;/td&gt;
       &lt;td style=&quot;color:#64748b;font-size:12px;&quot;&gt;${row.evaluator_name||&quot;–&quot;}&lt;/td&gt;
       &lt;td style=&quot;color:#475569;&quot;&gt;${commitPreview}&lt;/td&gt;
     &lt;/tr&gt;`;
@@ -3760,7 +3906,7 @@ async function loadRubricTable(filters) {
       const color = d.ok === d.count ? &quot;#0f172a&quot; : &quot;#991b1b&quot;;
       return`&lt;td style=&quot;text-align:center;font-weight:700;font-size:13px;color:${color};&quot; title=&quot;${r}: ${d.ok} buenas de ${d.count}&quot;&gt;${d.ok}/${d.count}&lt;/td&gt;`;
     }).join(&quot;&quot;);
-    return`&lt;tr&gt;&lt;td&gt;&lt;span onclick=&quot;openAgentHistory('${a.key.replace(/'/g,&quot;\\'&quot;)}','${a.agent_name.replace(/'/g,&quot;\\'&quot;)}' )&quot; style=&quot;cursor:pointer;color:#0284c7;font-weight:700;text-decoration:underline;&quot; title=&quot;Ver historial de ${a.agent_name}&quot;&gt;${a.agent_name}&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${a.evals}&lt;/td&gt;&lt;td style=&quot;text-align:center;color:${scoreColor(a.avgScore)};font-weight:700;&quot;&gt;${a.avgScore.toFixed(2)}%&lt;/td&gt;${cells}&lt;/tr&gt;`;
+    return`&lt;tr&gt;&lt;td&gt;&lt;span onclick=&quot;openAgentHistory(&#x27;${a.key.replace(/&#x27;/g,&quot;\\&#x27;&quot;)}&#x27;,&#x27;${a.agent_name.replace(/&#x27;/g,&quot;\\&#x27;&quot;)}&#x27; )&quot; style=&quot;cursor:pointer;color:#0284c7;font-weight:700;text-decoration:underline;&quot; title=&quot;Ver historial de ${a.agent_name}&quot;&gt;${a.agent_name}&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${a.evals}&lt;/td&gt;&lt;td style=&quot;text-align:center;color:${scoreColor(a.avgScore)};font-weight:700;&quot;&gt;${a.avgScore.toFixed(2)}%&lt;/td&gt;${cells}&lt;/tr&gt;`;
   }).join(&quot;&quot;);
   wrapper.innerHTML=`&lt;div style=&quot;overflow-x:auto;&quot;&gt;&lt;table class=&quot;rubric-table&quot;&gt;${thead}&lt;tbody&gt;${tbody}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
 }
@@ -3791,7 +3937,7 @@ async function openEvalModal(key) {
     &lt;div class=&quot;eval-modal-kpis&quot;&gt;
       &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Fecha&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:16px;&quot;&gt;${row.created_date_cdmx||&quot;–&quot;}&lt;/div&gt;&lt;/div&gt;
       &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(sc)}&quot;&gt;${sc}%&lt;/div&gt;&lt;/div&gt;
-      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Error Crítico&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:16px;&quot;&gt;${row.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot; style=&quot;font-size:14px;&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot; style=&quot;font-size:14px;&quot;&gt;No&lt;/span&gt;'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Error Crítico&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:16px;&quot;&gt;${row.critical_error_triggered?&#x27;&lt;span class=&quot;badge badge-red&quot; style=&quot;font-size:14px;&quot;&gt;Sí&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;badge badge-green&quot; style=&quot;font-size:14px;&quot;&gt;No&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;eval-modal-kpis&quot; style=&quot;grid-template-columns:repeat(4,1fr);&quot;&gt;
       &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Campaña&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:13px;&quot;&gt;${row.campaign_key||&quot;–&quot;}&lt;/div&gt;&lt;/div&gt;
@@ -3836,7 +3982,7 @@ async function openEvalModal(key) {
             const pct  = mx &gt; 0 ? (sc / mx) * 100 : 0;
             const bg   = pct &gt;= 90 ? &quot;#dcfce7&quot; : pct &gt;= 70 ? &quot;#fef9c3&quot; : &quot;#fee2e2&quot;;
             const cl   = pct &gt;= 90 ? &quot;#166534&quot; : pct &gt;= 70 ? &quot;#854d0e&quot; : &quot;#991b1b&quot;;
-            const fail = r.failed_item ? '&lt;span class=&quot;badge badge-red&quot;&gt;Falla&lt;/span&gt;' : '&lt;span class=&quot;badge badge-green&quot;&gt;OK&lt;/span&gt;';
+            const fail = r.failed_item ? &#x27;&lt;span class=&quot;badge badge-red&quot;&gt;Falla&lt;/span&gt;&#x27; : &#x27;&lt;span class=&quot;badge badge-green&quot;&gt;OK&lt;/span&gt;&#x27;;
             return `&lt;tr&gt;&lt;td&gt;${rub}&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${fail}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${bg};color:${cl};font-weight:700;border-radius:6px;&quot;&gt;${pct.toFixed(2)}%&lt;/td&gt;&lt;td style=&quot;text-align:center;color:#94a3b8;&quot;&gt;${sc} / ${mx}&lt;/td&gt;&lt;/tr&gt;`;
           }).join(&quot;&quot;);
           rubricSection = `
@@ -4100,7 +4246,7 @@ async function openEvalSidePanel(key) {
     &lt;div class=&quot;eval-modal-kpis&quot;&gt;
       &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Fecha&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:14px;&quot;&gt;${row.created_date_cdmx||&quot;–&quot;}&lt;/div&gt;&lt;/div&gt;
       &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(sc)}&quot;&gt;${sc}%&lt;/div&gt;&lt;/div&gt;
-      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Error Crítico&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:14px;&quot;&gt;${row.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Error Crítico&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;font-size:14px;&quot;&gt;${row.critical_error_triggered?&#x27;&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;/div&gt;
     &lt;/div&gt;`;
 
   const interactionLink = row.interaction_link
@@ -4128,7 +4274,7 @@ async function openEvalSidePanel(key) {
             const pct = mx &gt; 0 ? (sc2/mx)*100 : 0;
             const bg  = pct&gt;=90?&quot;#dcfce7&quot;:pct&gt;=70?&quot;#fef9c3&quot;:&quot;#fee2e2&quot;;
             const cl  = pct&gt;=90?&quot;#166534&quot;:pct&gt;=70?&quot;#854d0e&quot;:&quot;#991b1b&quot;;
-            const fail= r.failed_item?'&lt;span class=&quot;badge badge-red&quot;&gt;Falla&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;OK&lt;/span&gt;';
+            const fail= r.failed_item?&#x27;&lt;span class=&quot;badge badge-red&quot;&gt;Falla&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;badge badge-green&quot;&gt;OK&lt;/span&gt;&#x27;;
             return `&lt;tr&gt;&lt;td&gt;${rub}&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${fail}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${bg};color:${cl};font-weight:700;border-radius:6px;&quot;&gt;${pct.toFixed(1)}%&lt;/td&gt;&lt;td style=&quot;text-align:center;color:#94a3b8;&quot;&gt;${sc2}/${mx}&lt;/td&gt;&lt;/tr&gt;`;
           }).join(&quot;&quot;);
           rubricSection = `&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📐 Rubros&lt;/h4&gt;&lt;table class=&quot;eval-modal-rubrics&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Rubro&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Estado&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Score&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Pts&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${rubricRows}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;`;
@@ -4174,20 +4320,25 @@ function clearEvalFilter() {
 let agentHistoryChart = null;
 async function openAgentHistory(agentId, agentName) {
   const overlay=document.getElementById(&quot;agentHistoryOverlay&quot;),body=document.getElementById(&quot;agentHistoryBody&quot;),title=document.getElementById(&quot;agentHistoryTitle&quot;),subtitle=document.getElementById(&quot;agentHistorySubtitle&quot;);
-  title.textContent=agentName; body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando historial...&lt;/div&gt;'; overlay.classList.add(&quot;active&quot;);
+  title.textContent=agentName; body.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando historial...&lt;/div&gt;&#x27;; overlay.classList.add(&quot;active&quot;);
   const today=new Date(),threeBack=new Date(today);threeBack.setMonth(today.getMonth()-3);
   const dateFrom=threeBack.toISOString().split(&quot;T&quot;)[0],dateTo=today.toISOString().split(&quot;T&quot;)[0];
   subtitle.textContent=`Historial: ${dateFrom} → ${dateTo}`;
-  const{data:evals,error}=await supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_date_cdmx&quot;,dateFrom).lte(&quot;created_date_cdmx&quot;,dateTo).order(&quot;created_date_cdmx&quot;,{ascending:true});
-  if(error||!evals||evals.length===0){body.innerHTML='&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;No hay evaluaciones en los últimos 3 meses.&lt;/div&gt;';return;}
+  const historyCampaign = getDashboardCampaign();
+  let historyQuery = supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_date_cdmx&quot;,dateFrom).lte(&quot;created_date_cdmx&quot;,dateTo).order(&quot;created_date_cdmx&quot;,{ascending:true});
+  if (historyCampaign) historyQuery = historyQuery.eq(&quot;campaign_key&quot;, historyCampaign);
+  const{data:evals,error}=await historyQuery;
+  if(error||!evals||evals.length===0){body.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;No hay evaluaciones en los últimos 3 meses.&lt;/div&gt;&#x27;;return;}
   const totalEvals=evals.length,avgSc=evals.reduce((s,r)=&gt;s+Number(r.score_final||0),0)/totalEvals,criticals=evals.filter(r=&gt;r.critical_error_triggered).length,zeros=evals.filter(r=&gt;r.weekly_zero_triggered).length;
-  const kpis=`&lt;div class=&quot;eval-modal-kpis&quot; style=&quot;grid-template-columns:repeat(4,1fr);margin-bottom:20px;&quot;&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Evaluaciones&lt;/div&gt;&lt;div class=&quot;value&quot;&gt;${totalEvals}&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Avg Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(avgSc)}&quot;&gt;${avgSc.toFixed(2)}%&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Errores Críticos&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${criticals&gt;0?'#ef4444':'#22c55e'}&quot;&gt;${criticals}&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Weekly Zeros&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${zeros&gt;0?'#f59e0b':'#22c55e'}&quot;&gt;${zeros}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;
+  const kpis=`&lt;div class=&quot;eval-modal-kpis&quot; style=&quot;grid-template-columns:repeat(4,1fr);margin-bottom:20px;&quot;&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Evaluaciones&lt;/div&gt;&lt;div class=&quot;value&quot;&gt;${totalEvals}&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Avg Score&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${scoreColor(avgSc)}&quot;&gt;${avgSc.toFixed(2)}%&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Errores Críticos&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${criticals&gt;0?&#x27;#ef4444&#x27;:&#x27;#22c55e&#x27;}&quot;&gt;${criticals}&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;eval-modal-kpi&quot;&gt;&lt;div class=&quot;label&quot;&gt;Weekly Zeros&lt;/div&gt;&lt;div class=&quot;value&quot; style=&quot;color:${zeros&gt;0?&#x27;#f59e0b&#x27;:&#x27;#22c55e&#x27;}&quot;&gt;${zeros}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;
   const byWeek={};
   evals.forEach(r=&gt;{const d=r.created_date_cdmx;if(!d)return;const dt=new Date(d+&quot;T12:00:00&quot;);const dow=dt.getDay();dt.setDate(dt.getDate()+(dow===0?-6:1-dow));const w=dt.toISOString().split(&quot;T&quot;)[0];if(!byWeek[w])byWeek[w]={scores:[],criticals:0,count:0};byWeek[w].scores.push(Number(r.score_final||0));if(r.critical_error_triggered)byWeek[w].criticals++;byWeek[w].count++;});
   const weeks=Object.keys(byWeek).sort(),weekScores=weeks.map(w=&gt;{const g=byWeek[w];return g.scores.reduce((a,b)=&gt;a+b,0)/g.scores.length;}),weekCounts=weeks.map(w=&gt;byWeek[w].count),weekCrits=weeks.map(w=&gt;byWeek[w].criticals);
   const chartId=&quot;agentTrendChart_&quot;+Date.now();
   const chartHtml=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📈 Tendencia semanal&lt;/h4&gt;&lt;canvas id=&quot;${chartId}&quot; height=&quot;100&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;`;
-  const{data:rubricData}=await supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,evaluation_id&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_at&quot;,dateFrom+&quot;T00:00:00&quot;).lte(&quot;created_at&quot;,dateTo+&quot;T23:59:59&quot;);
+  let historyRubricQuery = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,evaluation_id&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_at&quot;,dateFrom+&quot;T00:00:00&quot;).lte(&quot;created_at&quot;,dateTo+&quot;T23:59:59&quot;);
+  if (historyCampaign) historyRubricQuery = historyRubricQuery.eq(&quot;campaign_key&quot;, historyCampaign);
+  const{data:rubricData}=await historyRubricQuery;
   let rubricSection=&quot;&quot;;
   if(rubricData&amp;&amp;rubricData.length&gt;0){
     const nonBonus=rubricData.filter(r=&gt;!r.is_bonus);
@@ -4223,7 +4374,7 @@ async function openAgentHistory(agentId, agentName) {
       const bg  = pct&gt;=90?&quot;#dcfce7&quot;:pct&gt;=70?&quot;#fef9c3&quot;:&quot;#fee2e2&quot;;
       const cl  = pct&gt;=90?&quot;#166534&quot;:pct&gt;=70?&quot;#854d0e&quot;:&quot;#991b1b&quot;;
       const failCell = v.fails &gt; 0
-        ? `&lt;td style=&quot;text-align:center;&quot;&gt;&lt;span style=&quot;color:#991b1b;font-weight:800;cursor:pointer;text-decoration:underline;&quot; onclick=&quot;filterEvalsByRubric('${rub.replace(/'/g,&quot;\\'&quot;)}')&quot; title=&quot;Ver evaluaciones con falla en este rubro&quot;&gt;${v.fails}&lt;/span&gt;&lt;/td&gt;`
+        ? `&lt;td style=&quot;text-align:center;&quot;&gt;&lt;span style=&quot;color:#991b1b;font-weight:800;cursor:pointer;text-decoration:underline;&quot; onclick=&quot;filterEvalsByRubric(&#x27;${rub.replace(/&#x27;/g,&quot;\\&#x27;&quot;)}&#x27;)&quot; title=&quot;Ver evaluaciones con falla en este rubro&quot;&gt;${v.fails}&lt;/span&gt;&lt;/td&gt;`
         : `&lt;td style=&quot;text-align:center;color:#16a34a;font-weight:700;&quot;&gt;0&lt;/td&gt;`;
       return`&lt;tr&gt;
         &lt;td&gt;&lt;strong&gt;${rub}&lt;/strong&gt;&lt;/td&gt;
@@ -4240,10 +4391,10 @@ async function openAgentHistory(agentId, agentName) {
     const sc=Number(r.score_final||0);
     const key=`agentEval_${i}`;
     evalRowMap[key]=r;
-    return`&lt;tr style=&quot;cursor:pointer;&quot; class=&quot;agent-eval-row&quot; data-eval-id=&quot;${r.evaluation_id||r.id||''}&quot; onclick=&quot;openEvalSidePanel('${key}')&quot; title=&quot;Ver detalle&quot;&gt;
+    return`&lt;tr style=&quot;cursor:pointer;&quot; class=&quot;agent-eval-row&quot; data-eval-id=&quot;${r.evaluation_id||r.id||&#x27;&#x27;}&quot; onclick=&quot;openEvalSidePanel(&#x27;${key}&#x27;)&quot; title=&quot;Ver detalle&quot;&gt;
       &lt;td&gt;${r.created_date_cdmx||&quot;&quot;}&lt;/td&gt;
       &lt;td style=&quot;color:${scoreColor(sc)};font-weight:700;&quot;&gt;${sc}%&lt;/td&gt;
-      &lt;td&gt;${r.critical_error_triggered?'&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;':'&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;'}&lt;/td&gt;
+      &lt;td&gt;${r.critical_error_triggered?&#x27;&lt;span class=&quot;badge badge-red&quot;&gt;Sí&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;badge badge-green&quot;&gt;No&lt;/span&gt;&#x27;}&lt;/td&gt;
       &lt;td style=&quot;font-size:12px;color:#64748b;&quot;&gt;${r.evaluator_name||&quot;–&quot;}&lt;/td&gt;
       &lt;td style=&quot;color:#475569;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;&quot;&gt;${r.feedback?(r.feedback.length&gt;60?r.feedback.slice(0,60)+&quot;...&quot;:r.feedback):&quot;Sin feedback&quot;}&lt;/td&gt;
     &lt;/tr&gt;`;
@@ -4345,7 +4496,7 @@ function buildAgentCheckboxes(agentsMap) {
   selectedAgents = new Set([...selectedAgents].filter(id =&gt; availableIds.has(id)));
   const entries = Object.entries(agentsMap).sort((a,b) =&gt; String(a[1]).localeCompare(String(b[1]),&quot;es&quot;,{sensitivity:&quot;base&quot;}));
   container.innerHTML = entries.map(([id, name]) =&gt; `
-    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background='#f8fafc'&quot; onmouseout=&quot;this.style.background=''&quot; class=&quot;agent-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
+    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;agent-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
       &lt;input type=&quot;checkbox&quot; value=&quot;${id}&quot; onchange=&quot;onAgentCheckboxChange(this)&quot; ${selectedAgents.has(id)?&quot;checked&quot;:&quot;&quot;} style=&quot;width:13px;height:13px;accent-color:#62d3f5;cursor:pointer;&quot;&gt;
       &lt;span&gt;${name} &lt;span style=&quot;color:#94a3b8;font-size:10px;&quot;&gt;(${id})&lt;/span&gt;&lt;/span&gt;
     &lt;/label&gt;`).join(&quot;&quot;);
@@ -4409,7 +4560,7 @@ function buildEvaluatorCheckboxes(evaluatorsList) {
   selectedEvaluators = new Set([...selectedEvaluators].filter(name =&gt; availableEvaluators.has(name)));
   const sorted = [...evaluatorsList].sort((a,b) =&gt; String(a).localeCompare(String(b),&quot;es&quot;,{sensitivity:&quot;base&quot;}));
   container.innerHTML = sorted.map(name =&gt; `
-    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background='#f8fafc'&quot; onmouseout=&quot;this.style.background=''&quot; class=&quot;evaluator-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
+    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;evaluator-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
       &lt;input type=&quot;checkbox&quot; value=&quot;${name}&quot; onchange=&quot;onEvaluatorCheckboxChange(this)&quot; ${selectedEvaluators.has(name)?&quot;checked&quot;:&quot;&quot;} style=&quot;width:13px;height:13px;accent-color:#62d3f5;cursor:pointer;&quot;&gt;
       &lt;span&gt;${name}&lt;/span&gt;
     &lt;/label&gt;`).join(&quot;&quot;);
@@ -4471,7 +4622,7 @@ function buildQueueCheckboxes(queuesList) {
   selectedQueues = new Set([...selectedQueues].filter(name =&gt; availableQueues.has(name)));
   const sorted = [...queuesList].sort((a,b) =&gt; String(a).localeCompare(String(b), &quot;es&quot;, {sensitivity:&quot;base&quot;}));
   container.innerHTML = sorted.map(name =&gt; `
-    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background='#f8fafc'&quot; onmouseout=&quot;this.style.background=''&quot; class=&quot;queue-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
+    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;queue-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
       &lt;input type=&quot;checkbox&quot; value=&quot;${name}&quot; onchange=&quot;onQueueCheckboxChange(this)&quot; ${selectedQueues.has(name)?&quot;checked&quot;:&quot;&quot;} style=&quot;width:13px;height:13px;accent-color:#62d3f5;cursor:pointer;&quot;&gt;
       &lt;span&gt;${name}&lt;/span&gt;
     &lt;/label&gt;`).join(&quot;&quot;);
@@ -4519,7 +4670,7 @@ function exportTableToCSV(tableEl, filename) {
     return cells.map(cell =&gt; {
       let text = cell.innerText || cell.textContent || &quot;&quot;;
       text = text.replace(/\s+/g, &quot; &quot;).trim();
-      text = text.replace(/&quot;/g, '&quot;&quot;');
+      text = text.replace(/&quot;/g, &#x27;&quot;&quot;&#x27;);
       return `&quot;${text}&quot;`;
     }).join(&quot;,&quot;);
   });
@@ -4542,7 +4693,7 @@ function exportTableById(tbodyId, filename) {
 }
 
 function buildExportBtn(tableId, filename, label) {
-  return `&lt;button onclick=&quot;exportTableById('${tableId}','${filename}')&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;&quot;&gt;⬇️ ${label||'Exportar CSV'}&lt;/button&gt;`;
+  return `&lt;button onclick=&quot;exportTableById(&#x27;${tableId}&#x27;,&#x27;${filename}&#x27;)&quot; style=&quot;width:auto;padding:7px 14px;font-size:11px;border-radius:8px;background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;&quot;&gt;⬇️ ${label||&#x27;Exportar CSV&#x27;}&lt;/button&gt;`;
 }
 
 function exportEvaluationsTableCSV() {
@@ -4563,7 +4714,7 @@ function exportEvaluationsTableCSV() {
       row.agent_commitment || &quot;&quot;,
       row.interaction_link || &quot;&quot;
     ];
-    csvRows.push(cells.map(c =&gt; `&quot;${String(c).replace(/&quot;/g,'&quot;&quot;')}&quot;`).join(&quot;,&quot;));
+    csvRows.push(cells.map(c =&gt; `&quot;${String(c).replace(/&quot;/g,&#x27;&quot;&quot;&#x27;)}&quot;`).join(&quot;,&quot;));
   });
   const csvContent = csvRows.join(&quot;\r\n&quot;);
   const blob = new Blob([&quot;\ufeff&quot; + csvContent], { type: &quot;text/csv;charset=utf-8;&quot; });
@@ -4977,7 +5128,9 @@ async function toggleClientMode(forceState) {
 async function loadCorrecciones() {
   try {
     const SB_URL = SUPABASE_URL;
-    const H = { &quot;apikey&quot;: SUPABASE_ANON_KEY, &quot;Authorization&quot;: `Bearer ${SUPABASE_ANON_KEY}` };
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const bearer = session?.access_token || SUPABASE_ANON_KEY;
+    const H = { &quot;apikey&quot;: SUPABASE_ANON_KEY, &quot;Authorization&quot;: `Bearer ${bearer}` };
 
     // Get date filters from dashboard
     const filters = getFilters();
@@ -4999,13 +5152,38 @@ async function loadCorrecciones() {
       dispParams += `&amp;evaluator_name=in.(${encodeURIComponent(inList)})`;
     }
 
+    let allowedAplazoAgentIds = [];
+    if (isExternalAplazoDashboard()) {
+      allowedAplazoAgentIds = [...new Set(
+        employeeSupervisorData
+          .filter(emp =&gt; normalizeDashboardText(emp.campaign_id) === ECHO_APLAZO_CAMPAIGN)
+          .map(emp =&gt; String(emp.id || &quot;&quot;).trim())
+          .filter(Boolean)
+      )];
+
+      if (allowedAplazoAgentIds.length &gt; 0) {
+        const inList = allowedAplazoAgentIds.map(id =&gt; `&quot;${id.replace(/&quot;/g, &quot;&quot;)}&quot;`).join(&quot;,&quot;);
+        corrParams += `&amp;original_agent_identifier=in.(${encodeURIComponent(inList)})`;
+        dispParams += `&amp;agent_identifier=in.(${encodeURIComponent(inList)})`;
+      } else {
+        corrParams += `&amp;original_agent_identifier=eq.__NO_APLAZO_AGENT__`;
+        dispParams += `&amp;agent_identifier=eq.__NO_APLAZO_AGENT__`;
+      }
+    }
+
     const [corrRes, dispRes] = await Promise.all([
       fetch(`${SB_URL}/rest/v1/qa_evaluation_corrections?${corrParams}`, { headers: H }),
       fetch(`${SB_URL}/rest/v1/qa_evaluation_disputes?${dispParams}`, { headers: H })
     ]);
 
-    const corrections = corrRes.ok ? await corrRes.json() : [];
-    const disputes    = dispRes.ok ? await dispRes.json() : [];
+    let corrections = corrRes.ok ? await corrRes.json() : [];
+    let disputes    = dispRes.ok ? await dispRes.json() : [];
+
+    if (isExternalAplazoDashboard()) {
+      const allowed = new Set(allowedAplazoAgentIds);
+      corrections = corrections.filter(row =&gt; allowed.has(String(row.original_agent_identifier || &quot;&quot;).trim()));
+      disputes = disputes.filter(row =&gt; allowed.has(String(row.agent_identifier || &quot;&quot;).trim()));
+    }
 
     // Total evals in period for rate calculation
     const totalEvals = allEvalData.length;
@@ -5264,7 +5442,7 @@ function renderCorrRecentTables(corrections, disputes) {
 }
 
 function escHtml(str) {
-  return String(str??'').replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;').replace(/&quot;/g,'&amp;quot;');
+  return String(str??&#x27;&#x27;).replace(/&amp;/g,&#x27;&amp;amp;&#x27;).replace(/&lt;/g,&#x27;&amp;lt;&#x27;).replace(/&gt;/g,&#x27;&amp;gt;&#x27;).replace(/&quot;/g,&#x27;&amp;quot;&#x27;);
 }
 
 /* ═══════════════════════════════════════════════
@@ -5323,10 +5501,26 @@ async function loadFeedbackQuality() {
 
   // Feedback Quality se filtra por la fecha CDMX en que el agente contestó/omitió la encuesta.
   // Los timestamps llegan en UTC desde Supabase, por eso se convierten a America/Mexico_City antes de comparar.
-  const { data: allSurveys, error } = await supabaseClient
+  let surveyQuery = supabaseClient
     .from(&quot;qa_feedback_surveys&quot;)
     .select(&quot;*&quot;)
     .order(&quot;created_at&quot;, { ascending: false });
+
+  let allowedSurveyAgentIds = null;
+  if (isExternalAplazoDashboard()) {
+    const ids = [...new Set(
+      employeeSupervisorData
+        .filter(emp =&gt; normalizeDashboardText(emp.campaign_id) === ECHO_APLAZO_CAMPAIGN)
+        .map(emp =&gt; String(emp.id || &quot;&quot;).trim())
+        .filter(Boolean)
+    )];
+    allowedSurveyAgentIds = new Set(ids);
+    surveyQuery = ids.length &gt; 0
+      ? surveyQuery.in(&quot;agent_identifier&quot;, ids)
+      : surveyQuery.eq(&quot;agent_identifier&quot;, &quot;__NO_APLAZO_AGENT__&quot;);
+  }
+
+  const { data: allSurveys, error } = await surveyQuery;
 
   if (error) {
     console.error(&quot;Feedback quality error:&quot;, error);
@@ -5335,7 +5529,10 @@ async function loadFeedbackQuality() {
     return;
   }
 
-  const surveys = filterFeedbackSurveysByDashboardFilters(allSurveys || [], filters);
+  const safelyScopedSurveys = isExternalAplazoDashboard()
+    ? (allSurveys || []).filter(row =&gt; allowedSurveyAgentIds?.has(String(row.agent_identifier || &quot;&quot;).trim()))
+    : (allSurveys || []);
+  const surveys = filterFeedbackSurveysByDashboardFilters(safelyScopedSurveys, filters);
   const completed = surveys.filter(s =&gt; s.survey_status === &quot;completed&quot;);
   const dismissed = surveys.filter(s =&gt; s.survey_status === &quot;dismissed&quot;);
   const total = surveys.length;
@@ -5432,6 +5629,20 @@ function switchMainTab(tabId) {
 /* ═══════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════ */
+async function initializeEchoDashboard() {
+  if (echoDashboardInitialized || echoDashboardInitializing) return;
+  echoDashboardInitializing = true;
+  try {
+    lockExternalAplazoDashboardUI();
+    await loadFilterOptions();
+    lockExternalAplazoDashboardUI();
+    await loadDashboard();
+    echoDashboardInitialized = true;
+  } finally {
+    echoDashboardInitializing = false;
+  }
+}
+
 document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
   const today=new Date(),dow=today.getDay(),diffToMonday=(dow===0?-6:1-dow),monday=new Date(today);
   monday.setDate(today.getDate()+diffToMonday);
@@ -5456,8 +5667,12 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
   document.getElementById(&quot;agentHistoryClose&quot;)?.addEventListener(&quot;click&quot;,()=&gt;{ closeEvalDetailPanel(); document.getElementById(&quot;agentHistoryOverlay&quot;).classList.remove(&quot;active&quot;); });
   document.getElementById(&quot;agentHistoryOverlay&quot;)?.addEventListener(&quot;click&quot;,e=&gt;{if(e.target.id===&quot;agentHistoryOverlay&quot;){ closeEvalDetailPanel(); document.getElementById(&quot;agentHistoryOverlay&quot;).classList.remove(&quot;active&quot;); }});
 
-  await loadFilterOptions();
-  await loadDashboard();
+  if (window.parent === window) {
+    // Standalone preview/testing keeps the internal behavior.
+    await initializeEchoDashboard();
+  } else {
+    window.parent.postMessage({ type: &quot;echoDashboardReady&quot; }, &quot;*&quot;);
+  }
 
   function notifyHeight(){const h=document.documentElement.scrollHeight;if(window.parent&amp;&amp;window.parent!==window)window.parent.postMessage({type:&quot;iframeHeight&quot;,height:h},&quot;*&quot;);}
   notifyHeight();
@@ -6210,7 +6425,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.5: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.6: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -8894,7 +9109,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.5";
+const ECHO_APP_VERSION = "1.0.6";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -9169,8 +9384,10 @@ async function bootApp(user) {
 
   isAgentUser = !isClientUser && AGENT_ROLES.includes(normalizedRole);
 
+  const externalEmail = String(currentExternalAccess?.email || user.email || '').trim().toLowerCase();
   clientDashboardEnabled =
     isClientUser &&
+    externalEmail.endsWith('@aplazo.mx') &&
     String(currentExternalAccess?.campaign_key || '').trim().toLowerCase() === 'aplazo';
 
   canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
@@ -9182,26 +9399,29 @@ async function bootApp(user) {
 
   document.getElementById('sidebarName').textContent = String(name || 'Usuario').split(' ').slice(0,2).join(' ');
   document.getElementById('sidebarRole').textContent = isClientUser
-    ? (clientDashboardEnabled ? 'Cliente · Portal QA' : 'Cliente · Formulario')
+    ? (clientDashboardEnabled ? 'Cliente · QA Intelligence' : 'Cliente · Formulario')
     : (normalizedRole.replace(/_/g, ' ') || 'usuario');
   document.getElementById('sidebarAvatar').textContent = String(name || 'U').charAt(0).toUpperCase();
 
   // Role-based navigation:
   // - Agent: only Mis evaluaciones.
-  // - External client_form: only Formulario.
+  // - Authorized @aplazo.mx client_form: full QA Intelligence Center + Formulario.
+  // - Other external client_form: Formulario only.
   // - Internal staff: existing modules and correction permission.
   document.querySelectorAll('.staff-only').forEach(el => {
     const page = el.dataset.page || '';
-    const hidden = isAgentUser || (isClientUser && page !== 'formulario');
+    const clientCanSee = page === 'formulario' || (clientDashboardEnabled && page === 'dashboard');
+    const hidden = isAgentUser || (isClientUser && !clientCanSee);
     el.classList.toggle('hidden-by-permission', hidden);
     el.setAttribute('aria-hidden', String(hidden));
   });
 
+  // Retire the old simplified Aplazo portal from navigation.
+  // Authorized Aplazo clients now use the same QA Intelligence Center as internal users.
   const navClientDashboard = document.querySelector('.nav-item[data-page="cliente-dashboard"]');
   if (navClientDashboard) {
-    const hideClientDashboard = !clientDashboardEnabled;
-    navClientDashboard.classList.toggle('hidden-by-permission', hideClientDashboard);
-    navClientDashboard.setAttribute('aria-hidden', String(hideClientDashboard));
+    navClientDashboard.classList.add('hidden-by-permission');
+    navClientDashboard.setAttribute('aria-hidden', 'true');
   }
 
   const navAgent = document.getElementById('navMisEvaluaciones');
@@ -9219,7 +9439,7 @@ async function bootApp(user) {
 
   const sectionLabel = document.getElementById('sidebarSectionLabel');
   if (sectionLabel) {
-    sectionLabel.textContent = isAgentUser ? 'Mi QA' : (isClientUser ? 'Echo Cliente' : 'QA Tools');
+    sectionLabel.textContent = isAgentUser ? 'Mi QA' : (isClientUser ? (clientDashboardEnabled ? 'QA Intelligence' : 'Echo Cliente') : 'QA Tools');
   }
 
   document.getElementById('loginWall').style.display = 'none';
@@ -9237,9 +9457,10 @@ async function bootApp(user) {
 
   if (isClientUser) {
     if (clientDashboardEnabled) {
-      const navClientDashboard = document.querySelector('.nav-item[data-page="cliente-dashboard"]');
-      switchPage('cliente-dashboard', navClientDashboard);
-      loadClientDashboard();
+      const navDashboard = document.querySelector('.nav-item[data-page="dashboard"]');
+      switchPage('dashboard', navDashboard);
+      await loadDashboard();
+      setTimeout(sendEvaluatorToForm, 250);
     } else {
       const navForm = document.querySelector('.nav-item[data-page="formulario"]');
       switchPage('formulario', navForm);
@@ -9356,23 +9577,23 @@ function switchPage(page, el) {
 
   if (isClientUser) {
     const allowedClientPages = clientDashboardEnabled
-      ? ['cliente-dashboard', 'formulario']
+      ? ['dashboard', 'formulario']
       : ['formulario'];
 
     if (!allowedClientPages.includes(page)) {
-      page = clientDashboardEnabled ? 'cliente-dashboard' : 'formulario';
+      page = clientDashboardEnabled ? 'dashboard' : 'formulario';
     }
   }
 
   if (!isAgentUser && page === 'mis-evaluaciones') {
     page = isClientUser
-      ? (clientDashboardEnabled ? 'cliente-dashboard' : 'formulario')
+      ? (clientDashboardEnabled ? 'dashboard' : 'formulario')
       : 'dashboard';
   }
 
   if (page === 'correcciones' && !canAccessCorrections) {
     page = isClientUser
-      ? (clientDashboardEnabled ? 'cliente-dashboard' : 'formulario')
+      ? (clientDashboardEnabled ? 'dashboard' : 'formulario')
       : 'dashboard';
   }
 
@@ -9412,7 +9633,12 @@ function switchCorrTab(tab, btn) {
 /* ═══════════════ DASHBOARD ═══════════════ */
 function activateStaffIframe(id) {
   if (isAgentUser) return null;
-  if (isClientUser && id !== 'qaFormIframe') return null;
+  if (isClientUser) {
+    const allowedClientIframe =
+      id === 'qaFormIframe' ||
+      (clientDashboardEnabled && id === 'qaDashboardIframe');
+    if (!allowedClientIframe) return null;
+  }
   const iframe = document.getElementById(id);
   if (!iframe) return null;
   if (!iframe.getAttribute('srcdoc')) {
@@ -9432,12 +9658,38 @@ function resizeAgentIframe() {
   iframe.style.height = Math.max(parseInt(iframe.style.height, 10) || 0, minHeight) + 'px';
 }
 
+async function sendDashboardContext() {
+  if (isAgentUser) return;
+  const iframe = document.getElementById('qaDashboardIframe');
+  if (!iframe?.contentWindow || !currentUser?.email) return;
+
+  const { data: { session }, error: sessionError } = await sb.auth.getSession();
+  if (sessionError) {
+    console.error('Unable to obtain Echo session for dashboard:', sessionError);
+    return;
+  }
+
+  iframe.contentWindow.postMessage({
+    type: 'echoDashboardContext',
+    email: currentUser.email,
+    accessRole: isClientUser ? currentExternalAccess?.access_role : 'internal',
+    campaignKey: isClientUser ? currentExternalAccess?.campaign_key : null,
+    organization: isClientUser ? currentExternalAccess?.organization : null,
+    isExternal: isClientUser,
+    session: session ? {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    } : null
+  }, '*');
+}
+
 async function loadDashboard() {
   const iframe = activateStaffIframe('qaDashboardIframe');
   if (!iframe) return;
   const minHeight = Math.max(720, window.innerHeight - 64);
   const current = parseInt(iframe.style.height, 10) || 0;
   iframe.style.height = Math.max(current, minHeight) + 'px';
+  setTimeout(sendDashboardContext, 80);
 }
 
 function activateClientDashboardIframe() {
@@ -9946,6 +10198,17 @@ window.addEventListener('message', event => {
   if (type === 'echoFormError' && event.source === formIframe?.contentWindow) {
     console.error('Echo form initialization error:', event.data);
     toast('No se pudieron cargar los desplegables del formulario. Recarga Echo.', true);
+    return;
+  }
+
+  const dashboardIframe = document.getElementById('qaDashboardIframe');
+  if (type === 'echoDashboardReady' && event.source === dashboardIframe?.contentWindow) {
+    sendDashboardContext();
+    return;
+  }
+  if (type === 'echoDashboardError' && event.source === dashboardIframe?.contentWindow) {
+    console.error('Echo Intelligence initialization error:', event.data);
+    toast('No se pudo inicializar QA Intelligence. Recarga Echo.', true);
     return;
   }
 
