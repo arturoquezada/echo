@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.6" name="echo-version"/>
+<meta content="1.0.7" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -3138,8 +3138,16 @@ function getFilters() {
 
 function applyQueueFilter(query, filters) {
   if (filters.queues &amp;&amp; filters.queues.length &gt; 0) {
-    if (filters.queues.length === 1) return query.eq(&quot;queue_key&quot;, filters.queues[0]);
-    return query.in(&quot;queue_key&quot;, filters.queues);
+    // selectedQueues stores canonical keys. Expand each key to every historical
+    // spelling found in qa_v_evaluations_base so one filter never splits data.
+    const rawQueues = [...new Set(filters.queues.flatMap(queueKey =&gt; {
+      const canonical = normalizeFilterKey(queueKey);
+      const variants = queueFilterVariants.get(canonical);
+      return variants &amp;&amp; variants.size ? [...variants] : [canonical];
+    }).filter(Boolean))];
+
+    if (rawQueues.length === 1) return query.eq(&quot;queue_key&quot;, rawQueues[0]);
+    return query.in(&quot;queue_key&quot;, rawQueues);
   }
   return query;
 }
@@ -3231,6 +3239,10 @@ function scoreColor(score) {
 /* ═══════════════════════════════════════════════
    FILTER OPTIONS
 ═══════════════════════════════════════════════ */
+// canonical queue_key -&gt; every raw historical spelling found in the data.
+// Example: form_pagos -&gt; { form_pagos, form pagos, Form Pagos }
+let queueFilterVariants = new Map();
+
 async function loadFilterOptions() {
   let evalQuery = supabaseClient
     .from(&quot;qa_v_evaluations_base&quot;)
@@ -3249,9 +3261,28 @@ async function loadFilterOptions() {
     fetchAllRows(employeeQuery)
   ]);
 
-  filterOptionsData = (evalRows || []).filter(row =&gt;
+  const scopedEvalRows = (evalRows || []).filter(row =&gt;
     !isExternalAplazoDashboard() || normalizeDashboardText(row.campaign_key) === ECHO_APLAZO_CAMPAIGN
   );
+
+  // Build the historical variant map BEFORE canonicalizing the filter catalog.
+  queueFilterVariants = new Map();
+  scopedEvalRows.forEach(row =&gt; {
+    const canonical = normalizeFilterKey(row.queue_key);
+    const raw = String(row.queue_key || &quot;&quot;).trim();
+    if (!canonical || !raw) return;
+    if (!queueFilterVariants.has(canonical)) queueFilterVariants.set(canonical, new Set());
+    queueFilterVariants.get(canonical).add(raw);
+  });
+
+  // The filter catalog itself is canonical. Case/spacing/hyphen variants become
+  // one logical Campaign / LOB / Queue in the Intelligence Center.
+  filterOptionsData = scopedEvalRows.map(row =&gt; ({
+    ...row,
+    campaign_key: normalizeFilterKey(row.campaign_key),
+    lob_key: normalizeFilterKey(row.lob_key),
+    queue_key: normalizeFilterKey(row.queue_key)
+  }));
   employeeSupervisorData = (employeeRows || []).filter(emp =&gt;
     emp.id &amp;&amp; (!isExternalAplazoDashboard() || normalizeDashboardText(emp.campaign_id) === ECHO_APLAZO_CAMPAIGN)
   );
@@ -3299,6 +3330,50 @@ function normalizeFilterKey(value) {
     .replace(/[^a-z0-9_]/g, &quot;&quot;)
     .replace(/_+/g, &quot;_&quot;)
     .replace(/^_|_$/g, &quot;&quot;);
+}
+
+function formatQueueLabel(value) {
+  const key = normalizeFilterKey(value);
+  const labels = {
+    ace: &quot;ACE&quot;,
+    checkout: &quot;Checkout&quot;,
+    signup: &quot;Signup&quot;,
+    credito: &quot;Crédito&quot;,
+    cuenta: &quot;Cuenta&quot;,
+    educacion_al_usuario: &quot;Educación al Usuario&quot;,
+    form_pagos: &quot;Form Pagos&quot;,
+    form_reembolsos: &quot;Form Reembolsos&quot;,
+    wa_pagos: &quot;WA Pagos&quot;,
+    wa_reembolsos: &quot;WA Reembolsos&quot;,
+    cobranza: &quot;Cobranza&quot;,
+    comercios: &quot;Comercios&quot;,
+    kams_rfto: &quot;KAMs - RFTO&quot;,
+    kams_sams: &quot;KAMs - SAMs&quot;,
+    chats: &quot;Chats&quot;,
+    correos: &quot;Correos&quot;,
+    llamadas_entrada: &quot;Llamadas Entrada&quot;,
+    llamadas_salida: &quot;Llamadas Salida&quot;,
+    cashmind: &quot;Cashmind&quot;,
+    clivi: &quot;Clivi&quot;,
+    iforex: &quot;iForex&quot;,
+    casap: &quot;Casap&quot;
+  };
+  if (labels[key]) return labels[key];
+  return key
+    .split(&quot;_&quot;)
+    .filter(Boolean)
+    .map(part =&gt; part.charAt(0).toUpperCase() + part.slice(1))
+    .join(&quot; &quot;);
+}
+
+function normalizeEvaluationFilterKeys(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    campaign_key: normalizeFilterKey(row.campaign_key),
+    lob_key: normalizeFilterKey(row.lob_key),
+    queue_key: normalizeFilterKey(row.queue_key)
+  };
 }
 
 function valueMatchesFilter(rawValue, filterValue) {
@@ -3474,7 +3549,7 @@ async function loadDashboard() {
   resetParetoToggle();
   let q = supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;);
   q = applyBaseFilters(q, filters);
-  allEvalData = await fetchAllRows(q);
+  allEvalData = (await fetchAllRows(q)).map(normalizeEvaluationFilterKeys);
   document.getElementById(&quot;lastUpdated&quot;).textContent = `Actualizado: ${new Date().toLocaleString(&quot;es-MX&quot;)}`;
   document.getElementById(&quot;recordCount&quot;).textContent = `${allEvalData.length} registros`;
   await Promise.all([
@@ -4618,14 +4693,19 @@ document.addEventListener(&quot;click&quot;, e =&gt; {
 function buildQueueCheckboxes(queuesList) {
   const container = document.getElementById(&quot;queueCheckboxList&quot;);
   if (!container) return;
-  const availableQueues = new Set(queuesList);
-  selectedQueues = new Set([...selectedQueues].filter(name =&gt; availableQueues.has(name)));
-  const sorted = [...queuesList].sort((a,b) =&gt; String(a).localeCompare(String(b), &quot;es&quot;, {sensitivity:&quot;base&quot;}));
-  container.innerHTML = sorted.map(name =&gt; `
-    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;queue-checkbox-item&quot; data-name=&quot;${name.toLowerCase()}&quot;&gt;
+  const canonicalQueues = [...new Set((queuesList || []).map(normalizeFilterKey).filter(Boolean))];
+  const availableQueues = new Set(canonicalQueues);
+  selectedQueues = new Set([...selectedQueues].map(normalizeFilterKey).filter(name =&gt; availableQueues.has(name)));
+  const sorted = canonicalQueues.sort((a,b) =&gt; formatQueueLabel(a).localeCompare(formatQueueLabel(b), &quot;es&quot;, {sensitivity:&quot;base&quot;}));
+  container.innerHTML = sorted.map(name =&gt; {
+    const label = formatQueueLabel(name);
+    const searchName = `${label} ${name}`.toLowerCase();
+    return `
+    &lt;label style=&quot;display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:#0f172a;&quot; onmouseover=&quot;this.style.background=&#x27;#f8fafc&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot; class=&quot;queue-checkbox-item&quot; data-name=&quot;${searchName}&quot;&gt;
       &lt;input type=&quot;checkbox&quot; value=&quot;${name}&quot; onchange=&quot;onQueueCheckboxChange(this)&quot; ${selectedQueues.has(name)?&quot;checked&quot;:&quot;&quot;} style=&quot;width:13px;height:13px;accent-color:#62d3f5;cursor:pointer;&quot;&gt;
-      &lt;span&gt;${name}&lt;/span&gt;
-    &lt;/label&gt;`).join(&quot;&quot;);
+      &lt;span&gt;${label}&lt;/span&gt;
+    &lt;/label&gt;`;
+  }).join(&quot;&quot;);
 }
 
 function onQueueCheckboxChange(checkbox) {
@@ -4638,7 +4718,7 @@ function updateQueueMultiLabel() {
   const label = document.getElementById(&quot;queueMultiLabel&quot;);
   if (!label) return;
   if (selectedQueues.size === 0) label.textContent = &quot;Todas&quot;;
-  else if (selectedQueues.size === 1) label.textContent = [...selectedQueues][0];
+  else if (selectedQueues.size === 1) label.textContent = formatQueueLabel([...selectedQueues][0]);
   else label.textContent = `${selectedQueues.size} queues`;
 }
 
@@ -6425,7 +6505,7 @@ async function loadAgentNamesFromSupabase() {
     });
 
     console.log(
-      `Echo QA v1.0.6: ${agents.length} agentes autorizados por Supabase`
+      `Echo QA v1.0.7: ${agents.length} agentes autorizados por Supabase`
     );
 
   } catch (error) {
@@ -9109,7 +9189,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.6";
+const ECHO_APP_VERSION = "1.0.7";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
