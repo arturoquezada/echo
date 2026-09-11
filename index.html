@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.8" name="echo-version"/>
+<meta content="1.0.9" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -650,7 +650,8 @@ body.sidebar-collapsed .logout-btn {
   color: #94a3b8;
   font-size: 10px;
 }
-</style></head>
+</style><style>.eqWrap{padding:24px;max-width:1500px;margin:auto}.eqWrap p{line-height:1.6;margin:12px 0}.eqWrap h3{margin:24px 0 12px}.eqToolbar{display:flex;gap:12px;flex-wrap:wrap}.eqToolbar input{flex:1;min-width:240px}.eqWrap input,.eqWrap select,.eqWrap textarea{padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:white;color:#0f172a}.eqWrap button{padding:10px 14px;border:1px solid #8cd8eb;border-radius:8px;background:#e5f8fd;color:#0f172a;cursor:pointer}.eqWrap button:disabled{opacity:.5;cursor:wait}.eqScroll{overflow:auto;max-height:620px}.eqWrap table{width:100%;border-collapse:collapse;font-size:13px}.eqWrap th,.eqWrap td{padding:12px;border-bottom:1px solid #e2e8f0;text-align:left}.eqWrap th{background:#f1f5f9;position:sticky;top:0}.eqFail{background:#fff1f2;color:#9f1239}.eqPass{background:#ecfdf5;color:#065f46}.eqEmpty{background:#f8fafc;color:#64748b}.eqCase,.eqEvent{padding:16px;margin:12px 0;border:1px solid #e2e8f0;border-radius:12px;background:#fff}.eqWrap label{display:grid;gap:8px;margin:14px 0}.eqWrap textarea{min-height:100px}.eqWrap form{max-width:800px}.eqOriginal{white-space:pre-wrap;background:#f1f5f9;padding:12px;border-radius:8px}.eqEvent p{white-space:pre-wrap}#eqDetail{margin-top:24px;padding:20px;background:#f8fafc;border-radius:14px}</style>
+</head>
 <body><div aria-labelledby="echoUpdateTitle" aria-modal="true" id="echoUpdateGate" role="dialog">
 <div class="echo-update-card">
 <div class="echo-update-icon">↻</div>
@@ -734,6 +735,7 @@ body.sidebar-collapsed .logout-btn {
 <div class="nav-item staff-only" data-page="formulario" onclick="switchPage('formulario', this)" title="Formulario de Evaluación">
 <span class="nav-icon">📝</span> Formulario de Evaluación
       </div>
+<div class="nav-item hidden-by-permission" id="navQaFollowup" data-page="qa-followup" onclick="switchPage('qa-followup',this)" title="Feedback y habilidades QA">🧭 Feedback y habilidades</div>
 <div class="nav-item staff-only" data-page="correcciones" id="navCorrecciones" onclick="switchPage('correcciones', this)" title="Correcciones">
 <span class="nav-icon">✏️</span> Correcciones
       </div>
@@ -758,6 +760,7 @@ body.sidebar-collapsed .logout-btn {
 </div>
 </div>
 <!-- PAGE: MIS EVALUACIONES (AGENT ONLY) -->
+<div class="page" id="page-qa-followup"><div class="eqWrap"><h2>Feedback y habilidades QA</h2><p>Detecta brechas, documenta intervenciones y revisa la evidencia de mejora.</p><div class="eqToolbar"><input id="eqSearch" placeholder="Buscar agente, campaña, LOB, queue o rubro" oninput="eqRender()"><button id="eqRefresh" onclick="eqLoad()">Actualizar</button></div><p id="eqStatus" role="status"></p><h3>Mapa de habilidades</h3><p>Falla = multiplicador y score en cero. Aprobado = ambos positivos; incluye crédito parcial. Tendencia: últimas 2 semanas frente a las 2 previas; positivo significa más fallas. Sin evidencia no equivale a mejora.</p><div id="eqMap" class="eqScroll"></div><h3>Seguimiento por tres semanas consecutivas</h3><div id="eqCases"></div><section id="eqDetail">Selecciona un rubro o caso.</section></div></div>
 <div class="page" id="page-mis-evaluaciones">
 <iframe id="qaAgentIframe" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-modals" title="Mis evaluaciones de QA"></iframe>
 </div>
@@ -9189,7 +9192,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.8";
+const ECHO_APP_VERSION = "1.0.9";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -9472,6 +9475,8 @@ async function bootApp(user) {
 
   canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
 
+  eqAccess();
+
   // Shared user card.
   const name = isClientUser
     ? (currentExternalAccess.display_name || currentExternalAccess.email || user.email)
@@ -9652,6 +9657,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 /* ═══════════════ NAVIGATION ═══════════════ */
 function switchPage(page, el) {
+  if(page === "qa-followup" && !eqAllowed()) return;
   // Hard client-side route guard. Database RLS remains the final security layer.
   if (isAgentUser && page !== 'mis-evaluaciones') page = 'mis-evaluaciones';
 
@@ -9688,6 +9694,7 @@ function switchPage(page, el) {
   target.classList.add('active');
 
   const titles = {
+    'qa-followup': 'Feedback y habilidades QA',
     dashboard: 'Dashboard',
     'cliente-dashboard': 'Dashboard',
     formulario: 'Formulario de Evaluación',
@@ -9696,6 +9703,7 @@ function switchPage(page, el) {
   };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
 
+  if (page === 'qa-followup') eqLoad();
   if (page === 'dashboard') loadDashboard();
   if (page === 'cliente-dashboard') loadClientDashboard();
   if (page === 'formulario') { activateStaffIframe('qaFormIframe'); sendEvaluatorToForm(); resizeFormIframe(); }
@@ -10373,5 +10381,35 @@ window.addEventListener('resize', () => {
 
 </script>
 <!-- ECHO_SURVEY_FIX_V2_UTF8_RPC_2026_08_04 -->
+<script>
+/* ECHO 1.0.9 — módulo aditivo; RPC autenticadas y permisos en servidor. */
+let eqData={rows:[],cases:[]}, eqSelected=null, eqHistory=[], eqRequest=null;
+function eqAllowed(){return !isClientUser && currentEmployee && String(currentEmployee.status||'').trim().toLowerCase()==='active' && ['qa_analyst','qa_jr_manager','qa_manager'].includes(String(currentEmployee.system_role||'').trim().toLowerCase());}
+function eqAccess(){document.getElementById('navQaFollowup')?.classList.toggle('hidden-by-permission',!eqAllowed());}
+async function eqRpc(name,args={}){const {data,error}=await sb.rpc(name,args);if(error)throw new Error(error.message);return data;}
+function eqKey(r){return JSON.stringify([r.agent_identifier,r.campaign_key,r.lob_key,r.queue_key,r.rubric_item_id]);}
+function eqDay(d,n){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10);}
+function eqWeek(d){const x=new Date(d+'T12:00:00Z');return eqDay(d,-((x.getUTCDay()+6)%7));}
+function eqGroups(rows){const m=new Map();for(const r of rows){const k=eqKey(r);if(!m.has(k))m.set(k,{...r,items:[]});m.get(k).items.push(r);}return [...m.values()];}
+function eqMetrics(rows){const fail=rows.filter(r=>r.outcome==='fail').length,pass=rows.filter(r=>r.outcome==='pass').length;return {fail,n:fail+pass,unknown:rows.filter(r=>r.outcome==='unknown').length};}
+function eqMessage(s){document.getElementById('eqStatus').textContent=s;}
+async function eqLoad(){if(!eqAllowed())return;const b=document.getElementById('eqRefresh');b.disabled=true;eqMessage('Cargando evidencia y actualizando casos…');try{eqData=await eqRpc('echo_qa_dashboard_v109');eqSelected=null;document.getElementById('eqDetail').innerHTML='Selecciona un rubro o un caso para registrar feedback.';eqRender();eqMessage('12 semanas · '+eqData.from+' a '+eqData.today+' · CDMX. Los casos se actualizan al consultar; bonos excluidos.');}catch(e){eqMessage('No se pudo cargar: '+e.message);}finally{b.disabled=false;}}
+function eqRender(){const query=document.getElementById('eqSearch').value.trim().toLowerCase();const match=r=>[r.agent_identifier,r.agent_name,r.campaign_key,r.lob_key,r.queue_key,r.rubric_name].join(' ').toLowerCase().includes(query);const groups=eqGroups(eqData.rows).filter(match);const current=eqWeek(eqData.today);let html='<table><thead><tr><th>Agente / operación</th><th>Rubro</th><th>Fallas / oportunidades</th><th>Tendencia de falla</th>';for(let i=3;i>=0;i--)html+='<th>Semana '+eqDay(current,-7*i)+'</th>';html+='<th></th></tr></thead><tbody>';
+const index=new Map(eqData.rows.map((r,i)=>[eqKey(r),i]));
+for(const g of groups){const m=eqMetrics(g.items),recent=eqMetrics(g.items.filter(r=>r.week_start>=eqDay(current,-7))),prior=eqMetrics(g.items.filter(r=>r.week_start<eqDay(current,-7)&&r.week_start>=eqDay(current,-21)));const trend=recent.n&&prior.n?((recent.fail/recent.n-prior.fail/prior.n)*100).toFixed(1)+' pp':'Sin comparación';html+='<tr><td><b>'+esc(g.agent_name)+'</b><br>'+esc(g.agent_identifier)+'<br><small>'+esc([g.campaign_key,g.lob_key,g.queue_key].join(' / '))+'</small></td><td>'+esc(g.rubric_name)+'</td><td>'+m.fail+' / '+m.n+(m.n?' · '+(100*m.fail/m.n).toFixed(1)+'%':'')+(m.unknown?'<br><small>'+m.unknown+' por validar</small>':'')+'</td><td>'+trend+'</td>';for(let i=3;i>=0;i--){const w=eqMetrics(g.items.filter(r=>r.week_start===eqDay(current,-7*i)));html+='<td class="'+(w.fail?'eqFail':w.n?'eqPass':'eqEmpty')+'">'+(w.n?w.fail+'/'+w.n:'Sin evidencia')+'</td>';}html+='<td><button type="button" onclick="eqOpen('+index.get(eqKey(g))+')">Ver / feedback</button></td></tr>';}
+html+='</tbody></table>';document.getElementById('eqMap').innerHTML=groups.length?html:'No hay evidencia para estos filtros y asignaciones.';
+const visible=eqData.cases.map((c,i)=>({...c,_index:i})).filter(c=>match({...c,agent_name:eqData.rows.find(r=>r.agent_identifier===c.agent_identifier)?.agent_name,rubric_name:eqData.rows.find(r=>r.rubric_item_id===c.rubric_item_id)?.rubric_name}));
+document.getElementById('eqCases').innerHTML=visible.length?visible.map(c=>{const rows=eqData.rows.filter(r=>eqKey(r)===eqKey(c));const weeks=new Set(rows.filter(r=>r.outcome==='fail').map(r=>r.week_start));const valid=[...weeks].some(w=>weeks.has(eqDay(w,-7))&&weeks.has(eqDay(w,-14)));const title=rows[0]?.rubric_name||c.rubric_item_id;return '<div class="eqCase"><b>'+esc(c.agent_identifier)+' · '+esc(title)+'</b><br>'+esc([c.campaign_key,c.lob_key,c.queue_key].join(' / '))+'<br>'+esc({open:'Abierto',in_progress:'En seguimiento',closed:'Cerrado'}[c.status])+' · Responsable: '+esc(c.owner_id||'Sin asignar')+' · Tercera semana: '+esc(c.last_qualifying_week)+(c.status!=='closed'&&!valid?'<p>Revalidar: el patrón no aparece en la ventana actual; puede haber correcciones o evidencia antigua.</p>':'')+' <button type="button" onclick="eqOpenCase('+c._index+')">Ver caso</button></div>';}).join(''):'Sin casos detectados.';
+}
+async function eqOpenCase(i){const c=eqData.cases[i];const j=eqData.rows.findIndex(r=>eqKey(r)===eqKey(c));if(j<0){eqSelected={...c,rubric_name:c.rubric_item_id,agent_name:c.agent_identifier};await eqDetail(c);return;}await eqOpen(j,c);}
+async function eqOpen(i,c=null){eqSelected=eqData.rows[i];await eqDetail(c||eqData.cases.find(x=>x.status!=='closed'&&eqKey(x)===eqKey(eqSelected))||null);}
+async function eqDetail(c){const selected=eqSelected;document.getElementById('eqDetail').innerHTML='Cargando historial…';try{const history=await eqRpc('echo_qa_history_v109',{p_agent:selected.agent_identifier});if(eqSelected!==selected)return;eqHistory=history;const rows=eqData.rows.filter(r=>eqKey(r)===eqKey(selected));eqRequest=crypto.randomUUID();const closed=c?.status==='closed';let h='<h3>'+esc(selected.agent_name)+' · '+esc(selected.rubric_name)+'</h3><p>'+esc([selected.campaign_key,selected.lob_key,selected.queue_key].join(' / '))+'</p>';
+if(rows.length&&!closed){h+='<form id="eqForm"><label>Evaluación que sustenta este registro<select id="eqEvaluation" required>'+rows.map((r,i)=>'<option value="'+i+'">'+esc(r.interaction_date+' · '+({fail:'Falla',pass:'Aprobado',unknown:'Por validar',na:'No aplica'}[r.outcome])+' · '+r.evaluation_id)+'</option>').join('')+'</select></label><p id="eqOriginal" class="eqOriginal"></p><label>Tipo de registro<select id="eqKind"><option value="feedback">Feedback</option>'+(c?'<option value="progress">Avance del seguimiento</option><option value="close">Cerrar con evidencia posterior</option>':'')+'</select></label><label>Hallazgo / avance / evidencia<textarea id="eqObservation" required minlength="3" maxlength="4000" placeholder="Describe la conducta y la evidencia concreta."></textarea></label><label>Acción trabajada y conducta esperada<textarea id="eqAction" required minlength="3" maxlength="4000"></textarea></label><label>Próxima revisión<input id="eqReview" type="date" min="'+eqData.today+'" value="'+eqDay(eqData.today,7)+'" required></label><p>El cierre exige una intervención registrada y una evaluación aprobada de un día posterior, sin fallas posteriores en ese rubro. El registro queda atribuido al QA que lo guarda.</p><button id="eqSave" type="submit">Guardar registro</button><p id="eqSaveStatus" role="status"></p></form>';}
+h+='<h3>Historial del agente · últimos 200 registros</h3>'+history.map(x=>'<article class="eqEvent"><b>'+esc(x.kind)+' · '+esc(x.actor_name)+'</b><br>'+esc(new Date(x.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(x.campaign_key+'/'+x.queue_key)+'<p>'+esc(x.observation)+'</p><p><b>Acción:</b> '+esc(x.action)+'</p><small>Evaluación '+esc(x.evaluation_id)+' · Rubro '+esc(eqData.rows.find(r=>r.rubric_item_id===x.rubric_item_id)?.rubric_name||x.rubric_item_id)+(x.next_review?' · Revisión: '+esc(x.next_review):'')+'</small></article>').join('');if(!history.length)h+='<p>Aún no hay registros.</p>';document.getElementById('eqDetail').innerHTML=h;
+const f=document.getElementById('eqForm');if(f){const original=()=>{document.getElementById('eqOriginal').textContent='Feedback original de la evaluación: '+(rows[Number(document.getElementById('eqEvaluation').value)].feedback||'Sin feedback');};document.getElementById('eqEvaluation').onchange=original;original();document.getElementById('eqKind').onchange=()=>{const close=document.getElementById('eqKind').value==='close';document.getElementById('eqReview').required=!close;document.getElementById('eqReview').disabled=close;};f.onsubmit=async event=>{event.preventDefault();const btn=document.getElementById('eqSave'),status=document.getElementById('eqSaveStatus');btn.disabled=true;const r=rows[Number(document.getElementById('eqEvaluation').value)];try{await eqRpc('echo_qa_record_v109',{p_request:eqRequest,p_evaluation:r.evaluation_id,p_rubric:r.rubric_item_id,p_observation:document.getElementById('eqObservation').value,p_action:document.getElementById('eqAction').value,p_review:document.getElementById('eqReview').disabled?null:document.getElementById('eqReview').value,p_case:c?.id||null,p_kind:document.getElementById('eqKind').value});toast('Feedback registrado');await eqLoad();}catch(e){status.textContent=e.message;btn.disabled=false;}};}
+document.getElementById('eqDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}catch(e){document.getElementById('eqDetail').textContent='No se pudo cargar el historial: '+e.message;}}
+
+</script>
 </body>
 </html>
