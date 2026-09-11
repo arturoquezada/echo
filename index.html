@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.12" name="echo-version"/>
+<meta content="1.0.13" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2571,7 +2571,7 @@ document.addEventListener('DOMContentLoaded',async()=&gt;{
       &lt;div&gt;&lt;label&gt;Fecha inicio&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;startDate&quot;&gt;&lt;/div&gt;
       &lt;div&gt;&lt;label&gt;Fecha fin&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;endDate&quot;&gt;&lt;/div&gt;
       &lt;div&gt;&lt;label&gt;Campaña&lt;/label&gt;&lt;select id=&quot;campaignFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todas&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
-      &lt;div&gt;&lt;label&gt;LOB&lt;/label&gt;&lt;select id=&quot;lobFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todos&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;label&gt;Tipo de contacto&lt;/label&gt;&lt;details id=&quot;echoContactMenu&quot; style=&quot;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px&quot;&gt;&lt;summary id=&quot;echoContactLabel&quot; style=&quot;cursor:pointer&quot;&gt;Todos&lt;/summary&gt;&lt;button type=&quot;button&quot; onclick=&quot;echoClearContacts()&quot; style=&quot;margin:8px 0&quot;&gt;Todos los tipos&lt;/button&gt;&lt;div id=&quot;echoContactOptions&quot; style=&quot;max-height:220px;overflow:auto&quot;&gt;&lt;/div&gt;&lt;/details&gt;&lt;/div&gt;&lt;div&gt;&lt;label&gt;LOB&lt;/label&gt;&lt;select id=&quot;lobFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todos&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
       &lt;div style=&quot;position:relative;&quot;&gt;
         &lt;label&gt;Supervisor&lt;/label&gt;
         &lt;div id=&quot;supervisorMultiBtn&quot; onclick=&quot;toggleSupervisorDropdown()&quot; style=&quot;width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e2e8f0;font-size:13px;background:#f8fafc;color:#0f172a;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;&quot;&gt;
@@ -3114,13 +3114,27 @@ async function fetchAllRows(queryBuilder, pageSize = 1000) {
   let allRows = [], from = 0, to = pageSize - 1, keepGoing = true;
   while (keepGoing) {
     const { data, error } = await queryBuilder.range(from, to);
-    if (error) { console.error(error); return allRows; }
+    if (error) { console.error(error); throw error; }
     allRows = allRows.concat(data || []);
     if (!data || data.length &lt; pageSize) keepGoing = false;
     else { from += pageSize; to += pageSize; }
   }
   return allRows;
 }
+
+
+function echoSelectedContacts(){return [...document.querySelectorAll(&#x27;#echoContactOptions input:checked&#x27;)].map(x=&gt;x.value);}
+function echoContactFrom(relation,filtered=true){return {select(...args){let q=supabaseClient.from(relation+&#x27;_ct113&#x27;).select(...args);const selected=echoSelectedContacts();if(filtered&amp;&amp;selected.length)q=q.in(&#x27;echo_contact_key&#x27;,selected);return q;}};}
+function echoContactLabel(){const n=echoSelectedContacts().length;document.getElementById(&#x27;echoContactLabel&#x27;).textContent=n?n+&#x27; tipos seleccionados&#x27;:&#x27;Todos&#x27;;}
+function echoRefreshContacts(){
+ const selected=new Set(echoSelectedContacts()),s=getCurrentFilterValues();
+ const keys=[...new Set(filterOptionsData.filter(r=&gt;(!s.campaign||r.campaign_key===s.campaign)&amp;&amp;(!s.lob||r.lob_key===s.lob)&amp;&amp;(!s.queues.length||s.queues.includes(r.queue_key))).map(r=&gt;r.echo_contact_key).filter(Boolean))].sort();
+ const container=document.getElementById(&#x27;echoContactOptions&#x27;);container.replaceChildren();
+ keys.forEach(key=&gt;{const label=document.createElement(&#x27;label&#x27;);label.style.cssText=&#x27;display:flex;gap:8px;align-items:center;padding:6px 0;text-transform:none;letter-spacing:normal&#x27;;const cb=document.createElement(&#x27;input&#x27;);cb.type=&#x27;checkbox&#x27;;cb.value=key;cb.checked=selected.has(key);cb.style.width=&#x27;auto&#x27;;cb.addEventListener(&#x27;change&#x27;,echoContactLabel);label.append(cb,document.createTextNode(key===&#x27;missing:&#x27;?&#x27;Sin clasificar&#x27;:key.slice(6).replace(/_/g,&#x27; &#x27;)));container.appendChild(label);});
+ if(!keys.length)container.textContent=&#x27;Sin tipos registrados para esta operación.&#x27;;
+ echoContactLabel();
+}
+function echoClearContacts(){document.querySelectorAll(&#x27;#echoContactOptions input&#x27;).forEach(x=&gt;x.checked=false);echoContactLabel();}
 
 function getFilters() {
   return {
@@ -3247,9 +3261,8 @@ function scoreColor(score) {
 let queueFilterVariants = new Map();
 
 async function loadFilterOptions() {
-  let evalQuery = supabaseClient
-    .from(&quot;qa_v_evaluations_base&quot;)
-    .select(&quot;campaign_key,lob_key,queue_key,agent_identifier,agent_name,evaluator_name,created_date_cdmx&quot;);
+  let evalQuery = echoContactFrom(&quot;qa_v_evaluations_base&quot;,false)
+    .select(&quot;campaign_key,lob_key,queue_key,agent_identifier,agent_name,evaluator_name,created_date_cdmx,echo_contact_key&quot;);
   let employeeQuery = supabaseClient
     .from(&quot;employees&quot;)
     .select(&quot;id,full_name,email,status,system_role,supervisor_id,supervisor_name,supervisor_email,campaign_id,lob,queue&quot;);
@@ -3533,6 +3546,7 @@ function refreshAllFilterOptions() {
     if (before === after) break;
   }
 
+  echoRefreshContacts();
   isRefreshingFilterOptions = false;
 }
 
@@ -3546,11 +3560,12 @@ function restoreSelectValue(id, value) {
 /* ═══════════════════════════════════════════════
    MAIN DASHBOARD LOADER
 ═══════════════════════════════════════════════ */
-async function loadDashboard() {
+async function loadDashboard(){try{await echoLoadDashboardData();}catch(error){console.error(error);document.getElementById(&#x27;lastUpdated&#x27;).textContent=&#x27;No se pudo actualizar. Revisa la instalación 1.0.13 y los permisos; las cifras visibles pueden corresponder a la consulta anterior.&#x27;;}}
+async function echoLoadDashboardData() {
   const filters = getFilters();
   document.getElementById(&quot;lastUpdated&quot;).textContent = &quot;Actualizando...&quot;;
   resetParetoToggle();
-  let q = supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;);
+  let q = echoContactFrom(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;);
   q = applyBaseFilters(q, filters);
   allEvalData = (await fetchAllRows(q)).map(normalizeEvaluationFilterKeys);
   document.getElementById(&quot;lastUpdated&quot;).textContent = `Actualizado: ${new Date().toLocaleString(&quot;es-MX&quot;)}`;
@@ -3583,7 +3598,7 @@ async function loadExecutiveCards(filters) {
     const dur   = end - start;
     const prevStart = new Date(start - dur).toISOString().split(&quot;T&quot;)[0];
     const prevEnd   = new Date(start - 1).toISOString().split(&quot;T&quot;)[0];
-    let pq = supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;score_final,critical_error_triggered,weekly_zero_triggered&quot;).gte(&quot;created_date_cdmx&quot;, prevStart).lte(&quot;created_date_cdmx&quot;, prevEnd);
+    let pq = echoContactFrom(&quot;qa_v_evaluations_base&quot;).select(&quot;score_final,critical_error_triggered,weekly_zero_triggered&quot;).gte(&quot;created_date_cdmx&quot;, prevStart).lte(&quot;created_date_cdmx&quot;, prevEnd);
     if (filters.campaign)  pq = pq.eq(&quot;campaign_key&quot;, filters.campaign);
     if (filters.lob)       pq = pq.eq(&quot;lob_key&quot;, filters.lob);
     pq = applyQueueFilter(pq, filters);
@@ -3643,7 +3658,7 @@ async function loadWeeklyTrend(filters) {
    PARETO
 ═══════════════════════════════════════════════ */
 async function loadPareto(filters) {
-  let q = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;*&quot;).eq(&quot;failed_item&quot;,true);
+  let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;*&quot;).eq(&quot;failed_item&quot;,true);
   if (filters.startDate) q = q.gte(&quot;created_at&quot;, filters.startDate + &quot;T00:00:00&quot;);
   if (filters.endDate)   q = q.lte(&quot;created_at&quot;, filters.endDate + &quot;T23:59:59&quot;);
   if (filters.campaign)  q = q.eq(&quot;campaign_key&quot;, filters.campaign);
@@ -3695,7 +3710,7 @@ async function buildRubricDetailTable() {
   const detView = document.getElementById(&quot;rubricDetailView&quot;);
   detView.innerHTML = &#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando detalle...&lt;/div&gt;&#x27;;
   const filters = getFilters();
-  let q = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,rubric_item,field_key,calculated_score,weight,failed_item,is_bonus&quot;);
+  let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,rubric_item,field_key,calculated_score,weight,failed_item,is_bonus&quot;);
   if (filters.startDate) q=q.gte(&quot;created_at&quot;,filters.startDate+&quot;T00:00:00&quot;); if(filters.endDate) q=q.lte(&quot;created_at&quot;,filters.endDate+&quot;T23:59:59&quot;); if(filters.campaign) q=q.eq(&quot;campaign_key&quot;,filters.campaign); if(filters.lob) q=q.eq(&quot;lob_key&quot;,filters.lob); q = applyQueueFilter(q, filters); q = applyAgentFilter(q, filters); q = applyEvaluatorFilter(q, filters);
   const rawData = await fetchAllRows(q);
   if (!rawData||rawData.length===0){detView.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;No hay datos de rubros para este periodo.&lt;/div&gt;&#x27;;return;}
@@ -3748,7 +3763,7 @@ function getCriticalShortName(label) {
   return label.length&gt;32?label.slice(0,32)+&quot;...&quot;:label;
 }
 async function loadCriticalErrors(filters) {
-  let q=supabaseClient.from(&quot;qa_v_policy_flags_detail&quot;).select(&quot;*&quot;);
+  let q=echoContactFrom(&quot;qa_v_policy_flags_detail&quot;).select(&quot;*&quot;);
   if(filters.startDate)q=q.gte(&quot;created_date_cdmx&quot;,filters.startDate);if(filters.endDate)q=q.lte(&quot;created_date_cdmx&quot;,filters.endDate);if(filters.campaign)q=q.eq(&quot;campaign_key&quot;,filters.campaign);if(filters.lob)q=q.eq(&quot;lob_key&quot;,filters.lob);q = applyQueueFilter(q, filters);q = applyAgentFilter(q, filters);q = applyEvaluatorFilter(q, filters);
   const data=await fetchAllRows(q);
   const grouped={};
@@ -3943,7 +3958,7 @@ async function loadRubricTable(filters) {
   const validEvalIds = allEvalData.map(row =&gt; row.evaluation_id || row.id).filter(Boolean);
   if (validEvalIds.length === 0) { wrapper.innerHTML=`&lt;div class=&quot;muted&quot; style=&quot;padding:16px;&quot;&gt;No hay evaluaciones para este periodo.&lt;/div&gt;`; return; }
 
-  let q = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,agent_name,rubric_item,field_key,calculated_score,weight,is_bonus,failed_item,evaluation_id&quot;);
+  let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,agent_name,rubric_item,field_key,calculated_score,weight,is_bonus,failed_item,evaluation_id&quot;);
   // Filter by evaluation_id batches (Supabase .in() supports up to 1000)
   if (validEvalIds.length &lt;= 1000) {
     q = q.in(&quot;evaluation_id&quot;, validEvalIds);
@@ -4046,8 +4061,7 @@ async function openEvalModal(key) {
   try {
     const evalId = row.evaluation_id || row.id;
     if (evalId) {
-      const { data: rData, error } = await supabaseClient
-        .from(&quot;qa_v_evaluation_responses_detail&quot;)
+      const { data: rData, error } = await echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;)
         .select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,rubric_item_id&quot;)
         .eq(&quot;evaluation_id&quot;, evalId);
       if (!error &amp;&amp; rData) {
@@ -4338,8 +4352,7 @@ async function openEvalSidePanel(key) {
   try {
     const evalId = row.evaluation_id || row.id;
     if (evalId) {
-      const { data: rData, error } = await supabaseClient
-        .from(&quot;qa_v_evaluation_responses_detail&quot;)
+      const { data: rData, error } = await echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;)
         .select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,rubric_item_id&quot;)
         .eq(&quot;evaluation_id&quot;, evalId);
       if (!error &amp;&amp; rData) {
@@ -4403,7 +4416,7 @@ async function openAgentHistory(agentId, agentName) {
   const dateFrom=threeBack.toISOString().split(&quot;T&quot;)[0],dateTo=today.toISOString().split(&quot;T&quot;)[0];
   subtitle.textContent=`Historial: ${dateFrom} → ${dateTo}`;
   const historyCampaign = getDashboardCampaign();
-  let historyQuery = supabaseClient.from(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_date_cdmx&quot;,dateFrom).lte(&quot;created_date_cdmx&quot;,dateTo).order(&quot;created_date_cdmx&quot;,{ascending:true});
+  let historyQuery = echoContactFrom(&quot;qa_v_evaluations_base&quot;).select(&quot;*&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_date_cdmx&quot;,dateFrom).lte(&quot;created_date_cdmx&quot;,dateTo).order(&quot;created_date_cdmx&quot;,{ascending:true});
   if (historyCampaign) historyQuery = historyQuery.eq(&quot;campaign_key&quot;, historyCampaign);
   const{data:evals,error}=await historyQuery;
   if(error||!evals||evals.length===0){body.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:30px;text-align:center;&quot;&gt;No hay evaluaciones en los últimos 3 meses.&lt;/div&gt;&#x27;;return;}
@@ -4414,7 +4427,7 @@ async function openAgentHistory(agentId, agentName) {
   const weeks=Object.keys(byWeek).sort(),weekScores=weeks.map(w=&gt;{const g=byWeek[w];return g.scores.reduce((a,b)=&gt;a+b,0)/g.scores.length;}),weekCounts=weeks.map(w=&gt;byWeek[w].count),weekCrits=weeks.map(w=&gt;byWeek[w].criticals);
   const chartId=&quot;agentTrendChart_&quot;+Date.now();
   const chartHtml=`&lt;div class=&quot;eval-modal-section&quot;&gt;&lt;h4&gt;📈 Tendencia semanal&lt;/h4&gt;&lt;canvas id=&quot;${chartId}&quot; height=&quot;100&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;`;
-  let historyRubricQuery = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,evaluation_id&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_at&quot;,dateFrom+&quot;T00:00:00&quot;).lte(&quot;created_at&quot;,dateTo+&quot;T23:59:59&quot;);
+  let historyRubricQuery = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,evaluation_id&quot;).eq(&quot;agent_identifier&quot;,agentId).gte(&quot;created_at&quot;,dateFrom+&quot;T00:00:00&quot;).lte(&quot;created_at&quot;,dateTo+&quot;T23:59:59&quot;);
   if (historyCampaign) historyRubricQuery = historyRubricQuery.eq(&quot;campaign_key&quot;, historyCampaign);
   const{data:rubricData}=await historyRubricQuery;
   let rubricSection=&quot;&quot;;
@@ -4822,7 +4835,7 @@ async function loadFallas() {
 
   try {
     // Current period
-    let q = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;)
+    let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;)
       .select(&quot;agent_identifier,agent_name,rubric_item,field_key,failed_item,is_bonus,evaluation_id&quot;);
     if (filters.startDate) q = q.gte(&quot;created_at&quot;, filters.startDate + &quot;T00:00:00&quot;);
     if (filters.endDate)   q = q.lte(&quot;created_at&quot;, filters.endDate + &quot;T23:59:59&quot;);
@@ -4843,7 +4856,7 @@ async function loadFallas() {
     const lastMonday = new Date(thisMonday); lastMonday.setDate(thisMonday.getDate()-7);
     const lastSunday = new Date(thisMonday); lastSunday.setDate(thisMonday.getDate()-1);
 
-    let qPrev = supabaseClient.from(&quot;qa_v_evaluation_responses_detail&quot;)
+    let qPrev = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;)
       .select(&quot;rubric_item,field_key,failed_item,is_bonus&quot;)
       .gte(&quot;created_at&quot;, lastMonday.toISOString().split(&quot;T&quot;)[0] + &quot;T00:00:00&quot;)
       .lte(&quot;created_at&quot;, lastSunday.toISOString().split(&quot;T&quot;)[0] + &quot;T23:59:59&quot;);
@@ -5044,8 +5057,7 @@ async function buildClientView() {
   const aplazoEvalIds = aplazoData.map(r =&gt; r.evaluation_id || r.id).filter(Boolean);
   let paretoRows = [];
   if (aplazoEvalIds.length &gt; 0) {
-    const { data: rd } = await supabaseClient
-      .from(&quot;qa_v_evaluation_responses_detail&quot;)
+    const { data: rd } = await echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;)
       .select(&quot;rubric_item,field_key,failed_item,is_bonus&quot;)
       .in(&quot;evaluation_id&quot;, aplazoEvalIds.slice(0,1000))
       .eq(&quot;failed_item&quot;, true);
@@ -6322,7 +6334,7 @@ label,.additional-fields label{font-size:14px;color:#31435a;font-weight:600;marg
 &lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;contactType&quot;&gt;Tipo de contacto&lt;/label&gt;&lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; required=&quot;&quot;&gt;
 &lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;
 &lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;interactionDate&quot;&gt;Fecha de interacción&lt;/label&gt;&lt;input id=&quot;interactionDate&quot; name=&quot;Interaction Date&quot; required type=&quot;date&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;
-&lt;details id=&quot;eiPanel&quot;&gt;&lt;summary&gt;Insights del agente &lt;span id=&quot;eiBadge&quot;&gt;Contexto del agente&lt;/span&gt;&lt;/summary&gt;&lt;div id=&quot;eiBody&quot; aria-live=&quot;polite&quot;&gt;Selecciona agente, campaña, LOB, queue y tipo de contacto para consultar su historial.&lt;/div&gt;&lt;/details&gt;
+&lt;p id=&quot;eaNotice&quot; class=&quot;eiMuted&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;&lt;details id=&quot;eiPanel&quot;&gt;&lt;summary&gt;Insights del agente &lt;span id=&quot;eiBadge&quot;&gt;Contexto del agente&lt;/span&gt;&lt;/summary&gt;&lt;div style=&quot;padding:0 22px 14px&quot;&gt;&lt;label for=&quot;eiScopeSelect&quot;&gt;Ver historial de&lt;/label&gt;&lt;select id=&quot;eiScopeSelect&quot;&gt;&lt;option value=&quot;agent&quot;&gt;Agente completo&lt;/option&gt;&lt;option value=&quot;operation&quot;&gt;Esta operación · todos los contact types&lt;/option&gt;&lt;option value=&quot;contact&quot;&gt;Este tipo de contacto&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;div id=&quot;eiBody&quot; aria-live=&quot;polite&quot;&gt;Selecciona un agente. Para acotar el historial, completa la operación y el tipo de contacto según el alcance elegido.&lt;/div&gt;&lt;/details&gt;
 &lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;02&lt;/span&gt;&lt;h3&gt;Evaluación por rubro&lt;/h3&gt;&lt;/div&gt;&lt;div id=&quot;dynamicRubricContainer&quot;&gt;&lt;/div&gt;&lt;/section&gt;
 &lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;03&lt;/span&gt;&lt;h3&gt;Evidencia y feedback&lt;/h3&gt;&lt;/div&gt;&lt;div class=&quot;efGrid efEvidence&quot;&gt;&lt;div class=&quot;efField efFull&quot;&gt;&lt;label for=&quot;feedback&quot;&gt;Feedback de la evaluación&lt;/label&gt;&lt;textarea id=&quot;feedback&quot; name=&quot;Feedback&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;link&quot;&gt;Enlace a la interacción&lt;/label&gt;&lt;textarea id=&quot;link&quot; name=&quot;Link&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;conversation&quot;&gt;Conversación / notas&lt;/label&gt;&lt;textarea id=&quot;conversation&quot; name=&quot;Conversation&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;
 &lt;div class=&quot;efSavebar button-container&quot;&gt;&lt;div class=&quot;efScore&quot;&gt;&lt;label for=&quot;evaluationScore&quot;&gt;Score actual (%)&lt;/label&gt;&lt;input id=&quot;evaluationScore&quot; name=&quot;Score&quot; min=&quot;0&quot; max=&quot;120&quot; value=&quot;0&quot; readonly type=&quot;number&quot;&gt;&lt;/div&gt;&lt;button type=&quot;button&quot; onclick=&quot;addEvaluation()&quot;&gt;Guardar evaluación&lt;/button&gt;&lt;/div&gt;&lt;/form&gt;
@@ -6522,7 +6534,9 @@ async function loadAgentNamesFromSupabase() {
             .replace(/^_|_$/g, &quot;&quot;);
         }
         
+        let echoRubricGeneration=0;
         function clearDynamicRubric() {
+          ++echoRubricGeneration;
           currentRubricGroup = null;
           currentRubricItems = [];
           currentPolicyFlags = [];
@@ -6706,6 +6720,7 @@ async function loadAgentNamesFromSupabase() {
 
         async function loadRubricFromSupabase() {
   clearDynamicRubric();
+  const rubricGeneration=echoRubricGeneration;
 
   const campaign = document.getElementById(&quot;Campaign&quot;).value;
   const lob = document.getElementById(&quot;LOB&quot;).value;
@@ -6726,6 +6741,7 @@ async function loadAgentNamesFromSupabase() {
     .eq(&quot;is_active&quot;, true)
     .maybeSingle();
 
+  if(rubricGeneration!==echoRubricGeneration)return;
   if (groupError || !group) {
     document.getElementById(&quot;dynamicRubricContainer&quot;).innerHTML =
       `&lt;div class=&quot;additional-fields&quot;&gt;
@@ -6736,7 +6752,7 @@ async function loadAgentNamesFromSupabase() {
     return;
   }
 
-  currentRubricGroup = group;
+  // Assign the group only when all rubric data is ready.
 
   const { data: items, error: itemsError } = await supabaseClient
     .from(&quot;qa_rubric_items&quot;)
@@ -6748,6 +6764,7 @@ async function loadAgentNamesFromSupabase() {
     .eq(&quot;is_active&quot;, true)
     .order(&quot;display_order&quot;, { ascending: true });
 
+  if(rubricGeneration!==echoRubricGeneration)return;
   if (itemsError) {
     console.error(itemsError);
     return;
@@ -6760,6 +6777,7 @@ async function loadAgentNamesFromSupabase() {
     .eq(&quot;is_active&quot;, true)
     .order(&quot;display_order&quot;, { ascending: true });
 
+  if(rubricGeneration!==echoRubricGeneration)return;
   if (flagsError) {
     console.error(flagsError);
     return;
@@ -6789,7 +6807,8 @@ async function loadAgentNamesFromSupabase() {
         .eq(&quot;is_active&quot;, true)
         .maybeSingle();
 
-    if (raceGroupError || !raceGroup) {
+    if(rubricGeneration!==echoRubricGeneration)return;
+  if (raceGroupError || !raceGroup) {
       console.error(
         &quot;No se encontró el grupo RACE para cargar Critical Errors.&quot;,
         raceGroupError
@@ -6811,7 +6830,8 @@ async function loadAgentNamesFromSupabase() {
         .eq(&quot;is_active&quot;, true)
         .order(&quot;display_order&quot;, { ascending: true });
 
-    if (raceFlagsError) {
+    if(rubricGeneration!==echoRubricGeneration)return;
+  if (raceFlagsError) {
       console.error(raceFlagsError);
       currentRubricGroup = null;
       return;
@@ -6820,6 +6840,8 @@ async function loadAgentNamesFromSupabase() {
     flags = raceFlags || [];
   }
 
+  if(rubricGeneration!==echoRubricGeneration)return;
+  currentRubricGroup = group;
   currentRubricItems = items || [];
   currentPolicyFlags = flags || [];
 
@@ -7299,13 +7321,13 @@ if (typeof ResizeObserver !== &quot;undefined&quot;) {
 let eiSequence=0,eiTimer=null,eiAllTypes=false;
 const eiCache=new Map();
 function eiEsc(v){return String(v??&#x27;&#x27;).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));}
-function eiSelection(){const agent=document.getElementById(&#x27;agentName&#x27;);return {p_agent:agent.selectedOptions[0]?.dataset.agentId||&#x27;&#x27;,p_campaign:normalizeKey(document.getElementById(&#x27;Campaign&#x27;).value),p_lob:normalizeKey(document.getElementById(&#x27;LOB&#x27;).value),p_queue:normalizeKey(document.getElementById(&#x27;Queue&#x27;).value),p_contact_type:document.getElementById(&#x27;contactType&#x27;).value,p_all_types:eiAllTypes};}
+function eiSelection(){const agent=document.getElementById(&#x27;agentName&#x27;);return {p_agent:agent.selectedOptions[0]?.dataset.agentId||&#x27;&#x27;,p_campaign:normalizeKey(document.getElementById(&#x27;Campaign&#x27;).value),p_lob:normalizeKey(document.getElementById(&#x27;LOB&#x27;).value),p_queue:normalizeKey(document.getElementById(&#x27;Queue&#x27;).value),p_contact_type:document.getElementById(&#x27;contactType&#x27;).value,p_all_types:document.getElementById(&quot;eiScopeSelect&quot;).value!==&quot;contact&quot;,p_scope:document.getElementById(&quot;eiScopeSelect&quot;).value};}
 function eiMessage(text){document.getElementById(&#x27;eiBody&#x27;).textContent=text;document.getElementById(&#x27;eiBadge&#x27;).textContent=&#x27;Contexto del agente&#x27;;if(typeof notifyParentHeight===&#x27;function&#x27;)notifyParentHeight();}
-function eiSchedule(resetScope=true){if(resetScope)eiAllTypes=false;clearTimeout(eiTimer);const seq=++eiSequence;const p=eiSelection();document.getElementById(&#x27;eiPanel&#x27;).open=false;
-if(!p.p_agent||!p.p_campaign||!p.p_lob||!p.p_queue||!p.p_contact_type){eiMessage(&#x27;Selecciona agente, campaña, LOB, queue y tipo de contacto para consultar su historial.&#x27;);return;}
+function eiSchedule(resetScope=true){clearTimeout(eiTimer);const seq=++eiSequence;const p=eiSelection();
+if(!p.p_agent||(p.p_scope!==&#x27;agent&#x27;&amp;&amp;(!p.p_campaign||!p.p_lob||!p.p_queue))||(p.p_scope===&#x27;contact&#x27;&amp;&amp;!p.p_contact_type)){eiMessage(&#x27;Selecciona un agente. Para acotar el historial, completa la operación y el tipo de contacto según el alcance elegido.&#x27;);return;}
 eiMessage(&#x27;Consultando historial de esta combinación…&#x27;);document.getElementById(&#x27;eiBadge&#x27;).textContent=&#x27;Consultando…&#x27;;eiTimer=setTimeout(()=&gt;eiLoad(p,seq),350);}
-async function eiLoad(p,seq){try{const key=JSON.stringify(p),cached=eiCache.get(key);let data;if(cached&amp;&amp;Date.now()-cached.at&lt;60000)data=cached.data;else{const result=await supabaseClient.rpc(&#x27;echo_qa_insights_v110&#x27;,p);if(result.error)throw result.error;data=result.data;if(data){eiCache.set(key,{at:Date.now(),data});if(eiCache.size&gt;30)eiCache.delete(eiCache.keys().next().value);}}
-if(seq!==eiSequence)return;if(!data)throw new Error(&#x27;Respuesta vacía.&#x27;);eiRender(data);
+async function eiLoad(p,seq){try{const key=JSON.stringify(p),cached=eiCache.get(key);let data;if(cached&amp;&amp;Date.now()-cached.at&lt;60000)data=cached.data;else{const {p_scope,...args}=p;const result=await supabaseClient.rpc(p_scope===&#x27;agent&#x27;?&#x27;echo_qa_agent_insights_v113&#x27;:&#x27;echo_qa_insights_v110&#x27;,p_scope===&#x27;agent&#x27;?{p_agent:p.p_agent}:args);if(result.error)throw result.error;data=result.data;if(data){eiCache.set(key,{at:Date.now(),data});if(eiCache.size&gt;30)eiCache.delete(eiCache.keys().next().value);}}
+if(seq!==eiSequence)return;if(!data)throw new Error(&#x27;Respuesta vacía.&#x27;);if(p.p_scope===&#x27;agent&#x27;)eiRenderAgent(data);else eiRender(data);
 }catch(error){if(seq!==eiSequence)return;eiMessage(error.code===&#x27;42501&#x27;?&#x27;Tu cuenta no tiene permiso para consultar esta operación.&#x27;:&#x27;No se pudo consultar el historial. Puedes continuar evaluando.&#x27;);document.getElementById(&#x27;eiBadge&#x27;).textContent=&#x27;Historial no disponible&#x27;;if(error.code!==&#x27;42501&#x27;){const b=document.createElement(&#x27;button&#x27;);b.type=&#x27;button&#x27;;b.className=&#x27;eiLink&#x27;;b.textContent=&#x27;Reintentar&#x27;;b.onclick=()=&gt;eiSchedule(false);document.getElementById(&#x27;eiBody&#x27;).appendChild(b);}}}
 function eiRender(d){const c=d.current,p=d.previous;const delta=c.average!=null&amp;&amp;p.average!=null?Number(c.average)-Number(p.average):null;const scope=d.scope.all_types?&#x27;Toda la queue · todos los tipos de contacto&#x27;:&#x27;Combinación exacta · &#x27;+d.scope.contact_type;
 document.getElementById(&#x27;eiBadge&#x27;).textContent=c.evaluations?c.evaluations+&#x27; evaluaciones recientes&#x27;:&#x27;Sin evaluaciones recientes&#x27;;
@@ -7318,12 +7340,29 @@ h+=&#x27;&lt;section class=&quot;eiNote&quot;&gt;&lt;h4&gt;Último registro de Q
 h+=&#x27;&lt;section&gt;&lt;h4&gt;Seguimientos abiertos de la queue&lt;/h4&gt;&lt;p class=&quot;eiMuted&quot;&gt;Incluyen todos los tipos de contacto. Se sincronizan en Feedback y habilidades.&lt;/p&gt;&#x27;+(d.queue_cases.length?d.queue_cases.map(x=&gt;&#x27;&lt;p&gt;&lt;b&gt;&#x27;+eiEsc(x.rubric_name)+&#x27;&lt;/b&gt; · &#x27;+eiEsc(x.status===&#x27;open&#x27;?&#x27;Abierto&#x27;:&#x27;En seguimiento&#x27;)+&#x27;&lt;/p&gt;&#x27;).join(&#x27;&#x27;):&#x27;&lt;p&gt;Sin casos abiertos registrados.&lt;/p&gt;&#x27;)+&#x27;&lt;/section&gt;&#x27;;
 if(d.missing_contact_type)h+=&#x27;&lt;p class=&quot;eiMuted&quot;&gt;&#x27;+d.missing_contact_type+&#x27; evaluaciones de la queue no tienen tipo de contacto en las últimas ocho semanas; no se atribuyen al tipo seleccionado.&lt;/p&gt;&#x27;;
 h+=&#x27;&lt;div class=&quot;eiFooter&quot;&gt;&lt;span&gt;Los insights no modifican la calificación.&lt;/span&gt;&lt;button type=&quot;button&quot; class=&quot;eiLink&quot; id=&quot;eiWiden&quot;&gt;&#x27;+(d.scope.all_types?&#x27;Volver al tipo seleccionado&#x27;:&#x27;Ampliar a toda la queue&#x27;)+&#x27;&lt;/button&gt;&lt;/div&gt;&#x27;;
-document.getElementById(&#x27;eiBody&#x27;).innerHTML=h;document.getElementById(&#x27;eiWiden&#x27;).onclick=()=&gt;{eiAllTypes=!eiAllTypes;const seq=++eiSequence;eiMessage(&#x27;Consultando…&#x27;);eiLoad(eiSelection(),seq);};if(typeof notifyParentHeight===&#x27;function&#x27;)notifyParentHeight();}
-for(const id of [&#x27;agentName&#x27;,&#x27;Campaign&#x27;,&#x27;LOB&#x27;,&#x27;Queue&#x27;,&#x27;contactType&#x27;])document.getElementById(id).addEventListener(&#x27;change&#x27;,()=&gt;eiSchedule());
-document.getElementById(&#x27;FORM_ID&#x27;).addEventListener(&#x27;reset&#x27;,()=&gt;{eiCache.clear();setTimeout(()=&gt;eiSchedule(),0);});
+document.getElementById(&#x27;eiBody&#x27;).innerHTML=h;document.getElementById(&#x27;eiWiden&#x27;).onclick=()=&gt;{document.getElementById(&#x27;eiScopeSelect&#x27;).value=d.scope.all_types?&#x27;contact&#x27;:&#x27;operation&#x27;;eiSchedule(false);};if(typeof notifyParentHeight===&#x27;function&#x27;)notifyParentHeight();}
+document.getElementById(&#x27;agentName&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{document.getElementById(&#x27;eiScopeSelect&#x27;).value=&#x27;agent&#x27;;eaPopulate();document.getElementById(&#x27;eiPanel&#x27;).open=true;eiSchedule();});
+for(const id of [&#x27;Campaign&#x27;,&#x27;LOB&#x27;,&#x27;Queue&#x27;,&#x27;contactType&#x27;,&#x27;eiScopeSelect&#x27;])document.getElementById(id).addEventListener(&#x27;change&#x27;,()=&gt;eiSchedule());
+document.getElementById(&#x27;FORM_ID&#x27;).addEventListener(&#x27;reset&#x27;,()=&gt;{eiCache.clear();document.getElementById(&#x27;eaNotice&#x27;).textContent=&#x27;&#x27;;setTimeout(()=&gt;eiSchedule(),0);});
 document.getElementById(&#x27;eiPanel&#x27;).addEventListener(&#x27;toggle&#x27;,()=&gt;{if(typeof notifyParentHeight===&#x27;function&#x27;)notifyParentHeight();});
 // Nunca reutilizar historial después de un cambio/renovación de contexto de sesión.
-window.addEventListener(&#x27;message&#x27;,event=&gt;{if(event.source!==window.parent)return;if(![&#x27;echoEvaluator&#x27;,&#x27;echoEvaluatorSession&#x27;].includes(event.data?.type))return;eiCache.clear();clearTimeout(eiTimer);++eiSequence;eiAllTypes=false;document.getElementById(&#x27;eiPanel&#x27;).open=false;eiMessage(&#x27;Selecciona agente, campaña, LOB, queue y tipo de contacto para consultar su historial.&#x27;);});
+window.addEventListener(&#x27;message&#x27;,event=&gt;{if(event.source!==window.parent)return;if(![&#x27;echoEvaluator&#x27;,&#x27;echoEvaluatorSession&#x27;].includes(event.data?.type))return;eiCache.clear();clearTimeout(eiTimer);++eiSequence;eiAllTypes=false;document.getElementById(&#x27;eiPanel&#x27;).open=false;eiMessage(&#x27;Selecciona un agente. Para acotar el historial, completa la operación y el tipo de contacto según el alcance elegido.&#x27;);});
+
+function eiRenderAgent(d){
+ const ops=d.operations||[];
+ document.getElementById(&#x27;eiBadge&#x27;).textContent=ops.length+(ops.length===1?&#x27; operación con historial&#x27;:&#x27; operaciones con historial&#x27;);
+ document.getElementById(&#x27;eiBody&#x27;).innerHTML=&#x27;&lt;p class=&quot;eiScope&quot;&gt;Agente completo · todos los tipos de contacto · operaciones que puedes consultar&lt;/p&gt;&lt;p&gt;Últimas 4 semanas frente a las 4 anteriores. Resultados separados por operación.&lt;/p&gt;&#x27;+(ops.length?ops.map(x=&gt;{const c=x.current,p=x.previous;const delta=c.average!=null&amp;&amp;p.average!=null?Number(c.average)-Number(p.average):null;return &#x27;&lt;section class=&quot;eiNote&quot;&gt;&lt;h4&gt;&#x27;+eiEsc([x.scope.campaign,x.scope.lob,x.scope.queue].join(&#x27; / &#x27;))+&#x27;&lt;/h4&gt;&lt;div class=&quot;eiMetrics&quot;&gt;&lt;div&gt;&lt;span&gt;Score · últimas 4 semanas&lt;/span&gt;&lt;strong&gt;&#x27;+(c.average==null?&#x27;—&#x27;:eiEsc(c.average)+&#x27;%&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+c.evaluations+&#x27; evaluaciones · &#x27;+c.scored+&#x27; con score&lt;/small&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;Frente a 4 semanas previas&lt;/span&gt;&lt;strong&gt;&#x27;+(delta==null?&#x27;Sin comparación&#x27;:(delta&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+delta.toFixed(1)+&#x27; pp&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+p.evaluations+&#x27; evaluaciones previas&lt;/small&gt;&lt;/div&gt;&lt;/div&gt;&#x27;+(c.evaluations&lt;5?&#x27;&lt;p class=&quot;eiNotice&quot;&gt;Poca evidencia reciente para interpretar la tendencia.&lt;/p&gt;&#x27;:&#x27;&#x27;)+&#x27;&lt;h4&gt;Rubros con mayor tasa de falla&lt;/h4&gt;&#x27;+(x.top_failures.length?x.top_failures.map(r=&gt;&#x27;&lt;p&gt;&#x27;+eiEsc(r.rubric_name)+&#x27; · &#x27;+r.failures+&#x27;/&#x27;+r.opportunities+&#x27; · &#x27;+eiEsc(r.failure_rate)+&#x27;%&lt;/p&gt;&#x27;).join(&#x27;&#x27;):&#x27;&lt;p&gt;Sin fallas confirmadas en el periodo actual.&lt;/p&gt;&#x27;)+&#x27;&lt;h4&gt;Reincidencia&lt;/h4&gt;&#x27;+(x.streaks.length?x.streaks.map(r=&gt;&#x27;&lt;p&gt;&#x27;+eiEsc(r.rubric_name)+&#x27; · &#x27;+r.weeks+&#x27; semanas · última &#x27;+eiEsc(r.last_week)+&#x27;&lt;/p&gt;&#x27;).join(&#x27;&#x27;):&#x27;&lt;p&gt;Sin rachas registradas de dos o más semanas.&lt;/p&gt;&#x27;)+&#x27;&lt;h4&gt;Último registro de QA&lt;/h4&gt;&#x27;+(x.last_feedback?&#x27;&lt;p&gt;&#x27;+eiEsc(x.last_feedback.observation)+&#x27;&lt;/p&gt;&lt;p&gt;Acción: &#x27;+eiEsc(x.last_feedback.action)+&#x27;&lt;/p&gt;&#x27;:&#x27;&lt;p&gt;Sin feedback registrado.&lt;/p&gt;&#x27;)+&#x27;&lt;p&gt;&#x27;+x.queue_cases.length+&#x27; seguimientos abiertos · &#x27;+eiEsc(x.current_from)+&#x27; a &#x27;+eiEsc(x.today)+&#x27;&lt;/p&gt;&lt;/section&gt;&#x27;;}).join(&#x27;&#x27;):&#x27;&lt;p&gt;Sin evaluaciones en las últimas ocho semanas dentro de tu alcance de consulta.&lt;/p&gt;&#x27;);
+ if(typeof notifyParentHeight===&#x27;function&#x27;)notifyParentHeight();
+}
+function eaSet(id,value){const s=document.getElementById(id),key=normalizeKey(value);const matches=[...s.options].filter(o=&gt;o.value&amp;&amp;normalizeKey(o.value)===key);s.value=matches.length===1?matches[0].value:&#x27;&#x27;;return Boolean(s.value);}
+function eaPopulate(){
+ const a=document.getElementById(&#x27;agentName&#x27;).selectedOptions[0]?.dataset||{};
+ clearDynamicRubric();eaSet(&#x27;Campaign&#x27;,a.campaign);updateLOBOptions();eaSet(&#x27;LOB&#x27;,a.lob);updateQueueOptions();eaSet(&#x27;Queue&#x27;,a.queue);updateContactTypeOptions();
+ const complete=[&#x27;Campaign&#x27;,&#x27;LOB&#x27;,&#x27;Queue&#x27;].every(id=&gt;document.getElementById(id).value);
+ document.getElementById(&#x27;eaNotice&#x27;).textContent=!a.agentId?&#x27;&#x27;:complete?&#x27;Operación sugerida con la asignación consultada en Supabase. Puedes cambiarla para esta evaluación.&#x27;:&#x27;Asignación consultada en Supabase: &#x27;+[a.campaign,a.lob,a.queue].filter(Boolean).join(&#x27; / &#x27;)+&#x27;. Completa los campos pendientes: la asignación no coincide con una única opción de evaluación. Puedes cambiar la operación.&#x27;;
+ if(complete)loadRubricFromSupabase();
+}
+
 &lt;/script&gt;&lt;/body&gt;
 &lt;/html&gt;" id="qaFormIframe" onload="window.sendEvaluatorToForm &amp;&amp; window.sendEvaluatorToForm();" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:760px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Herramienta de QA"></iframe>
 </div>
@@ -9210,7 +9249,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.12";
+const ECHO_APP_VERSION = "1.0.13";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -10403,7 +10442,7 @@ window.addEventListener('resize', () => {
 /* ECHO 1.0.9 — módulo aditivo; RPC autenticadas y permisos en servidor. */
 let eqData={rows:[],cases:[]}, eqSelected=null, eqHistory=[], eqRequest=null;
 function eqAllowed(){return !isClientUser && currentEmployee && String(currentEmployee.status||'').trim().toLowerCase()==='active' && ['qa_analyst','qa_jr_manager','qa_manager'].includes(String(currentEmployee.system_role||'').trim().toLowerCase());}
-function eqCanRead(){return eqAllowed() || (!isClientUser && ["arturo.quezada@evolvecx.io", "paola.eyssautier@evolvecx.io", "diana.sanchez@evolvecx.io", "daniela.copca@evolvecx.io", "luz.gonzalez@evolvecx.io", "gilberto.garcia@evolvecx.io", "m.mora@evolvecx.io"].includes(String(currentUser?.email||'').trim().toLowerCase()));}
+function eqCanRead(){return eqAllowed() || (!isClientUser && ["arturo.quezada@evolvecx.io", "paola.eyssautier@evolvecx.io", "diana.sanchez@evolvecx.io", "daniela.copca@evolvecx.io", "luz.gonzalez@evolvecx.io", "gilberto.garcia@evolvecx.io", "m.mora@evolvecx.io", "mariana.martinez@evolvecx.io", "jimena.cartagena@evolvecx.io"].includes(String(currentUser?.email||'').trim().toLowerCase()));}
 function eqAccess(){document.getElementById('navQaFollowup')?.classList.toggle('hidden-by-permission',!eqCanRead());}
 async function eqRpc(name,args={}){const {data,error}=await sb.rpc(name,args);if(error)throw new Error(error.message);return data;}
 function eqKey(r){return JSON.stringify([r.agent_identifier,r.campaign_key,r.lob_key,r.queue_key,r.rubric_item_id]);}
