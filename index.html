@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.17" name="echo-version"/>
+<meta content="1.0.19" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -761,7 +761,7 @@ body.sidebar-collapsed .logout-btn {
 </div>
 </div>
 <!-- PAGE: MIS EVALUACIONES (AGENT ONLY) -->
-<div class="page" id="page-qa-followup"><div class="eqWrap"><h2>Feedback y habilidades QA</h2><p>Detecta brechas, documenta intervenciones y revisa la evidencia de mejora.</p><div class="eqToolbar"><label class="eqAgentField" for="eqAgentSelect">Agente<select id="eqAgentSelect" onchange="eqLoadAgent()" aria-describedby="eqAgentHint"><option value="">Selecciona un agente</option></select></label><button id="eqRefresh" onclick="eqLoad()">Actualizar</button></div><p id="eqAgentHint">Selecciona nombre + ID. La lista incluye agentes con evaluaciones en las últimas 12 semanas o casos registrados dentro de tu acceso. El mapa se carga al seleccionar a uno.</p><details class="eqHelp"><summary>¿Para qué sirve y cómo lo uso?</summary><p>Este módulo ayuda a QA a detectar fallas por rubro, registrar el feedback trabajado con el agente y comprobar si la conducta mejora en evaluaciones posteriores.</p><ol><li>Selecciona al agente y abre la queue que quieras revisar: verás scores semanales, recomendaciones y mapa de habilidades. Por ejemplo, 2/8 significa dos fallas en ocho oportunidades evaluadas.</li><li>Abre «Ver / feedback», elige la evaluación que sustenta el registro y documenta el hallazgo, la acción esperada y la próxima revisión. Puedes registrar feedback sin esperar tres semanas.</li><li>Si el mismo agente falla en el mismo rubro y operación durante tres semanas calendario consecutivas, QA genera o actualiza los casos de ese agente al seleccionarlo o actualizarlo. Los agentes que no se consulten no se revisan automáticamente en esta pantalla. Una semana sin evidencia no cuenta como una semana de falla.</li><li>Registra avances y cierra con evidencia: se exige una intervención previa y una evaluación aprobada de un día posterior, sin fallas posteriores en ese rubro.</li></ol><p>El mapa acumula 12 semanas y muestra las cuatro más recientes en columnas. La tendencia compara las dos semanas más recientes con las dos anteriores: si sube la tasa de falla, hay deterioro. Bonos, respuestas No aplica y respuestas por validar no cuentan en la tasa.</p><p>QA registra y cierra seguimientos. Las cuentas de consulta solo revisan la información. La fecha de próxima revisión queda registrada; este módulo no envía recordatorios automáticos ni cambia la calificación original.</p></details><p id="eqStatus" role="status"></p><h3>Mapa de habilidades</h3><details style="margin:12px 0;color:#607087;font-size:14px"><summary style="cursor:pointer">Cómo leer el mapa</summary><p>Cada celda muestra fallas sobre oportunidades evaluadas. Una tendencia positiva significa mayor tasa de falla. Sin evidencia no equivale a mejora. El acumulado cubre 12 semanas; la tendencia compara las últimas dos con las dos anteriores.</p></details><div id="eqMap"></div><h3>Seguimiento por tres semanas consecutivas</h3><div id="eqCases"></div><section id="eqDetail">Selecciona un rubro o caso.</section></div></div>
+<div class="page" id="page-qa-followup"><div class="eqWrap"><h2>Feedback y habilidades QA</h2><p>Detecta brechas, documenta intervenciones y revisa la evidencia de mejora.</p><div class="eqToolbar"><label class="eqAgentField" for="eqAgentSelect">Agente<select id="eqAgentSelect" onchange="eqLoadAgent()" aria-describedby="eqAgentHint"><option value="">Selecciona un agente</option></select></label><button id="eqRefresh" onclick="eqLoad()">Actualizar</button></div><p id="eqAgentHint">Selecciona nombre + ID. La lista incluye agentes con evaluaciones creadas o interacciones en las últimas 12 semanas, o casos registrados dentro de tu acceso. El mapa se carga al seleccionar a uno.</p><details class="eqHelp"><summary>¿Para qué sirve y cómo lo uso?</summary><p>Este módulo ayuda a QA a detectar fallas por rubro, registrar el feedback trabajado con el agente y comprobar si la conducta mejora en evaluaciones posteriores.</p><ol><li>Selecciona al agente y abre la queue que quieras revisar: verás scores semanales por creación, desempeño por contact type, recomendaciones y mapa de habilidades. Por ejemplo, 2/8 significa dos fallas en ocho oportunidades evaluadas.</li><li>Abre «Ver / feedback», elige la evaluación que sustenta el registro y documenta el hallazgo, la acción esperada y la próxima revisión. Puedes registrar feedback sin esperar tres semanas.</li><li>Si el mismo agente falla en el mismo rubro y operación durante tres semanas calendario consecutivas, QA genera o actualiza los casos de ese agente al seleccionarlo o actualizarlo. Los agentes que no se consulten no se revisan automáticamente en esta pantalla. Una semana sin evidencia no cuenta como una semana de falla.</li><li>Registra avances y cierra con evidencia: se exige una intervención previa y una evaluación aprobada de un día posterior, sin fallas posteriores en ese rubro.</li></ol><p>El mapa acumula 12 semanas y muestra las cuatro más recientes en columnas. La tendencia compara las dos semanas más recientes con las dos anteriores: si sube la tasa de falla, hay deterioro. Bonos, respuestas No aplica y respuestas por validar no cuentan en la tasa.</p><p>QA registra y cierra seguimientos. Las cuentas de consulta solo revisan la información. La fecha de próxima revisión queda registrada; este módulo no envía recordatorios automáticos ni cambia la calificación original.</p></details><p id="eqStatus" role="status"></p><h3>Mapa de habilidades</h3><details style="margin:12px 0;color:#607087;font-size:14px"><summary style="cursor:pointer">Cómo leer el mapa</summary><p>Cada celda muestra fallas sobre oportunidades evaluadas. Una tendencia positiva significa mayor tasa de falla. Sin evidencia no equivale a mejora. El acumulado cubre 12 semanas; la tendencia compara las últimas dos con las dos anteriores.</p></details><div id="eqMap"></div><h3>Seguimiento por tres semanas consecutivas</h3><div id="eqCases"></div><section id="eqDetail">Selecciona un rubro o caso.</section></div></div>
 <div class="page" id="page-mis-evaluaciones">
 <iframe id="qaAgentIframe" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-modals" title="Mis evaluaciones de QA"></iframe>
 </div>
@@ -4250,11 +4250,19 @@ async function submitCorrection() {
   const row = currentEvalForCorrection;
   if (!row) return;
 
-  // Evaluator comes automatically from the evaluation — no need to ask
-  const reqBy = row.evaluator_name || &quot;Sin evaluador&quot;;
+  if (btn.disabled) return;
 
   btn.disabled = true;
   btn.textContent = &quot;Enviando...&quot;;
+
+  try {
+    const { data, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) throw sessionError;
+    const session = data?.session;
+    const reqBy = String(session?.user?.email || &quot;&quot;).toLowerCase();
+    if (!session?.access_token || !reqBy) {
+      throw new Error(&quot;Tu sesión no está disponible. Vuelve a iniciar sesión en Echo antes de enviar la corrección.&quot;);
+    }
 
   // Build rubric responses JSON if score correction
   let newRubricResponses = null;
@@ -4283,15 +4291,16 @@ async function submitCorrection() {
     new_agent_name           : type === &quot;Cambio de agente&quot; ? (document.getElementById(&quot;corrNewAgentName&quot;)?.value?.trim() || null) : null,
     new_agent_identifier     : type === &quot;Cambio de agente&quot; ? (document.getElementById(&quot;corrNewAgentId&quot;)?.value?.trim() || null) : null,
     new_queue_key            : type === &quot;Cambio de queue&quot;  ? (document.getElementById(&quot;corrNewQueue&quot;)?.value || null) : null,
-    new_score_raw            : type === &quot;Corrección de score&quot; ? (parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value) || null) : null,
-    new_score_final          : type === &quot;Corrección de score&quot; ? (parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value) || null) : null,
+    new_score_raw            : type === &quot;Corrección de score&quot; ? (Number.isFinite(parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value)) ? parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value) : null) : null,
+    new_score_final          : type === &quot;Corrección de score&quot; ? (Number.isFinite(parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value)) ? parseFloat(document.getElementById(&quot;corrNewScore&quot;)?.value) : null) : null,
     new_rubric_responses     : newRubricResponses,
     correction_reason        : reason,
-    corrected_by             : reqBy,
+    corrected_by             : null,
+    resolved_by              : null,
+    resolved_at              : null,
     evaluator_name           : row.evaluator_name || null
   };
 
-  try {
     const { error } = await supabaseClient.from(&quot;qa_evaluation_corrections&quot;).insert([payload]);
     if (error) throw error;
 
@@ -9250,7 +9259,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.17";
+const ECHO_APP_VERSION = "1.0.19";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -10460,7 +10469,7 @@ async function eqLoad(){
  const seq=++eqLoadSequence,select=document.getElementById('eqAgentSelect'),previous=select.value;
  eqBusy(true);eqClearAgent('Cargando lista de agentes…');eqMessage('Cargando catálogo de agentes…');
  try{
-  const catalog=await eqRpc('echo_qa_agent_catalog_v116');if(seq!==eqLoadSequence)return;
+  const catalog=await eqRpc('echo_qa_agent_catalog_v118');if(seq!==eqLoadSequence)return;
   select.replaceChildren(new Option('Selecciona un agente',''));
   for(const a of catalog.agents||[])select.add(new Option(a.agent_name+' · '+a.agent_identifier,a.agent_identifier));
   if([...select.options].some(o=>o.value===previous))select.value=previous;
@@ -10477,7 +10486,7 @@ async function eqLoadAgent(){
  if(!agent){eqMessage('Selecciona un agente.');eqBusy(false);return;}
  eqBusy(true);eqMessage('Consultando únicamente al agente '+agent+'…');
  try{
-  const data=await eqRpc('echo_qa_agent_dashboard_v117',{p_agent:agent});if(seq!==eqLoadSequence)return;
+  const data=await eqRpc('echo_qa_agent_dashboard_v118',{p_agent:agent});if(seq!==eqLoadSequence)return;
   eqData=data;eqRender();eqMessage('Agente '+agent+' · 12 semanas · '+data.from+' a '+data.today+' · CDMX. '+(eqAllowed()?'Casos del agente actualizados.':'Acceso de consulta; QA actualiza los casos.')+' Bonos excluidos del mapa de fallas; score final según la evaluación.');
  }catch(e){if(seq!==eqLoadSequence)return;eqClearAgent('No se pudo cargar la evidencia. Pulsa Actualizar para reintentar.');eqMessage('No se pudo cargar al agente '+agent+': '+e.message);}
  finally{if(seq===eqLoadSequence)eqBusy(false);}
@@ -10490,6 +10499,17 @@ function eqRecommend(groups,current){
  if(!ranked.length){const m=eqMetrics(groups.flatMap(g=>g.items).filter(r=>r.week_start>=recentFrom));return '<p>'+(m.n?'Sin fallas confirmadas en las últimas cuatro semanas. Sugerencia: mantener el muestreo de estos rubros; esto no demuestra dominio con poca evidencia.':'No hay oportunidades con resultado confirmado en las últimas cuatro semanas. Sugerencia: obtener evidencia reciente antes de definir un foco de mejora.')+'</p>';}
  return ranked.map(x=>'<article class="eqSuggestion"><b>Trabajar: '+esc(x.g.rubric_name)+'</b><p>'+x.m.fail+' fallas / '+x.m.n+' oportunidades · '+(100*x.m.fail/x.m.n).toFixed(1)+'% en las últimas cuatro semanas.'+(x.recurrence?' Presenta fallas en tres semanas consecutivas.':'')+(x.m.n<5?' Poca evidencia: validar el patrón antes de concluir.':'')+'</p><p><b>Acción sugerida:</b> revisar una evaluación reciente con falla en este rubro, acordar la conducta esperada según la rúbrica y practicar un ejemplo correcto.</p><p><b>Cómo comprobar avance:</b> revisar este rubro en las próximas tres interacciones evaluadas de esta queue. Registrar el resultado en «Ver / feedback»; esta sugerencia no crea tareas ni cierra casos.</p></article>').join('');
 }
+function eqContactTable(scope){
+ const rows=(eqData.contact_scores||[]).filter(r=>eqScopeKey(r)===eqScopeKey(scope)).sort((a,b)=>(a.average==null?Infinity:Number(a.average))-(b.average==null?Infinity:Number(b.average))||String(a.contact_type).localeCompare(String(b.contact_type),'es'));
+ const period=eqData.contact_period;
+ let h='<h4>Desempeño por tipo de contacto</h4><p>Solo esta queue · por fecha de creación (CDMX). Score promedio de las cuatro semanas calendario más recientes frente a las cuatro anteriores. La semana actual está en curso.</p>';
+ if(period)h+='<p>Actual: '+esc(period.current_from)+' a '+esc(period.current_to)+' · Anterior: '+esc(period.previous_from)+' a '+esc(period.previous_to)+'.</p>';
+ if(!rows.length)return h+'<p>Sin evaluaciones creadas para comparar tipos de contacto en estos periodos.</p>';
+ h+='<div class="eqScroll"><table><thead><tr><th>Tipo de contacto</th><th>Evaluaciones actuales</th><th>Score actual</th><th>Score anterior</th><th>Cambio de score</th><th>Evidencia</th></tr></thead><tbody>';
+ for(const r of rows){const delta=r.average!=null&&r.previous_average!=null?Number(r.average)-Number(r.previous_average):null;const score=v=>v==null?'—':Number(v).toFixed(1)+'%';h+='<tr><td>'+esc(eqLabel(r.contact_type))+'</td><td>'+Number(r.evaluations)+'<br><small>'+Number(r.scored)+' con score</small></td><td>'+score(r.average)+'</td><td>'+score(r.previous_average)+'<br><small>'+Number(r.previous_evaluations)+' evaluaciones · '+Number(r.previous_scored)+' con score</small></td><td>'+(delta==null?'Sin comparación':(delta>0?'+':'')+delta.toFixed(1)+' pp')+'</td><td>'+(Number(r.evaluations)===0?'Sin evaluaciones recientes':Number(r.scored)<5?'Poca evidencia actual':Number(r.previous_scored)<5?'Poca evidencia previa':'Revisar junto con la rúbrica')+'</td></tr>';}
+ return h+'</tbody></table></div><p>Un cambio positivo aquí significa que subió el score. Un promedio bajo con pocas evaluaciones requiere validación; no basta para concluir una brecha. Sin clasificar agrupa contact types vacíos; N/A se conserva como tipo registrado.</p>';
+}
+
 function eqRender(){
  if(!eqData.today)return;
  const current=eqWeek(eqData.today),scopeMap=new Map(),agent=document.getElementById('eqAgentSelect').value;
@@ -10501,9 +10521,9 @@ function eqRender(){
   const key=eqScopeKey(scope),rows=eqData.rows.filter(r=>eqScopeKey(r)===key),groups=eqGroups(rows).sort((a,b)=>String(a.rubric_name).localeCompare(String(b.rubric_name),'es'));
   const scores=(eqData.weekly_scores||[]).filter(r=>eqScopeKey(r)===key),scoreMap=new Map(scores.map(r=>[r.week_start,r]));
   const total=scores.reduce((n,r)=>n+Number(r.evaluations),0),openCases=eqData.cases.filter(c=>eqScopeKey(c)===key&&c.status!=='closed').length;
-  html+='<details class="eqQueue"><summary><span><b>'+esc(eqLabel(scope.queue_key))+'</b><small>'+esc(eqLabel(scope.campaign_key)+' / '+eqLabel(scope.lob_key))+'</small></span><span class="eqQueueMeta">'+total+' evaluaciones · '+openCases+' casos abiertos</span></summary><div class="eqQueueBody"><h4>Score por semana</h4><p>Promedio del score final guardado, una vez por evaluación. Semanas de lunes a domingo según fecha de interacción; la actual está en curso.</p><div class="eqWeekly">';
+  html+='<details class="eqQueue"><summary><span><b>'+esc(eqLabel(scope.queue_key))+'</b><small>'+esc(eqLabel(scope.campaign_key)+' / '+eqLabel(scope.lob_key))+'</small></span><span class="eqQueueMeta">'+total+' evaluaciones · '+openCases+' casos abiertos</span></summary><div class="eqQueueBody"><h4>Score por semana</h4><p>Promedio del score final guardado, una vez por evaluación. Semanas de lunes a domingo según fecha de creación (CDMX); la actual está en curso.</p><div class="eqWeekly">';
   for(let i=0;i<12;i++){const week=eqDay(current,-7*i),s=scoreMap.get(week);html+='<div class="eqWeekCard"><span>'+esc(week)+(i===0?' · En curso':'')+'</span><strong>'+(s&&s.average!=null?esc(Number(s.average).toFixed(1))+'%':'—')+'</strong><small>'+(s?Number(s.evaluations)+' evaluaciones · '+Number(s.scored)+' con score':'Sin evaluaciones')+'</small>'+(s&&Number(s.rubric_groups)>1?'<small>Incluye '+Number(s.rubric_groups)+' rúbricas distintas.</small>':'')+'</div>';}
-  html+='</div><h4>Qué trabajar en esta queue</h4><p>Sugerencia basada en reglas: prioriza reincidencia y después cantidad de fallas recientes. QA debe validarla con la evidencia.</p>'+eqRecommend(groups,current)+'<h4>Mapa de habilidades</h4><p>Acumulado de 12 semanas; detalle semanal de las cuatro más recientes. Una tendencia positiva indica mayor tasa de falla.</p>';
+  html+='</div>'+eqContactTable(scope)+'<h4>Qué trabajar en esta queue</h4><p>Sugerencia basada en reglas sobre fecha de interacción: prioriza reincidencia y después cantidad de fallas recientes. QA debe validarla con la evidencia.</p>'+eqRecommend(groups,current)+'<h4>Mapa de habilidades</h4><p>Por fecha de interacción: acumulado de 12 semanas; detalle semanal de las cuatro más recientes. Una tendencia positiva indica mayor tasa de falla.</p>';
   if(groups.length){html+='<div class="eqScroll"><table><thead><tr><th>Rubro</th><th>Fallas / oportunidades · 12 semanas</th><th>Cambio en tasa de falla</th>';for(let i=3;i>=0;i--)html+='<th>'+eqDay(current,-7*i)+'</th>';html+='<th>Acción</th></tr></thead><tbody>';
    for(const g of groups){const m=eqMetrics(g.items),recent=eqMetrics(g.items.filter(r=>r.week_start>=eqDay(current,-7))),prior=eqMetrics(g.items.filter(r=>r.week_start<eqDay(current,-7)&&r.week_start>=eqDay(current,-21)));const delta=recent.n&&prior.n?(recent.fail/recent.n-prior.fail/prior.n)*100:null;const trend=delta==null?'Sin comparación':(delta>0?'+':'')+delta.toFixed(1)+' pp';html+='<tr><td>'+esc(g.rubric_name)+'</td><td>'+m.fail+' / '+m.n+(m.n?' · '+(100*m.fail/m.n).toFixed(1)+'%':'')+(m.unknown?'<br><small>'+m.unknown+' por validar</small>':'')+'</td><td>'+trend+'</td>';for(let i=3;i>=0;i--){const w=eqMetrics(g.items.filter(r=>r.week_start===eqDay(current,-7*i)));html+='<td class="'+(w.fail?'eqFail':w.n?'eqPass':'eqEmpty')+'">'+(w.n?w.fail+'/'+w.n:'Sin evidencia')+'</td>';}html+='<td><button type="button" onclick="eqOpen('+index.get(eqKey(g))+')">Ver / feedback</button></td></tr>';}
    html+='</tbody></table></div>';
