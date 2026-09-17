@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.23" name="echo-version"/>
+<meta content="1.0.24" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2908,7 +2908,8 @@ body:has(#FORM_ID){padding:24px!important}#container{max-width:1580px!important;
 .studio-interaction&gt;summary{display:list-item!important;cursor:pointer;list-style:disclosure-closed!important;color:#102039;padding:0!important;background:transparent!important}.studio-interaction[open]&gt;summary{list-style:disclosure-open!important}.studio-evidence-heading{font-size:14px;font-weight:750;overflow-wrap:anywhere}.studio-evidence-meta{display:grid;gap:6px;margin-top:10px;font-size:12px;line-height:1.5;color:#52647c;font-weight:400}.studio-evidence-toggle{display:block;margin-top:12px;font-size:12px;font-weight:650;color:#145f79}.studio-interaction-body{border-top:1px solid #dbe5ed;padding-top:12px;margin-top:12px}.studio-interaction:not([open])&gt;.studio-interaction-body{display:none!important}
 
 &lt;/style&gt;
-&lt;/head&gt;
+&lt;style&gt;.ec-card124&gt;summary{cursor:pointer;list-style:disclosure-closed;padding:2px 0}.ec-card124[open]&gt;summary{list-style:disclosure-open}.ec-card124 .critical-bar,.ec-card124 .critical-bar-fill,.ec-card124 .critical-detail{display:block}.ec-card124 .critical-bar-fill{height:100%}.ec-toggle124{display:block;margin-top:12px;color:#145f79;font-size:12px;font-weight:700}.ec-rows124{display:grid;gap:12px;margin-top:16px}.ec-row124{padding:14px;border:1px solid #dbe5ed;border-radius:9px;background:white;min-width:0}.ec-meta124{font-size:12px;color:#64748b;margin:6px 0 10px}.ec-row124 .ec-link124{display:block;width:100%;box-sizing:border-box;background:#f5f8fb;color:#334155;border:1px solid #dbe5ed;border-radius:6px;padding:9px;font-size:12px}.ec-actions124{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.ec-actions124 button,.ec-actions124 a{display:inline-flex;align-items:center;justify-content:center;width:auto!important;min-height:38px;padding:8px 12px;border:1px solid #4ebfdf;border-radius:8px;background:#62d3f5;color:#102039;text-decoration:none;font-size:12px;font-weight:700;cursor:pointer}.ec-status124{display:block;font-size:12px;margin-top:6px;color:#145f79}.ec-actions124 button:focus-visible,.ec-actions124 a:focus-visible{outline:3px solid #102039;outline-offset:2px}
+&lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
 &lt;div class=&quot;app&quot;&gt;
 
@@ -4140,16 +4141,44 @@ function getCriticalShortName(label) {
   if(v.includes(&quot;seguimiento&quot;))return&quot;Falta de seguimiento&quot;;
   return label.length&gt;32?label.slice(0,32)+&quot;...&quot;:label;
 }
+let ecDetailRequest124=0;
+function ecEscape124(value){return String(value??&#x27;&#x27;).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));}
+function ecUrl124(value){try{const u=new URL(String(value||&#x27;&#x27;).trim());return [&#x27;https:&#x27;,&#x27;http:&#x27;].includes(u.protocol)?u.href:&#x27;&#x27;;}catch(_){return &#x27;&#x27;;}}
 async function loadCriticalErrors(filters) {
-  let q=echoContactFrom(&quot;qa_v_policy_flags_detail&quot;).select(&quot;*&quot;);
-  if(filters.startDate)q=q.gte(&quot;created_date_cdmx&quot;,filters.startDate);if(filters.endDate)q=q.lte(&quot;created_date_cdmx&quot;,filters.endDate);if(filters.campaign)q=q.eq(&quot;campaign_key&quot;,filters.campaign);if(filters.lob)q=q.eq(&quot;lob_key&quot;,filters.lob);q = applyQueueFilter(q, filters);q = applyAgentFilter(q, filters);q = applyEvaluatorFilter(q, filters);
-  const data=await fetchAllRows(q);
-  const grouped={};
-  (data||[]).forEach(row=&gt;{const lbl=row.policy_flag||row.display_label||row.field_key||row.policy_flag_id||&quot;Unknown&quot;;grouped[lbl]=(grouped[lbl]||0)+1;});
-  const items=Object.keys(grouped).map(l=&gt;({label:l,shortName:getCriticalShortName(l),count:grouped[l]})).sort((a,b)=&gt;b.count-a.count).slice(0,10);
-  const maxCount=items.length?Math.max(...items.map(i=&gt;i.count)):0;
-  const list=document.getElementById(&quot;criticalErrorsList&quot;);
-  list.innerHTML=items.length?items.map(item=&gt;`&lt;div class=&quot;critical-card&quot; title=&quot;${item.label}&quot;&gt;&lt;div class=&quot;critical-card-header&quot;&gt;&lt;div class=&quot;critical-title&quot;&gt;${item.shortName}&lt;/div&gt;&lt;div class=&quot;critical-count&quot;&gt;${item.count}&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;critical-bar&quot;&gt;&lt;div class=&quot;critical-bar-fill&quot; style=&quot;width:${maxCount?(item.count/maxCount)*100:0}%&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;critical-detail&quot;&gt;${item.label}&lt;/div&gt;&lt;/div&gt;`).join(&quot;&quot;):`&lt;div class=&quot;muted&quot;&gt;No hay errores críticos para estos filtros.&lt;/div&gt;`;
+  const request=++ecDetailRequest124;
+  const evaluations=new Map(allEvalData.map(r=&gt;[String(r.evaluation_id||r.id),r]));
+  let q=echoContactFrom(&quot;qa_v_policy_flags_detail&quot;).select(&quot;*&quot;).eq(&#x27;triggered&#x27;,true);
+  if(filters.startDate)q=q.gte(&quot;created_date_cdmx&quot;,filters.startDate);if(filters.endDate)q=q.lte(&quot;created_date_cdmx&quot;,filters.endDate);if(filters.campaign)q=q.eq(&quot;campaign_key&quot;,filters.campaign);if(filters.lob)q=q.eq(&quot;lob_key&quot;,filters.lob);q=applyQueueFilter(q,filters);q=applyAgentFilter(q,filters);q=applyEvaluatorFilter(q,filters);
+  const data=await fetchAllRows(q);if(request!==ecDetailRequest124)return;
+  const grouped=new Map();
+  for(const row of data||[]){
+    const id=String(row.evaluation_id||&#x27;&#x27;);if(!id||!evaluations.has(id))continue;
+    const label=row.policy_flag||row.display_label||row.field_key||row.policy_flag_id||&#x27;Sin motivo&#x27;;
+    const key=String(row.policy_flag_id||label);
+    if(!grouped.has(key))grouped.set(key,{label,rows:new Map()});
+    grouped.get(key).rows.set(id,{...row,...evaluations.get(id)});
+  }
+  const items=[...grouped.values()].sort((a,b)=&gt;b.rows.size-a.rows.size).slice(0,10);
+  const max=Math.max(1,...items.map(x=&gt;x.rows.size)),list=document.getElementById(&#x27;criticalErrorsList&#x27;);
+  list.innerHTML=items.length?items.map(item=&gt;{
+    const rows=[...item.rows.values()].sort((a,b)=&gt;String(b.interaction_date||&#x27;&#x27;).localeCompare(String(a.interaction_date||&#x27;&#x27;)));
+    return &#x27;&lt;details class=&quot;critical-card ec-card124&quot;&gt;&lt;summary&gt;&lt;span class=&quot;critical-card-header&quot;&gt;&lt;span class=&quot;critical-title&quot;&gt;&#x27;+ecEscape124(getCriticalShortName(item.label))+&#x27;&lt;/span&gt;&lt;span class=&quot;critical-count&quot;&gt;&#x27;+rows.length+&#x27; eventos&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;critical-bar&quot;&gt;&lt;span class=&quot;critical-bar-fill&quot; style=&quot;width:&#x27;+rows.length/max*100+&#x27;%&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;critical-detail&quot;&gt;&#x27;+ecEscape124(item.label)+&#x27;&lt;/span&gt;&lt;span class=&quot;ec-toggle124&quot;&gt;Ver agentes e interacciones&lt;/span&gt;&lt;/summary&gt;&lt;div class=&quot;ec-rows124&quot;&gt;&#x27;+rows.map(row=&gt;{
+      const url=ecUrl124(row.interaction_link);
+      return &#x27;&lt;article class=&quot;ec-row124&quot;&gt;&lt;strong&gt;&#x27;+ecEscape124(row.agent_name||&#x27;Agente sin nombre&#x27;)+&#x27;&lt;/strong&gt;&lt;div class=&quot;ec-meta124&quot;&gt;&#x27;+ecEscape124(row.agent_identifier||&#x27;Sin ID&#x27;)+&#x27; · Interacción: &#x27;+ecEscape124(row.interaction_date||&#x27;Sin fecha&#x27;)+&#x27;&lt;/div&gt;&#x27;+(url?&#x27;&lt;input class=&quot;ec-link124&quot; type=&quot;text&quot; readonly aria-label=&quot;Enlace de la interacción&quot; value=&quot;&#x27;+ecEscape124(url)+&#x27;&quot;&gt;&lt;div class=&quot;ec-actions124&quot;&gt;&lt;button type=&quot;button&quot; data-ec-copy&gt;Copiar enlace&lt;/button&gt;&lt;a href=&quot;&#x27;+ecEscape124(url)+&#x27;&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Abrir chat ↗&lt;/a&gt;&lt;/div&gt;&#x27;:&#x27;&lt;p class=&quot;muted&quot;&gt;Sin enlace registrado&lt;/p&gt;&#x27;)+&#x27;&lt;span class=&quot;ec-status124&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;/span&gt;&lt;/article&gt;&#x27;;
+    }).join(&#x27;&#x27;)+&#x27;&lt;/div&gt;&lt;/details&gt;&#x27;;
+  }).join(&#x27;&#x27;):&#x27;&lt;div class=&quot;muted&quot;&gt;No hay errores críticos para estos filtros.&lt;/div&gt;&#x27;;
+  list.onclick=async event=&gt;{
+    const button=event.target.closest(&#x27;[data-ec-copy]&#x27;);if(!button||!list.contains(button))return;
+    const card=button.closest(&#x27;.ec-row124&#x27;),input=card.querySelector(&#x27;input&#x27;),status=card.querySelector(&#x27;[role=&quot;status&quot;]&#x27;);
+    button.disabled=true;
+    try{
+      let copied=false;
+      try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(input.value);copied=true;}}catch(_){}
+      if(!copied){input.focus();input.select();copied=document.execCommand(&#x27;copy&#x27;);}
+      status.textContent=copied?&#x27;Enlace copiado.&#x27;:&#x27;Selecciona el enlace y usa Ctrl+C o ⌘C para copiarlo.&#x27;;
+    }catch(_){input.focus();input.select();status.textContent=&#x27;Usa Ctrl+C o ⌘C para copiar el enlace seleccionado.&#x27;;}
+    finally{button.disabled=false;}
+  };
 }
 
 /* ═══════════════════════════════════════════════
@@ -10145,7 +10174,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.23";
+const ECHO_APP_VERSION = "1.0.24";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
