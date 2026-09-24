@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.27" name="echo-version"/>
+<meta content="1.0.28" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10196,7 +10196,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.27";
+const ECHO_APP_VERSION = "1.0.28";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -11655,7 +11655,7 @@ document.getElementById('eqDetail').scrollIntoView({behavior:'smooth',block:'sta
 
 </script>
 <script>
-/* Echo 1.0.27 — administración de asignaciones. Autorización final en RPC. */
+/* Echo 1.0.28 — administración de asignaciones. Autorización final en RPC. */
 let ea126Allowed=false,ea126Catalog=null,ea126Detail=null,ea126Person=null,ea126Busy=false,ea126Serial=0,ea126Reviewed='';
 const ea126Norm=x=>String(x??'').trim().toLowerCase();
 const ea126El=id=>document.getElementById('ea126-'+id);
@@ -11676,11 +11676,14 @@ async function ea126Load(){
  catch(e){if(seq===ea126Serial)ea126El('status').textContent='No se pudo cargar. '+e.message+' Vuelve a abrir esta sección para reintentar.';}
 }
 function ea126People(){if(!ea126Catalog)return;const q=ea126Norm(ea126El('search').value),id=ea126Person?.id;const list=ea126Catalog.people.filter(p=>p.id===id||ea126Norm(p.name+' '+p.id+' '+p.email).includes(q));ea126El('person').innerHTML='<option value="">Selecciona una persona</option>'+list.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name+' · '+p.id)+'</option>').join('');if(id)ea126El('person').value=id;}
-function ea127IsAdmin(o){return ea126Norm(o?.campaign)==='admin';}
+function ea128IsHiddenOperation(o){
+ const campaign=ea126Norm(o?.campaign),lob=ea126Norm(o?.lob);
+ return campaign==='admin'||(campaign==='aplazo'&&lob==='marketing')||(campaign==='stori'&&lob==='luna');
+}
 function ea126Selected(){
  const selected=[...ea126El('operations').querySelectorAll('input:checked')].map(x=>x.value);
- // Conserva asignaciones administrativas ocultas; nunca se agregan desde el selector.
- const retained=(ea126Detail?.assignments||[]).filter(a=>a.is_active&&ea126Catalog?.operations.some(o=>o.id===a.operational_structure_id&&ea127IsAdmin(o))).map(a=>a.operational_structure_id);
+ // Conserva asignaciones de operaciones ocultas; nunca se agregan desde el selector.
+ const retained=(ea126Detail?.assignments||[]).filter(a=>a.is_active&&ea126Catalog?.operations.some(o=>o.id===a.operational_structure_id&&ea128IsHiddenOperation(o))).map(a=>a.operational_structure_id);
  return [...new Set([...selected,...retained])].sort();
 }
 function ea126Original(){return (ea126Detail?.assignments||[]).filter(a=>a.is_active).map(a=>a.operational_structure_id).sort();}
@@ -11698,7 +11701,7 @@ async function ea126Choose(force=false){
 }
 function ea126Render(){
  const p=ea126Person;ea126El('person-info').innerHTML='<div class="ea126-notice"><b>'+esc(p.name)+'</b><br>'+esc(p.email)+'<br>'+esc(p.role)+'</div>';
- const original=ea126Original(),groups=new Map();for(const o of ea126Catalog.operations.filter(o=>!ea127IsAdmin(o))){const k=[o.campaign,o.lob].join(' / ');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);}
+ const original=ea126Original(),groups=new Map();for(const o of ea126Catalog.operations.filter(o=>!ea128IsHiddenOperation(o))){const k=[o.campaign,o.lob].join(' / ');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);}
  ea126El('operations').innerHTML=[...groups].map(([k,ops])=>'<details'+(ops.some(o=>original.includes(o.id))?' open':'')+'><summary>'+esc(k)+'</summary>'+ops.map(o=>'<label class="ea126-choice"><input type="checkbox" value="'+esc(o.id)+'" '+(original.includes(o.id)?'checked ':'')+'onchange="ea126Preview()"><span>'+esc(o.queue||'Sin queue')+'</span><small>'+ea126Visible([o.id]).length+' agentes</small></label>').join('')+'</details>').join('');
  const unmatched=ea126Detail.assignments.filter(a=>a.is_active&&!ea126Catalog.operations.some(o=>o.id===a.operational_structure_id));
  if(unmatched.length)ea126El('operations').insertAdjacentHTML('afterbegin','<div class="ea126-notice ea126-warn">Hay asignaciones sin catálogo activo: '+unmatched.map(a=>esc([a.campaign_key,a.lob_key,a.queue_key].join(' / '))).join(', ')+'. Recarga el catálogo o revisa estas asignaciones antes de guardar.</div>');
@@ -11708,7 +11711,7 @@ function ea126Render(){
 function ea126Invalidate(){ea126Reviewed='';ea126El('confirm').hidden=true;}
 function ea126Preview(){
  ea126Invalidate();if(!ea126Detail)return;
- const ops=ea126Catalog.operations;const visible=id=>!ops.some(o=>o.id===id&&ea127IsAdmin(o));
+ const ops=ea126Catalog.operations;const visible=id=>!ops.some(o=>o.id===id&&ea128IsHiddenOperation(o));
  const ids=ea126Selected().filter(visible),before=ea126Original().filter(visible);
  const labels=arr=>arr.map(id=>{const o=ops.find(o=>o.id===id);return o?ea126Label(o):'Asignación sin catálogo activo';});
  const add=labels(ids.filter(id=>!before.includes(id))),remove=labels(before.filter(id=>!ids.includes(id)));
