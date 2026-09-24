@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.29" name="echo-version"/>
+<meta content="1.0.30" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6943,8 +6943,8 @@ body:has(#FORM_ID){padding:24px!important}#container{max-width:1580px!important;
 &lt;h2&gt;Nueva evaluación&lt;/h2&gt;
 &lt;p class=&quot;subtitle&quot;&gt;Revisa la interacción, evalúa los rubros y documenta la evidencia.&lt;/p&gt;
 &lt;!----------------------- Formlario de calidad de Evolve CX --------------------------&gt;
-&lt;form id=&quot;FORM_ID&quot;&gt;&lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;01&lt;/span&gt;&lt;h3&gt;Contexto de la interacción&lt;/h3&gt;&lt;/div&gt;&lt;div class=&quot;efGrid&quot;&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;agentName&quot;&gt;Agente&lt;/label&gt;&lt;select id=&quot;agentName&quot; name=&quot;Agent&quot; required=&quot;&quot;&gt;
-&lt;option value=&quot;&quot;&gt;Agent Name&lt;/option&gt;
+&lt;form id=&quot;FORM_ID&quot;&gt;&lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;01&lt;/span&gt;&lt;h3&gt;Contexto de la interacción&lt;/h3&gt;&lt;/div&gt;&lt;div class=&quot;efGrid&quot;&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;agentName&quot;&gt;Persona a evaluar&lt;/label&gt;&lt;select id=&quot;agentName&quot; name=&quot;Agent&quot; required=&quot;&quot;&gt;
+&lt;option value=&quot;&quot;&gt;Selecciona agente, elite o supervisor&lt;/option&gt;
 &lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;Campaign&quot;&gt;Campaña&lt;/label&gt;&lt;select id=&quot;Campaign&quot; name=&quot;Campaign&quot; onchange=&quot;updateLOBOptions(); updateQueueOptions(); updateContactTypeOptions(); clearDynamicRubric();&quot; required=&quot;&quot;&gt;
 &lt;option value=&quot;&quot;&gt;Selecciona la campaña&lt;/option&gt;
 &lt;option value=&quot;Aplazo&quot;&gt;Aplazo&lt;/option&gt;
@@ -7120,12 +7120,12 @@ async function loadAgentNamesFromSupabase() {
         a.name.localeCompare(b.name, &quot;es&quot;, { sensitivity: &quot;base&quot; })
       );
 
-    select.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;Agent Name&lt;/option&gt;&#x27;;
+    select.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;Selecciona agente, elite o supervisor&lt;/option&gt;&#x27;;
 
     agents.forEach(agent =&gt; {
       const option = document.createElement(&quot;option&quot;);
       option.value = agent.name;
-      option.textContent = agent.name;
+      option.textContent = agent.name + &#x27; · &#x27; + agent.id + ([&#x27;CX00323&#x27;,&#x27;CX00324&#x27;].includes(agent.id) ? &#x27; · Elite&#x27; : normalizeText(agent.role)===&#x27;supervisor&#x27; ? &#x27; · Supervisor&#x27; : &#x27;&#x27;);
       option.dataset.agentId = agent.id;
       option.dataset.campaign = agent.campaign;
       option.dataset.lob = agent.lob;
@@ -10148,10 +10148,10 @@ function exportFQCSV() {
  <div class="ea126-heading"><div><small>CONFIGURACIÓN · ECHO</small><h1>Administrar accesos</h1><p>Define qué operaciones puede evaluar cada persona.</p></div><span class="ea126-pill">Solo administradores</span></div>
  <p id="ea126-status" role="status" aria-live="polite"></p>
  <div class="ea126-layout">
- <section class="ea126-card"><h2>1. Elige a la persona</h2><label for="ea126-search">Buscar por nombre, ID o correo</label><input id="ea126-search" type="search" placeholder="Ej. Gabriela o CX00326" oninput="ea126People()"><label for="ea126-person">Persona</label><select id="ea126-person" onchange="ea126Choose()"><option value="">Selecciona una persona</option></select><p class="ea126-muted">Personal interno activo. Los permisos especiales de las tres cuentas administradoras y los clientes externos se conservan fuera de este editor.</p><div id="ea126-person-info"></div></section>
- <section class="ea126-card"><h2>2. Selecciona las operaciones</h2><p class="ea126-muted">Cada queue da acceso a sus agentes activos, aunque reporten a otro supervisor. Esta pantalla administra asignaciones operativas; no cambia roles ni permisos especiales de otros módulos.</p><div id="ea126-operations">Primero selecciona una persona.</div></section>
- <section class="ea126-card ea126-wide"><h2>Acceso a Feedback y habilidades QA</h2><p class="ea126-muted">Este permiso se guarda por separado de las operaciones. Habilitar la consulta no convierte a la persona en QA: registrar acciones sigue reservado a QA dentro de su alcance autorizado.</p><label for="ef129-mode">Permiso del módulo</label><select id="ef129-mode" disabled onchange="ef129Change()"><option value="none">Sin acceso</option></select><p id="ef129-hint" class="ea126-notice">Selecciona una persona para consultar su permiso.</p><label for="ef129-reason">Motivo del cambio de permiso</label><textarea id="ef129-reason" rows="2" maxlength="1000" placeholder="Ej. Seguimiento de calidad de su operación" oninput="ef129Change()"></textarea><div class="ea126-actions"><button id="ef129-save" type="button" onclick="ef129Save()" disabled>Guardar permiso de Feedback</button><button type="button" class="ea126-secondary" onclick="ef129LoadDetail()">Recargar permiso</button></div><p id="ef129-status" role="status" aria-live="polite">Selecciona una persona.</p><details><summary>Historial del permiso</summary><div id="ef129-history"></div></details></section><section class="ea126-card ea126-wide"><h2>3. Revisa y guarda</h2><div id="ea126-preview">Aquí verás el alcance y los cambios antes de guardarlos.</div><label for="ea126-reason">Motivo del cambio</label><textarea id="ea126-reason" maxlength="1000" rows="2" placeholder="Ej. Cubrir evaluaciones de RACE" oninput="ea126Invalidate()"></textarea><div class="ea126-actions"><button type="button" id="ea126-review" onclick="ea126Review()" disabled>Revisar cambios</button><button type="button" id="ea126-reload" class="ea126-secondary" onclick="ea126Reload()" disabled>Descartar y recargar</button></div><div id="ea126-confirm" hidden><p>Confirma que estas operaciones corresponden a la persona seleccionada.</p><button type="button" id="ea126-save" onclick="ea126Save()">Confirmar y guardar</button></div></section>
- <section class="ea126-card"><h2>¿Por qué no aparece un agente?</h2><p class="ea126-muted">Diagnóstico del formulario con los accesos guardados. No incluye cambios pendientes.</p><label for="ea126-agent">Agente</label><select id="ea126-agent" onchange="ea126Diagnose()"><option value="">Selecciona un agente</option></select><div id="ea126-diagnosis" role="status"></div></section>
+ <section class="ea126-card"><h2>1. Elige a la persona</h2><label for="ea126-search">Buscar por nombre, ID o correo</label><input id="ea126-search" type="search" placeholder="Ej. Gabriela o CX00326" oninput="ea126People()"><label for="ea126-person">Persona</label><select id="ea126-person" onchange="ea126Choose()"><option value="">Selecciona una persona</option></select><p class="ea126-muted">Personal interno y clientes activos de Echo. Cada cliente permanece limitado a su campaña.</p><div id="ea126-person-info"></div></section>
+ <section class="ea126-card" id="es130-operations-card"><h2>2. Selecciona las operaciones</h2><p class="ea126-muted">Cada queue da acceso a sus agentes activos, aunque reporten a otro supervisor. Esta pantalla administra asignaciones operativas; no cambia roles ni permisos especiales de otros módulos.</p><div id="ea126-operations">Primero selecciona una persona.</div></section>
+ <section class="ea126-card ea126-wide" id="es130-feedback-card"><h2>Acceso a Feedback y habilidades QA</h2><p class="ea126-muted">Este permiso se guarda por separado de las operaciones. Habilitar la consulta no convierte a la persona en QA: registrar acciones sigue reservado a QA dentro de su alcance autorizado.</p><label for="ef129-mode">Permiso del módulo</label><select id="ef129-mode" disabled onchange="ef129Change()"><option value="none">Sin acceso</option></select><p id="ef129-hint" class="ea126-notice">Selecciona una persona para consultar su permiso.</p><label for="ef129-reason">Motivo del cambio de permiso</label><textarea id="ef129-reason" rows="2" maxlength="1000" placeholder="Ej. Seguimiento de calidad de su operación" oninput="ef129Change()"></textarea><div class="ea126-actions"><button id="ef129-save" type="button" onclick="ef129Save()" disabled>Guardar permiso de Feedback</button><button type="button" class="ea126-secondary" onclick="ef129LoadDetail()">Recargar permiso</button></div><p id="ef129-status" role="status" aria-live="polite">Selecciona una persona.</p><details><summary>Historial del permiso</summary><div id="ef129-history"></div></details></section><section class="ea126-card ea126-wide" id="es130-save-operations"><h2>3. Revisa y guarda operaciones</h2><div id="ea126-preview">Aquí verás el alcance y los cambios antes de guardarlos.</div><label for="ea126-reason">Motivo del cambio</label><textarea id="ea126-reason" maxlength="1000" rows="2" placeholder="Ej. Cubrir evaluaciones de RACE" oninput="ea126Invalidate()"></textarea><div class="ea126-actions"><button type="button" id="ea126-review" onclick="ea126Review()" disabled>Revisar cambios</button><button type="button" id="ea126-reload" class="ea126-secondary" onclick="ea126Reload()" disabled>Descartar y recargar</button></div><div id="ea126-confirm" hidden><p>Confirma que estas operaciones corresponden a la persona seleccionada.</p><button type="button" id="ea126-save" onclick="ea126Save()">Confirmar y guardar</button></div></section>
+ <section class="ea126-card ea126-wide"><h2>Evaluar agentes, elite y supervisores</h2><p class="ea126-muted">Asigna personas y queues concretas. Los permisos de supervisores se otorgan aquí de forma explícita. Estos permisos se suman a los agentes disponibles por operación.</p><div id="es130-body">Selecciona al evaluador.</div></section><section class="ea126-card"><h2>¿Por qué no aparece un agente?</h2><p class="ea126-muted">Diagnóstico del formulario con los accesos guardados. No incluye cambios pendientes.</p><label for="ea126-agent">Agente</label><select id="ea126-agent" onchange="ea126Diagnose()"><option value="">Selecciona un agente</option></select><div id="ea126-diagnosis" role="status"></div></section>
  <section class="ea126-card"><h2>Historial de cambios</h2><p class="ea126-muted">Últimos 30 cambios realizados desde esta sección.</p><div id="ea126-history">Selecciona una persona.</div></section>
  </div>
 </div>
@@ -10196,7 +10196,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.29";
+const ECHO_APP_VERSION = "1.0.30";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -11656,7 +11656,7 @@ document.getElementById('eqDetail').scrollIntoView({behavior:'smooth',block:'sta
 
 </script>
 <script>
-/* Echo 1.0.29 — administración de asignaciones. Autorización final en RPC. */
+/* Echo 1.0.30 — administración de asignaciones. Autorización final en RPC. */
 let ea126Allowed=false,ea126Catalog=null,ea126Detail=null,ea126Person=null,ea126Busy=false,ea126Serial=0,ea126Reviewed='';
 const ea126Norm=x=>String(x??'').trim().toLowerCase();
 const ea126El=id=>document.getElementById('ea126-'+id);
@@ -11668,15 +11668,15 @@ async function ea126Access(){
  if(isClientUser||isAgentUser||!['m.mora@evolvecx.io','alberto.castro@evolvecx.io','arturo.quezada@evolvecx.io'].includes(ea126Norm(currentUser?.email)))return;
  try{const allowed=await ea126Rpc('echo_access_allowed_v126');if(currentUser?.id!==uid)return;ea126Allowed=allowed===true;document.getElementById('navAccess126').classList.toggle('hidden-by-permission',!ea126Allowed);}catch(e){console.warn('Administración de accesos no disponible:',e.message);}
 }
-function ea126Reset(){ea126Serial++;ea126Allowed=false;ea126Catalog=null;ea126Detail=null;ea126Person=null;ea126Busy=false;ea126Reviewed='';document.getElementById('navAccess126')?.classList.add('hidden-by-permission');for(const id of ['search','reason'])if(ea126El(id))ea126El(id).value='';for(const id of ['person','agent'])if(ea126El(id))ea126El(id).innerHTML='<option value="">Selecciona una persona o agente</option>';for(const id of ['person-info','operations','preview','history','diagnosis','status'])if(ea126El(id))ea126El(id).textContent='';if(ea126El('confirm'))ea126El('confirm').hidden=true;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea').forEach(x=>x.disabled=false);for(const id of ['review','reload'])if(ea126El(id))ea126El(id).disabled=true;}
+function ea126Reset(){es130Clear();ea126Serial++;ea126Allowed=false;ea126Catalog=null;ea126Detail=null;ea126Person=null;ea126Busy=false;ea126Reviewed='';document.getElementById('navAccess126')?.classList.add('hidden-by-permission');for(const id of ['search','reason'])if(ea126El(id))ea126El(id).value='';for(const id of ['person','agent'])if(ea126El(id))ea126El(id).innerHTML='<option value="">Selecciona una persona o agente</option>';for(const id of ['person-info','operations','preview','history','diagnosis','status'])if(ea126El(id))ea126El(id).textContent='';if(ea126El('confirm'))ea126El('confirm').hidden=true;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea').forEach(x=>x.disabled=false);for(const id of ['review','reload'])if(ea126El(id))ea126El(id).disabled=true;}
 async function ea126Load(){
  if(!ea126Allowed)return;
  if(ea126Catalog)return;
  const seq=++ea126Serial;ea126El('status').textContent='Cargando personas y operaciones…';
- try{const data=await ea126Rpc('echo_access_catalog_v126');if(seq!==ea126Serial||!ea126Allowed)return;ea126Catalog=data;ea126People();ea126El('agent').innerHTML='<option value="">Selecciona un agente</option>'+data.agents.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name+' · '+a.id+(ea126Norm(a.status)!=='active'?' · Inactivo':''))+'</option>').join('');ea126El('status').textContent='';}
+ try{const data=await ea126Rpc('echo_access_catalog_v130');if(seq!==ea126Serial||!ea126Allowed)return;ea126Catalog=data;ea126People();ea126El('agent').innerHTML='<option value="">Selecciona un agente</option>'+data.agents.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name+' · '+a.id+(ea126Norm(a.status)!=='active'?' · Inactivo':''))+'</option>').join('');ea126El('status').textContent='';}
  catch(e){if(seq===ea126Serial)ea126El('status').textContent='No se pudo cargar. '+e.message+' Vuelve a abrir esta sección para reintentar.';}
 }
-function ea126People(){if(!ea126Catalog)return;const q=ea126Norm(ea126El('search').value),id=ea126Person?.id;const list=ea126Catalog.people.filter(p=>p.id===id||ea126Norm(p.name+' '+p.id+' '+p.email).includes(q));ea126El('person').innerHTML='<option value="">Selecciona una persona</option>'+list.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name+' · '+p.id)+'</option>').join('');if(id)ea126El('person').value=id;}
+function ea126People(){if(!ea126Catalog)return;const q=ea126Norm(ea126El('search').value),id=ea126Person?.id;const list=ea126Catalog.people.filter(p=>p.id===id||ea126Norm(p.name+' '+p.id+' '+p.email).includes(q));ea126El('person').innerHTML='<option value="">Selecciona una persona</option>'+list.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name+' · '+(p.client?'Cliente · '+p.campaign:p.id))+'</option>').join('');if(id)ea126El('person').value=id;}
 function ea128IsHiddenOperation(o){
  const campaign=ea126Norm(o?.campaign),lob=ea126Norm(o?.lob);
  return campaign==='admin'||(campaign==='aplazo'&&lob==='marketing')||(campaign==='stori'&&lob==='luna');
@@ -11688,28 +11688,30 @@ function ea126Selected(){
  return [...new Set([...selected,...retained])].sort();
 }
 function ea126Original(){return (ea126Detail?.assignments||[]).filter(a=>a.is_active).map(a=>a.operational_structure_id).sort();}
-function ea126Dirty(){return JSON.stringify(ea126Selected())!==JSON.stringify(ea126Original());}
+function ea126Dirty(){if(ea126Person?.protected)return false;return JSON.stringify(ea126Selected())!==JSON.stringify(ea126Original());}
 function ea126Matches(a,o){return ea126Norm(a.campaign)===ea126Norm(o.campaign)&&ea126Norm(a.lob)===ea126Norm(o.lob)&&ea126Norm(a.queue)===ea126Norm(o.queue);}
 function ea126Visible(ids){const ops=ea126Catalog.operations.filter(o=>ids.includes(o.id));return ea126Catalog.agents.filter(a=>ea126Norm(a.status)==='active'&&String(a.name||'').trim()&&ops.some(o=>ea126Matches(a,o)));}
 async function ea126Choose(force=false){
  if(ea126Busy)return;
  const id=ea126El('person').value;
+ if(!force&&es130Detail&&JSON.stringify(es130Draft)!==JSON.stringify(es130Detail.grants)&&!confirm('Hay permisos por persona sin guardar. ¿Descartarlos?')){ea126El('person').value=ea126Person.id;return;}
  if(!force&&ef129Detail&&ef129El('mode').value!==ef129Detail.mode&&!confirm('Hay un cambio de permiso de Feedback sin guardar. ¿Descartarlo?')){ea126El('person').value=ea126Person.id;return;}
  if(!force&&ea126Person&&ea126Detail&&ea126Dirty()&&!confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')){ea126El('person').value=ea126Person.id;return;}
+ es130Clear();
  ef129Clear();
  const seq=++ea126Serial;ea126Detail=null;ea126Person=ea126Catalog?.people.find(p=>p.id===id)||null;ea126El('reason').value='';ea126El('confirm').hidden=true;ea126El('review').disabled=true;ea126El('reload').disabled=true;for(const x of ['operations','preview','history','diagnosis','person-info'])ea126El(x).textContent='';
  if(!ea126Person)return;
  ea126El('status').textContent='Consultando accesos…';
- try{const d=await ea126Rpc('echo_access_detail_v126',{p_employee:id});if(seq!==ea126Serial||!ea126Allowed)return;ea126Detail=d;ea126El('status').textContent='';ea126Render();}catch(e){if(seq===ea126Serial)ea126El('status').textContent=e.message;}
+ try{const d=await ea126Rpc('echo_access_detail_v130',{p_employee:id});if(seq!==ea126Serial||!ea126Allowed)return;ea126Detail=d;ea126El('status').textContent='';ea126Render();}catch(e){if(seq===ea126Serial)ea126El('status').textContent=e.message;}
 }
 function ea126Render(){
- const p=ea126Person;ea126El('person-info').innerHTML='<div class="ea126-notice"><b>'+esc(p.name)+'</b><br>'+esc(p.email)+'<br>'+esc(p.role)+'</div>';
- const original=ea126Original(),groups=new Map();for(const o of ea126Catalog.operations.filter(o=>!ea128IsHiddenOperation(o))){const k=[o.campaign,o.lob].join(' / ');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);}
+ const p=ea126Person;document.getElementById('es130-operations-card').hidden=!!p.protected;document.getElementById('es130-save-operations').hidden=!!p.protected;document.getElementById('es130-feedback-card').hidden=!!(p.client||p.protected);ea126El('person-info').innerHTML='<div class="ea126-notice"><b>'+esc(p.name)+'</b><br>'+esc(p.email)+'<br>'+esc(p.role)+'</div>';
+ const original=ea126Original(),groups=new Map();for(const o of ea126Catalog.operations.filter(o=>!ea128IsHiddenOperation(o)&&(!p.client||ea126Norm(o.campaign)===ea126Norm(p.campaign)))){const k=[o.campaign,o.lob].join(' / ');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);}
  ea126El('operations').innerHTML=[...groups].map(([k,ops])=>'<details'+(ops.some(o=>original.includes(o.id))?' open':'')+'><summary>'+esc(k)+'</summary>'+ops.map(o=>'<label class="ea126-choice"><input type="checkbox" value="'+esc(o.id)+'" '+(original.includes(o.id)?'checked ':'')+'onchange="ea126Preview()"><span>'+esc(o.queue||'Sin queue')+'</span><small>'+ea126Visible([o.id]).length+' agentes</small></label>').join('')+'</details>').join('');
  const unmatched=ea126Detail.assignments.filter(a=>a.is_active&&!ea126Catalog.operations.some(o=>o.id===a.operational_structure_id));
  if(unmatched.length)ea126El('operations').insertAdjacentHTML('afterbegin','<div class="ea126-notice ea126-warn">Hay asignaciones sin catálogo activo: '+unmatched.map(a=>esc([a.campaign_key,a.lob_key,a.queue_key].join(' / '))).join(', ')+'. Recarga el catálogo o revisa estas asignaciones antes de guardar.</div>');
  ea126El('history').innerHTML=ea126Detail.history.length?ea126Detail.history.map(h=>{const names=arr=>arr.filter(a=>a.is_active).map(a=>[a.campaign_key,a.lob_key,a.queue_key].join(' / ')).join('; ')||'Sin asignaciones';return '<details><summary>'+esc(new Date(h.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(h.actor_email)+'</summary><p class="ea126-muted">'+esc(h.reason)+'</p><p class="ea126-muted"><b>Antes:</b> '+esc(names(h.before_assignments))+'<br><b>Después:</b> '+esc(names(h.after_assignments))+'</p></details>';}).join(''):'<p class="ea126-muted">Sin cambios registrados desde esta sección.</p>';
- ea126El('reload').disabled=false;ea126Preview();ea126Diagnose();ef129LoadDetail();
+ ea126El('reload').disabled=false;ea126Preview();ea126Diagnose();ef129LoadDetail();es130Load();
 }
 function ea126Invalidate(){ea126Reviewed='';ea126El('confirm').hidden=true;}
 function ea126Preview(){
@@ -11727,14 +11729,14 @@ async function ea126Save(){
  if(!ea126Allowed||ea126Busy||!ea126Detail)return;
  const id=ea126Person.id,ids=ea126Selected(),reason=ea126El('reason').value.trim();if(ea126Reviewed!==JSON.stringify([id,ids,reason]))return;
  const seq=ea126Serial;ea126Busy=true;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea,#page-access-admin button').forEach(x=>x.disabled=true);ea126El('status').textContent='Guardando…';
- try{const d=await ea126Rpc('echo_access_save_v126',{p_employee:id,p_operations:ids,p_expected:ea126Detail.assignments,p_reason:reason});if(seq!==ea126Serial)return;ea126Detail=d;ea126El('reason').value='';ea126El('status').textContent='Accesos guardados. La persona debe recargar Echo para actualizar su catálogo.';toast('Accesos actualizados');}
+ try{const d=await ea126Rpc('echo_access_save_v130',{p_employee:id,p_operations:ids,p_expected:ea126Detail.assignments,p_reason:reason});if(seq!==ea126Serial)return;ea126Detail=d;ea126El('reason').value='';ea126El('status').textContent='Accesos guardados. La persona debe recargar Echo para actualizar su catálogo.';toast('Accesos actualizados');}
  catch(e){if(seq===ea126Serial)ea126El('status').textContent='No se confirmó el guardado: '+e.message+' Recarga los accesos antes de reintentar.';}
  finally{if(seq===ea126Serial){ea126Busy=false;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea,#page-access-admin button').forEach(x=>x.disabled=false);ea126Render();}}
 }
 function ea126Reload(){if(ea126Busy)return;if(ea126Dirty()&&!confirm('¿Descartar los cambios y recargar los accesos guardados?'))return;ea126Choose(true);}
 function ea126Diagnose(){
  const a=ea126Catalog?.agents.find(x=>x.id===ea126El('agent').value);if(!a||!ea126Person||!ea126Detail){ea126El('diagnosis').textContent='Selecciona una persona y un agente.';return;}
- const op=[a.campaign,a.lob,a.queue].filter(Boolean).join(' / ');let msg;
+ const op=[a.campaign,a.lob,a.queue].filter(Boolean).join(' / ');let msg;if(ea126Person.client){ea126El('diagnosis').textContent='Cliente: revisa sus operaciones y la lista de personas asignadas. Sin operaciones configuradas conserva la campaña completa, salvo que hayas activado solo personas asignadas.';return;}
  if(ea126Norm(a.status)!=='active')msg='No aparece porque el agente está inactivo.';
  else if(!String(a.name||'').trim())msg='No aparece porque no tiene nombre registrado.';
  else if(ea126Original().length)msg=ea126Visible(ea126Original()).some(x=>x.id===a.id)?'La operación está autorizada. Si no aparece, recarga Echo y revisa los filtros del formulario.':'Sus asignaciones no cubren esta operación. Puedes seleccionarla arriba y guardar el cambio.';
@@ -11758,7 +11760,7 @@ async function ef129RefreshAccess(){
 function ef129Clear(){ef129Seq++;ef129Detail=null;ef129Saving=false;if(ef129El('mode')){ef129El('mode').disabled=true;ef129El('mode').value='none';ef129El('reason').value='';ef129El('save').disabled=true;ef129El('status').textContent='Selecciona una persona.';ef129El('history').textContent='';}}
 function ef129Logout(){ef129Me={can_read:false,can_write:false,mode:'none'};eqLoadSequence++;eqAccess();eqClearAgent('Selecciona un agente.');document.getElementById('eqAgentSelect').replaceChildren(new Option('Selecciona un agente',''));ef129Clear();}
 async function ef129LoadDetail(){
- ef129Clear();if(!ea126Allowed||!ea126Person)return;const id=ea126Person.id,seq=ef129Seq;ef129El('status').textContent='Cargando permiso del módulo…';
+ ef129Clear();if(!ea126Allowed||!ea126Person||ea126Person.client||ea126Person.protected)return;const id=ea126Person.id,seq=ef129Seq;ef129El('status').textContent='Cargando permiso del módulo…';
  try{const d=await ea126Rpc('echo_feedback_detail_v129',{p_employee:id});if(seq!==ef129Seq||ea126Person?.id!==id)return;ef129Detail=d;const qa=['qa_analyst','qa_jr_manager','qa_manager'].includes(ea126Norm(ea126Person.role));ef129El('mode').innerHTML=Object.entries(ef129Labels).filter(([k])=>k!=='qa'||qa||d.mode==='qa').map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('');ef129El('mode').value=d.mode;ef129El('mode').disabled=false;ef129El('status').textContent='Permiso guardado: '+ef129Labels[d.mode]+'.';ef129El('history').innerHTML=d.history.length?d.history.map(h=>'<details><summary>'+esc(new Date(h.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(h.actor_email)+'</summary><p class="ea126-muted">'+esc(ef129Labels[h.previous_mode])+' → '+esc(ef129Labels[h.new_mode])+'<br>'+esc(h.reason)+'</p></details>').join(''):'Sin cambios registrados para este permiso.';ef129Change();}
  catch(e){if(seq===ef129Seq)ef129El('status').textContent='No se pudo cargar: '+e.message;}
 }
@@ -11775,6 +11777,46 @@ async function ef129Save(){
 }
 window.addEventListener('focus',()=>{if(currentUser)ef129RefreshAccess();});
 window.addEventListener('beforeunload',e=>{if(ef129Detail&&ef129El('mode')?.value!==ef129Detail.mode){e.preventDefault();e.returnValue='';}});
+
+</script>
+<script>
+let es130Detail=null,es130Draft=[],es130Seq=0;
+const es130El=id=>document.getElementById('es130-'+id);
+function es130Clear(){es130Seq++;es130Detail=null;es130Draft=[];if(es130El('body'))es130El('body').textContent='Selecciona al evaluador.';}
+function es130Ops(){return (ea126Catalog?.operations||[]).filter(o=>o.has_rubric&&!ea128IsHiddenOperation(o)&&(!ea126Person?.client||ea126Norm(o.campaign)===ea126Norm(ea126Person.campaign)));}
+function es130Targets(){return (ea126Catalog?.targets||[]).filter(t=>!ea126Person?.client||(t.campaigns||[]).some(c=>ea126Norm(c)===ea126Norm(ea126Person.campaign)));}
+async function es130Load(){
+ es130Clear();if(!ea126Allowed||!ea126Person)return;const id=ea126Person.id,seq=es130Seq;
+ try{const d=await ea126Rpc('echo_subject_detail_v130',{p_owner:id});if(seq!==es130Seq||ea126Person?.id!==id)return;es130Detail=d;es130Draft=d.grants.map(g=>({...g}));es130Render();}catch(e){if(seq===es130Seq)es130El('body').textContent='No se pudo cargar: '+e.message;}
+}
+function es130Render(){
+ es130El('body').innerHTML='<label for="es130-target">Persona que podrá evaluar</label><select id="es130-target" onchange="es130Target()"><option value="">Selecciona agente, elite o supervisor</option>'+es130Targets().map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name+' · '+t.id+' · '+t.kind)+'</option>').join('')+'</select><div id="es130-queues"></div><h3 style="margin:16px 0">Personas y queues autorizadas</h3><div id="es130-grants"></div><label for="es130-reason">Motivo</label><textarea id="es130-reason" maxlength="1000" rows="2" placeholder="Ej. Evaluar chats atendidos por supervisores"></textarea><div class="ea126-actions"><button type="button" onclick="es130Save()">Revisar y guardar personas</button><button type="button" class="ea126-secondary" onclick="es130Load()">Descartar y recargar</button></div>'+(ea126Person.client?'<p class="ea126-muted">Sin configurar operaciones, el cliente conserva los agentes de su campaña. Si quieres limitarlo únicamente a esta lista:</p><button type="button" class="ea126-secondary" onclick="es130OnlyNamed()">Usar solo las personas guardadas</button>':'')+'<p id="es130-status" role="status"></p><details><summary>Historial de permisos por persona</summary>'+es130Detail.history.map(h=>'<p class="ea126-muted">'+esc(new Date(h.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(h.actor_email)+'<br>'+esc(h.reason)+'<br>'+h.previous_grants.length+' → '+h.new_grants.length+' permisos</p>').join('')+'</details>';
+ es130List();
+}
+function es130List(){es130El('grants').innerHTML=es130Draft.length?'<ul>'+es130Draft.map((g,i)=>{const t=ea126Catalog.targets.find(x=>x.id===g.target_id),o=ea126Catalog.operations.find(x=>x.id===g.scope_id);return '<li>'+esc((t?.name||g.target_id)+' · '+(t?.kind||'Persona')+' — '+(o?ea126Label(o):'Operación no disponible'))+' <button type="button" class="ea126-secondary" onclick="es130Remove('+i+')">Quitar</button></li>';}).join('')+'</ul>':'<p class="ea126-muted">Sin permisos adicionales. Los supervisores no aparecen si no están asignados aquí.</p>';}
+function es130Target(){const id=es130El('target').value;es130El('queues').innerHTML=id?'<p class="ea126-muted">Marca las queues cuyos chats podrá evaluar. Se usan las rúbricas existentes.</p>'+es130Ops().map(o=>'<label class="ea126-choice"><input type="checkbox" data-scope="'+esc(o.id)+'" '+(es130Draft.some(g=>g.target_id===id&&g.scope_id===o.id)?'checked':'')+' onchange="es130Toggle(this)"><span>'+esc(ea126Label(o))+'</span></label>').join(''):'';}
+function es130Toggle(input){const id=es130El('target').value,s=input.dataset.scope;es130Draft=es130Draft.filter(g=>!(g.target_id===id&&g.scope_id===s));if(input.checked)es130Draft.push({target_id:id,scope_id:s});es130List();}
+function es130Remove(i){es130Draft.splice(i,1);es130List();es130Target();}
+async function es130Save(){
+ if(!ea126Allowed||ea126Busy||!es130Detail)return;const id=ea126Person.id,seq=es130Seq,reason=es130El('reason').value.trim();if(reason.length<5){es130El('status').textContent='Escribe un motivo de al menos cinco caracteres.';return;}
+ const draft=es130Draft.map(g=>({...g}));if(!confirm('Guardar '+draft.length+' permisos de persona y queue para '+ea126Person.name+'? Se quitarán los permisos que retiraste de la lista.'))return;
+ ea126Busy=true;es130El('status').textContent='Guardando…';es130Lock(true);
+ try{await ea126Rpc('echo_subject_save_v130',{p_owner:id,p_grants:draft,p_expected:es130Detail.grants,p_reason:reason});if(seq!==es130Seq||ea126Person?.id!==id)return;await es130Load();es130El('status').textContent='Permisos guardados. El evaluador debe recargar Echo.';}
+ catch(e){if(seq===es130Seq)es130El('status').textContent='No se confirmó el cambio: '+e.message;}
+ finally{ea126Busy=false;es130Lock(false);ea126Preview();}
+}
+function es130Lock(b){document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea,#page-access-admin button').forEach(x=>x.disabled=b);}
+async function es130OnlyNamed(){
+ if(ea126Busy||!ea126Person?.client||!ea126Detail||!es130Detail)return;
+ if(JSON.stringify(es130Draft)!==JSON.stringify(es130Detail.grants)){es130El('status').textContent='Guarda primero los permisos por persona.';return;}
+ const reason=es130El('reason').value.trim();if(reason.length<5){es130El('status').textContent='Escribe un motivo para limitar el acceso.';return;}
+ if(!confirm('El cliente dejará de ver todos los agentes de su campaña y verá únicamente las personas guardadas en esta lista. ¿Confirmar?'))return;
+ const id=ea126Person.id,seq=es130Seq;ea126Busy=true;es130Lock(true);
+ try{const d=await ea126Rpc('echo_access_save_v130',{p_employee:id,p_operations:[],p_expected:ea126Detail.assignments,p_reason:reason});if(seq!==es130Seq)return;ea126Detail=d;ea126Render();toast('Cliente limitado a personas asignadas');}
+ catch(e){if(seq===es130Seq)es130El('status').textContent='No se confirmó: '+e.message;}
+ finally{ea126Busy=false;es130Lock(false);ea126Preview();}
+}
+window.addEventListener('beforeunload',e=>{if(es130Detail&&JSON.stringify(es130Draft)!==JSON.stringify(es130Detail.grants)){e.preventDefault();e.returnValue='';}});
 
 </script>
 </body>
