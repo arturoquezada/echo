@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.28" name="echo-version"/>
+<meta content="1.0.29" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10150,7 +10150,7 @@ function exportFQCSV() {
  <div class="ea126-layout">
  <section class="ea126-card"><h2>1. Elige a la persona</h2><label for="ea126-search">Buscar por nombre, ID o correo</label><input id="ea126-search" type="search" placeholder="Ej. Gabriela o CX00326" oninput="ea126People()"><label for="ea126-person">Persona</label><select id="ea126-person" onchange="ea126Choose()"><option value="">Selecciona una persona</option></select><p class="ea126-muted">Personal interno activo. Los permisos especiales de las tres cuentas administradoras y los clientes externos se conservan fuera de este editor.</p><div id="ea126-person-info"></div></section>
  <section class="ea126-card"><h2>2. Selecciona las operaciones</h2><p class="ea126-muted">Cada queue da acceso a sus agentes activos, aunque reporten a otro supervisor. Esta pantalla administra asignaciones operativas; no cambia roles ni permisos especiales de otros módulos.</p><div id="ea126-operations">Primero selecciona una persona.</div></section>
- <section class="ea126-card ea126-wide"><h2>3. Revisa y guarda</h2><div id="ea126-preview">Aquí verás el alcance y los cambios antes de guardarlos.</div><label for="ea126-reason">Motivo del cambio</label><textarea id="ea126-reason" maxlength="1000" rows="2" placeholder="Ej. Cubrir evaluaciones de RACE" oninput="ea126Invalidate()"></textarea><div class="ea126-actions"><button type="button" id="ea126-review" onclick="ea126Review()" disabled>Revisar cambios</button><button type="button" id="ea126-reload" class="ea126-secondary" onclick="ea126Reload()" disabled>Descartar y recargar</button></div><div id="ea126-confirm" hidden><p>Confirma que estas operaciones corresponden a la persona seleccionada.</p><button type="button" id="ea126-save" onclick="ea126Save()">Confirmar y guardar</button></div></section>
+ <section class="ea126-card ea126-wide"><h2>Acceso a Feedback y habilidades QA</h2><p class="ea126-muted">Este permiso se guarda por separado de las operaciones. Habilitar la consulta no convierte a la persona en QA: registrar acciones sigue reservado a QA dentro de su alcance autorizado.</p><label for="ef129-mode">Permiso del módulo</label><select id="ef129-mode" disabled onchange="ef129Change()"><option value="none">Sin acceso</option></select><p id="ef129-hint" class="ea126-notice">Selecciona una persona para consultar su permiso.</p><label for="ef129-reason">Motivo del cambio de permiso</label><textarea id="ef129-reason" rows="2" maxlength="1000" placeholder="Ej. Seguimiento de calidad de su operación" oninput="ef129Change()"></textarea><div class="ea126-actions"><button id="ef129-save" type="button" onclick="ef129Save()" disabled>Guardar permiso de Feedback</button><button type="button" class="ea126-secondary" onclick="ef129LoadDetail()">Recargar permiso</button></div><p id="ef129-status" role="status" aria-live="polite">Selecciona una persona.</p><details><summary>Historial del permiso</summary><div id="ef129-history"></div></details></section><section class="ea126-card ea126-wide"><h2>3. Revisa y guarda</h2><div id="ea126-preview">Aquí verás el alcance y los cambios antes de guardarlos.</div><label for="ea126-reason">Motivo del cambio</label><textarea id="ea126-reason" maxlength="1000" rows="2" placeholder="Ej. Cubrir evaluaciones de RACE" oninput="ea126Invalidate()"></textarea><div class="ea126-actions"><button type="button" id="ea126-review" onclick="ea126Review()" disabled>Revisar cambios</button><button type="button" id="ea126-reload" class="ea126-secondary" onclick="ea126Reload()" disabled>Descartar y recargar</button></div><div id="ea126-confirm" hidden><p>Confirma que estas operaciones corresponden a la persona seleccionada.</p><button type="button" id="ea126-save" onclick="ea126Save()">Confirmar y guardar</button></div></section>
  <section class="ea126-card"><h2>¿Por qué no aparece un agente?</h2><p class="ea126-muted">Diagnóstico del formulario con los accesos guardados. No incluye cambios pendientes.</p><label for="ea126-agent">Agente</label><select id="ea126-agent" onchange="ea126Diagnose()"><option value="">Selecciona un agente</option></select><div id="ea126-diagnosis" role="status"></div></section>
  <section class="ea126-card"><h2>Historial de cambios</h2><p class="ea126-muted">Últimos 30 cambios realizados desde esta sección.</p><div id="ea126-history">Selecciona una persona.</div></section>
  </div>
@@ -10196,7 +10196,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.28";
+const ECHO_APP_VERSION = "1.0.29";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
@@ -10483,7 +10483,7 @@ async function bootApp(user) {
 
   canAccessCorrections = !isClientUser && !isAgentUser && CORRECTIONS_IDS.includes(currentEmployee?.id);
 
-  eqAccess();
+  await ef129RefreshAccess();
   await ea126Access();
 
   // Shared user card.
@@ -10638,6 +10638,7 @@ function showNoAccess() {
 }
 
 async function handleLogout() {
+  ef129Logout();
   ea126Reset();
   await sb.auth.signOut();
   document.getElementById('app').classList.remove('show');
@@ -11397,8 +11398,8 @@ window.addEventListener('resize', () => {
 <script>
 /* ECHO 1.0.9 — módulo aditivo; RPC autenticadas y permisos en servidor. */
 let eqData={rows:[],cases:[]}, eqSelected=null, eqHistory=[], eqRequest=null;
-function eqAllowed(){return !isClientUser && currentEmployee && String(currentEmployee.status||'').trim().toLowerCase()==='active' && ['qa_analyst','qa_jr_manager','qa_manager'].includes(String(currentEmployee.system_role||'').trim().toLowerCase());}
-function eqCanRead(){return eqAllowed() || (!isClientUser && ["arturo.quezada@evolvecx.io", "paola.eyssautier@evolvecx.io", "diana.sanchez@evolvecx.io", "daniela.copca@evolvecx.io", "luz.gonzalez@evolvecx.io", "gilberto.garcia@evolvecx.io", "m.mora@evolvecx.io", "mariana.martinez@evolvecx.io", "jimena.cartagena@evolvecx.io"].includes(String(currentUser?.email||'').trim().toLowerCase()));}
+function eqAllowed(){return ef129Me.can_write===true && !isClientUser && currentEmployee && String(currentEmployee.status||'').trim().toLowerCase()==='active' && ['qa_analyst','qa_jr_manager','qa_manager'].includes(String(currentEmployee.system_role||'').trim().toLowerCase());}
+function eqCanRead(){return !isClientUser && ef129Me.can_read===true;}
 function eqAccess(){document.getElementById('navQaFollowup')?.classList.toggle('hidden-by-permission',!eqCanRead());}
 async function eqRpc(name,args={}){const {data,error}=await sb.rpc(name,args);if(error)throw new Error(error.message);return data;}
 function eqKey(r){return JSON.stringify([r.agent_identifier,r.campaign_key,r.lob_key,r.queue_key,r.rubric_item_id]);}
@@ -11655,7 +11656,7 @@ document.getElementById('eqDetail').scrollIntoView({behavior:'smooth',block:'sta
 
 </script>
 <script>
-/* Echo 1.0.28 — administración de asignaciones. Autorización final en RPC. */
+/* Echo 1.0.29 — administración de asignaciones. Autorización final en RPC. */
 let ea126Allowed=false,ea126Catalog=null,ea126Detail=null,ea126Person=null,ea126Busy=false,ea126Serial=0,ea126Reviewed='';
 const ea126Norm=x=>String(x??'').trim().toLowerCase();
 const ea126El=id=>document.getElementById('ea126-'+id);
@@ -11693,7 +11694,9 @@ function ea126Visible(ids){const ops=ea126Catalog.operations.filter(o=>ids.inclu
 async function ea126Choose(force=false){
  if(ea126Busy)return;
  const id=ea126El('person').value;
+ if(!force&&ef129Detail&&ef129El('mode').value!==ef129Detail.mode&&!confirm('Hay un cambio de permiso de Feedback sin guardar. ¿Descartarlo?')){ea126El('person').value=ea126Person.id;return;}
  if(!force&&ea126Person&&ea126Detail&&ea126Dirty()&&!confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')){ea126El('person').value=ea126Person.id;return;}
+ ef129Clear();
  const seq=++ea126Serial;ea126Detail=null;ea126Person=ea126Catalog?.people.find(p=>p.id===id)||null;ea126El('reason').value='';ea126El('confirm').hidden=true;ea126El('review').disabled=true;ea126El('reload').disabled=true;for(const x of ['operations','preview','history','diagnosis','person-info'])ea126El(x).textContent='';
  if(!ea126Person)return;
  ea126El('status').textContent='Consultando accesos…';
@@ -11706,7 +11709,7 @@ function ea126Render(){
  const unmatched=ea126Detail.assignments.filter(a=>a.is_active&&!ea126Catalog.operations.some(o=>o.id===a.operational_structure_id));
  if(unmatched.length)ea126El('operations').insertAdjacentHTML('afterbegin','<div class="ea126-notice ea126-warn">Hay asignaciones sin catálogo activo: '+unmatched.map(a=>esc([a.campaign_key,a.lob_key,a.queue_key].join(' / '))).join(', ')+'. Recarga el catálogo o revisa estas asignaciones antes de guardar.</div>');
  ea126El('history').innerHTML=ea126Detail.history.length?ea126Detail.history.map(h=>{const names=arr=>arr.filter(a=>a.is_active).map(a=>[a.campaign_key,a.lob_key,a.queue_key].join(' / ')).join('; ')||'Sin asignaciones';return '<details><summary>'+esc(new Date(h.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(h.actor_email)+'</summary><p class="ea126-muted">'+esc(h.reason)+'</p><p class="ea126-muted"><b>Antes:</b> '+esc(names(h.before_assignments))+'<br><b>Después:</b> '+esc(names(h.after_assignments))+'</p></details>';}).join(''):'<p class="ea126-muted">Sin cambios registrados desde esta sección.</p>';
- ea126El('reload').disabled=false;ea126Preview();ea126Diagnose();
+ ea126El('reload').disabled=false;ea126Preview();ea126Diagnose();ef129LoadDetail();
 }
 function ea126Invalidate(){ea126Reviewed='';ea126El('confirm').hidden=true;}
 function ea126Preview(){
@@ -11739,6 +11742,39 @@ function ea126Diagnose(){
  ea126El('diagnosis').innerHTML='<b>'+esc(a.name)+' · '+esc(a.id)+'</b><br>'+esc(op)+'<div class="ea126-notice">'+esc(msg)+'</div>';
 }
 window.addEventListener('beforeunload',e=>{if(ea126Allowed&&ea126Detail&&ea126Dirty()){e.preventDefault();e.returnValue='';}});
+
+</script>
+<script>
+/* Permiso independiente del módulo de Feedback, validado por Supabase. */
+let ef129Me={can_read:false,can_write:false,mode:'none'},ef129Detail=null,ef129Saving=false,ef129Seq=0;
+const ef129Labels={none:'Sin acceso',assigned:'Solo operaciones asignadas',all:'Todas las operaciones',qa:'Alcance actual del rol QA'};
+const ef129El=id=>document.getElementById('ef129-'+id);
+async function ef129RefreshAccess(){
+ const uid=currentUser?.id;
+ if(!uid||isClientUser||isAgentUser){ef129Me={can_read:false,can_write:false,mode:'none'};eqAccess();return;}
+ try{const data=await ea126Rpc('echo_feedback_me_v129');if(currentUser?.id!==uid)return;const changed=ef129Me.mode!==data.mode;ef129Me=data;eqAccess();if(changed){eqLoadSequence++;eqClearAgent('Actualiza la lista para consultar el alcance autorizado.');document.getElementById('eqAgentSelect').replaceChildren(new Option('Selecciona un agente',''));}if(!data.can_read&&document.getElementById('page-qa-followup')?.classList.contains('active'))switchPage('dashboard');}
+ catch(e){if(currentUser?.id!==uid)return;ef129Me={can_read:false,can_write:false,mode:'none'};eqAccess();console.warn('No se pudo validar el acceso a Feedback:',e.message);}
+}
+function ef129Clear(){ef129Seq++;ef129Detail=null;ef129Saving=false;if(ef129El('mode')){ef129El('mode').disabled=true;ef129El('mode').value='none';ef129El('reason').value='';ef129El('save').disabled=true;ef129El('status').textContent='Selecciona una persona.';ef129El('history').textContent='';}}
+function ef129Logout(){ef129Me={can_read:false,can_write:false,mode:'none'};eqLoadSequence++;eqAccess();eqClearAgent('Selecciona un agente.');document.getElementById('eqAgentSelect').replaceChildren(new Option('Selecciona un agente',''));ef129Clear();}
+async function ef129LoadDetail(){
+ ef129Clear();if(!ea126Allowed||!ea126Person)return;const id=ea126Person.id,seq=ef129Seq;ef129El('status').textContent='Cargando permiso del módulo…';
+ try{const d=await ea126Rpc('echo_feedback_detail_v129',{p_employee:id});if(seq!==ef129Seq||ea126Person?.id!==id)return;ef129Detail=d;const qa=['qa_analyst','qa_jr_manager','qa_manager'].includes(ea126Norm(ea126Person.role));ef129El('mode').innerHTML=Object.entries(ef129Labels).filter(([k])=>k!=='qa'||qa||d.mode==='qa').map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('');ef129El('mode').value=d.mode;ef129El('mode').disabled=false;ef129El('status').textContent='Permiso guardado: '+ef129Labels[d.mode]+'.';ef129El('history').innerHTML=d.history.length?d.history.map(h=>'<details><summary>'+esc(new Date(h.created_at).toLocaleString('es-MX',{timeZone:'America/Mexico_City'}))+' · '+esc(h.actor_email)+'</summary><p class="ea126-muted">'+esc(ef129Labels[h.previous_mode])+' → '+esc(ef129Labels[h.new_mode])+'<br>'+esc(h.reason)+'</p></details>').join(''):'Sin cambios registrados para este permiso.';ef129Change();}
+ catch(e){if(seq===ef129Seq)ef129El('status').textContent='No se pudo cargar: '+e.message;}
+}
+function ef129Change(){const mode=ef129El('mode').value;ef129El('save').disabled=ef129Saving||!ef129Detail||mode===ef129Detail.mode||ef129El('reason').value.trim().length<5;ef129El('hint').textContent=mode==='assigned'?'Consulta únicamente las operaciones guardadas para esta persona. Primero guarda sus queues si necesitas cambiarlas.':mode==='all'?'Podrá consultar agentes de todas las campañas y queues del módulo.':mode==='qa'?'Conserva el alcance que ya corresponde al rol QA y sus asignaciones.':'No podrá consultar ni registrar acciones en este módulo. Insights y el formulario conservan sus permisos.';}
+async function ef129Save(){
+ if(!ea126Allowed||ef129Saving||ea126Busy||!ef129Detail||ef129El('save').disabled)return;
+ if(ea126Dirty()){ef129El('status').textContent='Primero guarda o descarta los cambios de operaciones. El permiso utiliza las operaciones guardadas.';return;}
+ const id=ea126Person.id,mode=ef129El('mode').value,reason=ef129El('reason').value.trim(),seq=ef129Seq;
+ if(!confirm('Cambiar Feedback y habilidades QA para '+ea126Person.name+' de “'+ef129Labels[ef129Detail.mode]+'” a “'+ef129Labels[mode]+'”. ¿Confirmar?'))return;
+ ef129Saving=true;ea126Busy=true;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea,#page-access-admin button').forEach(x=>x.disabled=true);ef129El('status').textContent='Guardando permiso…';
+ try{await ea126Rpc('echo_feedback_save_v129',{p_employee:id,p_mode:mode,p_expected:ef129Detail.expected,p_reason:reason});if(seq!==ef129Seq)return;toast('Permiso de Feedback actualizado');await ef129LoadDetail();ef129El('status').textContent='Guardado: '+ef129Labels[mode]+'. La persona debe recargar Echo.';}
+ catch(e){if(seq===ef129Seq)ef129El('status').textContent='No se confirmó el cambio: '+e.message;}
+ finally{if(ea126Person?.id===id){ef129Saving=false;ea126Busy=false;document.querySelectorAll('#page-access-admin input,#page-access-admin select,#page-access-admin textarea,#page-access-admin button').forEach(x=>x.disabled=false);ea126Preview();ef129Change();}}
+}
+window.addEventListener('focus',()=>{if(currentUser)ef129RefreshAccess();});
+window.addEventListener('beforeunload',e=>{if(ef129Detail&&ef129El('mode')?.value!==ef129Detail.mode){e.preventDefault();e.returnValue='';}});
 
 </script>
 </body>
