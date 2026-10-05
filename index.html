@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.31" name="echo-version"/>
+<meta content="1.0.32" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -847,7 +847,7 @@ body:has(#FORM_ID){padding:24px!important}#container{max-width:1580px!important;
 </div>
 </div>
 <!-- PAGE: MIS EVALUACIONES (AGENT ONLY) -->
-<div class="page" id="page-qa-followup"><div class="eqWrap"><h2>Feedback y habilidades QA</h2><p>Detecta brechas, documenta intervenciones y revisa la evidencia de mejora.</p><div class="eqToolbar"><label class="eqAgentField" for="eqAgentSelect">Agente<select id="eqAgentSelect" onchange="eqLoadAgent()" aria-describedby="eqAgentHint"><option value="">Selecciona un agente</option></select></label><button id="eqRefresh" onclick="eqLoad()">Actualizar</button></div><p id="eqAgentHint">Selecciona nombre + ID. La lista incluye agentes con evaluaciones creadas o interacciones en las últimas 4 semanas, o casos registrados dentro de tu acceso. El mapa se carga al seleccionar a uno.</p><details class="eqHelp"><summary>¿Para qué sirve y cómo lo uso?</summary><p>Este módulo ayuda a QA a detectar fallas por rubro, registrar el feedback trabajado con el agente y comprobar si la conducta mejora en evaluaciones posteriores.</p><ol><li>Selecciona al agente y abre la queue que quieras revisar: verás scores semanales por creación, desempeño por contact type, recomendaciones y mapa de habilidades. Por ejemplo, 2/8 significa dos fallas en ocho oportunidades evaluadas.</li><li>Abre «Ver / feedback», elige la evaluación que sustenta el registro y documenta el hallazgo, la acción esperada y la próxima revisión. Puedes registrar feedback sin esperar tres semanas.</li><li>Si el mismo agente falla en el mismo rubro y operación durante tres semanas calendario consecutivas, QA genera o actualiza los casos de ese agente al seleccionarlo o actualizarlo. Los agentes que no se consulten no se revisan automáticamente en esta pantalla. Una semana sin evidencia no cuenta como una semana de falla.</li><li>Registra avances y cierra con evidencia: se exige una intervención previa y una evaluación aprobada de un día posterior, sin fallas posteriores en ese rubro.</li></ol><p>El mapa acumula 4 semanas y muestra las cuatro más recientes en columnas. La tendencia compara las dos semanas más recientes con las dos anteriores: si sube la tasa de falla, hay deterioro. Bonos, respuestas No aplica y respuestas por validar no cuentan en la tasa.</p><p>QA registra y cierra seguimientos. Las cuentas de consulta solo revisan la información. La fecha de próxima revisión queda registrada; este módulo no envía recordatorios automáticos ni cambia la calificación original.</p></details><p id="eqStatus" role="status"></p><h3>Mapa de habilidades</h3><details style="margin:12px 0;color:#607087;font-size:14px"><summary style="cursor:pointer">Cómo leer el mapa</summary><p>Cada celda muestra fallas sobre oportunidades evaluadas. Una tendencia positiva significa mayor tasa de falla. Sin evidencia no equivale a mejora. El acumulado cubre 4 semanas; la tendencia compara las últimas dos con las dos anteriores.</p></details><div id="eqMap"></div><h3>Seguimiento por tres semanas consecutivas</h3><div id="eqCases"></div><section id="eqDetail">Selecciona un rubro o caso.</section></div></div>
+<div class="page" id="page-qa-followup"><div class="eqWrap"><h2>Feedback y habilidades QA</h2><p>Detecta brechas, documenta intervenciones y revisa la evidencia de mejora. Aplazo / Soporte cambió su guía el 05/oct/2026; compara resultados de la misma rúbrica.</p><div class="eqToolbar"><label class="eqAgentField" for="eqAgentSelect">Agente<select id="eqAgentSelect" onchange="eqLoadAgent()" aria-describedby="eqAgentHint"><option value="">Selecciona un agente</option></select></label><button id="eqRefresh" onclick="eqLoad()">Actualizar</button></div><p id="eqAgentHint">Selecciona nombre + ID. La lista incluye agentes con evaluaciones creadas o interacciones en las últimas 4 semanas, o casos registrados dentro de tu acceso. El mapa se carga al seleccionar a uno.</p><details class="eqHelp"><summary>¿Para qué sirve y cómo lo uso?</summary><p>Este módulo ayuda a QA a detectar fallas por rubro, registrar el feedback trabajado con el agente y comprobar si la conducta mejora en evaluaciones posteriores.</p><ol><li>Selecciona al agente y abre la queue que quieras revisar: verás scores semanales por creación, desempeño por contact type, recomendaciones y mapa de habilidades. Por ejemplo, 2/8 significa dos fallas en ocho oportunidades evaluadas.</li><li>Abre «Ver / feedback», elige la evaluación que sustenta el registro y documenta el hallazgo, la acción esperada y la próxima revisión. Puedes registrar feedback sin esperar tres semanas.</li><li>Si el mismo agente falla en el mismo rubro y operación durante tres semanas calendario consecutivas, QA genera o actualiza los casos de ese agente al seleccionarlo o actualizarlo. Los agentes que no se consulten no se revisan automáticamente en esta pantalla. Una semana sin evidencia no cuenta como una semana de falla.</li><li>Registra avances y cierra con evidencia: se exige una intervención previa y una evaluación aprobada de un día posterior, sin fallas posteriores en ese rubro.</li></ol><p>El mapa acumula 4 semanas y muestra las cuatro más recientes en columnas. La tendencia compara las dos semanas más recientes con las dos anteriores: si sube la tasa de falla, hay deterioro. Bonos, respuestas No aplica y respuestas por validar no cuentan en la tasa.</p><p>QA registra y cierra seguimientos. Las cuentas de consulta solo revisan la información. La fecha de próxima revisión queda registrada; este módulo no envía recordatorios automáticos ni cambia la calificación original.</p></details><p id="eqStatus" role="status"></p><h3>Mapa de habilidades</h3><details style="margin:12px 0;color:#607087;font-size:14px"><summary style="cursor:pointer">Cómo leer el mapa</summary><p>Cada celda muestra fallas sobre oportunidades evaluadas. Una tendencia positiva significa mayor tasa de falla. Sin evidencia no equivale a mejora. El acumulado cubre 4 semanas; la tendencia compara las últimas dos con las dos anteriores.</p></details><div id="eqMap"></div><h3>Seguimiento por tres semanas consecutivas</h3><div id="eqCases"></div><section id="eqDetail">Selecciona un rubro o caso.</section></div></div>
 <div class="page" id="page-mis-evaluaciones">
 <iframe id="qaAgentIframe" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-modals" title="Mis evaluaciones de QA"></iframe>
 </div>
@@ -2930,7 +2930,7 @@ body:has(#FORM_ID){padding:24px!important}#container{max-width:1580px!important;
 
   &lt;div class=&quot;filters-sticky-wrap&quot;&gt;
   &lt;div class=&quot;filters&quot;&gt;
-    &lt;div class=&quot;filters-grid&quot;&gt;
+    &lt;div class=&quot;filters-grid&quot;&gt;&lt;div&gt;&lt;label for=&quot;echoRubricVersion132&quot;&gt;Rúbrica Aplazo / Soporte&lt;/label&gt;&lt;select id=&quot;echoRubricVersion132&quot;&gt;&lt;option value=&quot;&quot;&gt;Todas las versiones&lt;/option&gt;&lt;option value=&quot;aplazo_soporte_2026_10_05&quot;&gt;Guía desde 05/oct/2026 · 25 rubros&lt;/option&gt;&lt;option value=&quot;legacy&quot;&gt;Guía anterior&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
       &lt;div&gt;&lt;label&gt;Fecha inicio&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;startDate&quot;&gt;&lt;/div&gt;
       &lt;div&gt;&lt;label&gt;Fecha fin&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;endDate&quot;&gt;&lt;/div&gt;
       &lt;div&gt;&lt;label&gt;Campaña&lt;/label&gt;&lt;select id=&quot;campaignFilter&quot;&gt;&lt;option value=&quot;&quot;&gt;Todas&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
@@ -3505,7 +3505,7 @@ async function fetchAllRows(queryBuilder, pageSize = 1000) {
 
 
 function echoSelectedContacts(){return [...document.querySelectorAll(&#x27;#echoContactOptions input:checked&#x27;)].map(x=&gt;x.value);}
-function echoContactFrom(relation,filtered=true){return {select(...args){let q=supabaseClient.from(relation+&#x27;_ct113&#x27;).select(...args);const selected=echoSelectedContacts();if(filtered&amp;&amp;selected.length)q=q.in(&#x27;echo_contact_key&#x27;,selected);return q;}};}
+function echoContactFrom(relation,filtered=true){return {select(...args){let q=supabaseClient.from(relation+&#x27;_ct113&#x27;).select(...args);const selected=echoSelectedContacts();if(filtered&amp;&amp;selected.length)q=q.in(&#x27;echo_contact_key&#x27;,selected);const rv=document.getElementById(&#x27;echoRubricVersion132&#x27;)?.value;if(filtered&amp;&amp;rv)q=q.eq(&#x27;rubric_version&#x27;,rv);return q;}};}
 function echoContactLabel(){const n=echoSelectedContacts().length;document.getElementById(&#x27;echoContactLabel&#x27;).textContent=n?n+&#x27; tipos seleccionados&#x27;:&#x27;Todos&#x27;;}
 function echoRefreshContacts(){
  const selected=new Set(echoSelectedContacts()),s=getCurrentFilterValues();
@@ -3952,6 +3952,10 @@ async function echoLoadDashboardData() {
   allEvalData = (await fetchAllRows(q)).map(normalizeEvaluationFilterKeys);
   document.getElementById(&quot;lastUpdated&quot;).textContent = `Actualizado: ${new Date().toLocaleString(&quot;es-MX&quot;)}`;
   document.getElementById(&quot;recordCount&quot;).textContent = `${allEvalData.length} registros`;
+  let note=document.getElementById(&#x27;e132-version-note&#x27;);if(!note){note=document.createElement(&#x27;p&#x27;);note.id=&#x27;e132-version-note&#x27;;note.style.cssText=&#x27;padding:12px 16px;background:#eafaff;border-left:4px solid #62d3f5;font-size:13px;line-height:1.6&#x27;;document.querySelector(&#x27;.filters&#x27;).after(note);}
+  const countNew=allEvalData.filter(x=&gt;x.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27;).length;
+  const countOld=allEvalData.filter(x=&gt;x.rubric_version===&#x27;legacy&#x27;).length;
+  note.hidden=!countNew&amp;&amp;!countOld;note.textContent=&#x27;Aplazo / Soporte: &#x27;+countNew+&#x27; evaluaciones con la guía de 25 rubros y &#x27;+countOld+&#x27; con la guía anterior. Los pesos cambiaron; usa el filtro de rúbrica para comparar la misma guía. Las semanas del Dashboard siguen por fecha de creación; el cero semanal afecta la semana de interacción.&#x27;;
   await Promise.all([
     loadExecutiveCards(filters), loadWeeklyTrend(filters), loadPareto(filters),
     loadWeeklyCompare(), loadHistogram(), loadCriticalErrors(filters),
@@ -4092,13 +4096,13 @@ async function buildRubricDetailTable() {
   const detView = document.getElementById(&quot;rubricDetailView&quot;);
   detView.innerHTML = &#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px 0;&quot;&gt;&lt;span class=&quot;loading-spinner&quot;&gt;&lt;/span&gt; Cargando detalle...&lt;/div&gt;&#x27;;
   const filters = getFilters();
-  let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,rubric_item,field_key,calculated_score,weight,failed_item,is_bonus&quot;);
+  let q = echoContactFrom(&quot;qa_v_evaluation_responses_detail&quot;).select(&quot;agent_identifier,rubric_item,field_key,calculated_score,weight,failed_item,is_bonus,rubric_version&quot;);
   if (filters.startDate) q=q.gte(&quot;created_at&quot;,filters.startDate+&quot;T00:00:00&quot;); if(filters.endDate) q=q.lte(&quot;created_at&quot;,filters.endDate+&quot;T23:59:59&quot;); if(filters.campaign) q=q.eq(&quot;campaign_key&quot;,filters.campaign); if(filters.lob) q=q.eq(&quot;lob_key&quot;,filters.lob); q = applyQueueFilter(q, filters); q = applyAgentFilter(q, filters); q = applyEvaluatorFilter(q, filters);
   const rawData = await fetchAllRows(q);
   if (!rawData||rawData.length===0){detView.innerHTML=&#x27;&lt;div class=&quot;muted&quot; style=&quot;padding:12px;&quot;&gt;No hay datos de rubros para este periodo.&lt;/div&gt;&#x27;;return;}
   const data=rawData.filter(r=&gt;!r.is_bonus);
   const rubricMap={};
-  data.forEach(row=&gt;{const rub=row.rubric_item||row.field_key||&quot;Sin rubro&quot;;const sc=Number(row.calculated_score||0);const mx=Number(row.weight||0);const fail=!!row.failed_item;if(!rubricMap[rub])rubricMap[rub]={sum:0,count:0,maxWeight:mx,failures:0};rubricMap[rub].sum+=sc;rubricMap[rub].count+=1;rubricMap[rub].failures+=fail?1:0;if(mx&gt;rubricMap[rub].maxWeight)rubricMap[rub].maxWeight=mx;});
+  data.forEach(row=&gt;{const rub=(row.rubric_item||row.field_key||&quot;Sin rubro&quot;)+(row.rubric_version===&#x27;legacy&#x27;?&#x27; · Guía anterior&#x27;:&#x27;&#x27;);const sc=Number(row.calculated_score||0);const mx=Number(row.weight||0);const fail=!!row.failed_item;if(!rubricMap[rub])rubricMap[rub]={sum:0,count:0,maxWeight:mx,failures:0};rubricMap[rub].sum+=sc;rubricMap[rub].count+=1;rubricMap[rub].failures+=fail?1:0;if(mx&gt;rubricMap[rub].maxWeight)rubricMap[rub].maxWeight=mx;});
   const rows=Object.entries(rubricMap).map(([rub,v])=&gt;({rubric:rub,pct:v.maxWeight&gt;0?(v.count?((v.sum/v.count)/v.maxWeight*100):0):0,failures:v.failures,count:v.count})).sort((a,b)=&gt;a.pct-b.pct);
   function rowColor(pct){if(pct&gt;=90)return{bg:&quot;#dcfce7&quot;,color:&quot;#166534&quot;};if(pct&gt;=70)return{bg:&quot;#fef9c3&quot;,color:&quot;#854d0e&quot;};return{bg:&quot;#fee2e2&quot;,color:&quot;#991b1b&quot;};}
   detView.innerHTML=`&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:13px;&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style=&quot;min-width:200px;&quot;&gt;Rubro&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Evaluaciones&lt;/th&gt;&lt;th style=&quot;text-align:center;&quot;&gt;Penalizaciones&lt;/th&gt;&lt;th style=&quot;text-align:center;min-width:100px;&quot;&gt;Score&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;${rows.map(r=&gt;{const c=rowColor(r.pct);return`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.rubric}&lt;/strong&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${r.count}&lt;/td&gt;&lt;td style=&quot;text-align:center;&quot;&gt;${r.failures}&lt;/td&gt;&lt;td style=&quot;text-align:center;background:${c.bg};color:${c.color};font-weight:800;border-radius:8px;&quot;&gt;${r.pct.toFixed(2)}%&lt;/td&gt;&lt;/tr&gt;`;}).join(&quot;&quot;)}&lt;/tbody&gt;&lt;/table&gt;`;
@@ -4391,7 +4395,7 @@ async function loadRubricTable(filters) {
   const rubricSet=new Set(),agentMap={};
   data.forEach(row=&gt;{
     const key=row.agent_identifier||row.agent_name||&quot;Unknown&quot;;
-    const rub=row.rubric_item||row.field_key||&quot;Sin rubro&quot;;
+    const rub=(row.rubric_item||row.field_key||&quot;Sin rubro&quot;)+(row.rubric_version===&#x27;legacy&#x27;?&#x27; · Guía anterior&#x27;:&#x27;&#x27;);
     rubricSet.add(rub);
     if(!agentMap[key])agentMap[key]={rubrics:{}};
     if(!agentMap[key].rubrics[rub])agentMap[key].rubrics[rub]={ok:0,count:0};
@@ -4503,7 +4507,7 @@ async function openEvalModal(key) {
   // Correction panel
   const correctionPanel = buildCorrectionPanel(row);
 
-  body.innerHTML = kpis + feedback + commitment + rubricSection + correctionPanel;
+  body.innerHTML = kpis + &#x27;&lt;p&gt;&lt;b&gt;Rúbrica:&lt;/b&gt; &#x27;+(row.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27;?&#x27;Aplazo / Soporte · 25 rubros · 05/oct/2026&#x27;:row.rubric_version===&#x27;legacy&#x27;?&#x27;Aplazo / Soporte · Guía anterior&#x27;:&#x27;Rúbrica de la operación&#x27;)+&#x27;&lt;/p&gt;&#x27;+(row.weekly_zero_applied?&#x27;&lt;p style=&quot;padding:12px;background:#fff1f2&quot;&gt;&lt;b&gt;Cero semanal aplicado.&lt;/b&gt; Score individual antes de la penalización semanal: &#x27;+Number(row.score_before_weekly_zero||0)+&#x27;%. Alcance: Aplazo / Soporte, semana de interacción.&lt;/p&gt;&#x27;:&#x27;&#x27;) + feedback + commitment + rubricSection + correctionPanel;
 
   // Wire correction form events after inject
   wireCorrectionForm();
@@ -4638,9 +4642,9 @@ function onCorrTypeChange() {
         return `
           &lt;div class=&quot;rubric-edit-row&quot;&gt;
             &lt;div class=&quot;rubric-edit-label&quot;&gt;${rub}&lt;/div&gt;
-            &lt;input type=&quot;number&quot; class=&quot;rubric-edit-input&quot; id=&quot;corrRub_${i}&quot;
+            ${currentEvalForCorrection?.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27; ? `&lt;select class=&quot;rubric-edit-input&quot; id=&quot;corrRub_${i}&quot;&gt;&lt;option value=&quot;${Number(r.weight)}&quot; ${sc&gt;0?&#x27;selected&#x27;:&#x27;&#x27;}&gt;Yes · ${Number(r.weight)} pts&lt;/option&gt;&lt;option value=&quot;0&quot; ${sc===0?&#x27;selected&#x27;:&#x27;&#x27;}&gt;No · 0 pts&lt;/option&gt;&lt;/select&gt;` : `&lt;input type=&quot;number&quot; class=&quot;rubric-edit-input&quot; id=&quot;corrRub_${i}&quot;
               value=&quot;${sc}&quot; min=&quot;0&quot; max=&quot;${r.weight||10}&quot; step=&quot;0.01&quot;
-              placeholder=&quot;0–${r.weight||10}&quot;&gt;
+              placeholder=&quot;0–${r.weight||10}&quot;&gt;`}
           &lt;/div&gt;`;
       }).join(&quot;&quot;);
     } else {
@@ -4683,7 +4687,8 @@ async function submitCorrection() {
       rubric_item    : r.rubric_item || r.field_key || `Rubro ${i+1}`,
       original_score : Number(r.calculated_score || 0),
       new_score      : Number(document.getElementById(`corrRub_${i}`)?.value || 0),
-      weight         : Number(r.weight || 0)
+      weight         : Number(r.weight || 0),
+      rubric_version : row.rubric_version || null
     }));
   }
 
@@ -4712,6 +4717,7 @@ async function submitCorrection() {
     evaluator_name           : row.evaluator_name || null
   };
 
+    if(type===&#x27;Corrección de score&#x27; &amp;&amp; row.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27; &amp;&amp; newRubricResponses){payload.new_score_raw=newRubricResponses.reduce((s,r)=&gt;s+r.new_score,0);payload.new_score_final=(row.critical_error_triggered||row.weekly_zero_applied)?0:payload.new_score_raw;}
     const { error } = await supabaseClient.from(&quot;qa_evaluation_corrections&quot;).insert([payload]);
     if (error) throw error;
 
@@ -4796,7 +4802,7 @@ async function openEvalSidePanel(key) {
   } catch(e) {}
 
   const correctionPanel = buildCorrectionPanel(row);
-  body.innerHTML = kpis + feedback + commitment + rubricSection + correctionPanel;
+  body.innerHTML = kpis + &#x27;&lt;p&gt;&lt;b&gt;Rúbrica:&lt;/b&gt; &#x27;+(row.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27;?&#x27;Aplazo / Soporte · 25 rubros · 05/oct/2026&#x27;:row.rubric_version===&#x27;legacy&#x27;?&#x27;Aplazo / Soporte · Guía anterior&#x27;:&#x27;Rúbrica de la operación&#x27;)+&#x27;&lt;/p&gt;&#x27;+(row.weekly_zero_applied?&#x27;&lt;p style=&quot;padding:12px;background:#fff1f2&quot;&gt;&lt;b&gt;Cero semanal aplicado.&lt;/b&gt; Score individual antes de la penalización semanal: &#x27;+Number(row.score_before_weekly_zero||0)+&#x27;%. Alcance: Aplazo / Soporte, semana de interacción.&lt;/p&gt;&#x27;:&#x27;&#x27;) + feedback + commitment + rubricSection + correctionPanel;
 }
 
 function closeEvalDetailPanel() {
@@ -6837,7 +6843,10 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
-    &lt;/style&gt;
+    .e132-rubric{color:#101820}.e132-intro{padding:8px 0 18px}.e132-intro h3{margin:0 0 8px}.e132-intro p{font-size:13px;color:#526779;line-height:1.6}.e132-section{border:1px solid #d6e3ec;border-radius:12px;margin-bottom:12px;background:#fff;overflow:hidden}.e132-section&gt;summary{cursor:pointer;padding:17px;display:flex;justify-content:space-between;gap:12px;align-items:center;background:#f3f9fc;font-weight:750;list-style:none}.e132-section&gt;summary:before{content:&#x27;▸&#x27;;color:#147792}.e132-section[open]&gt;summary:before{content:&#x27;▾&#x27;}.e132-section&gt;summary&gt;span{flex:1}.e132-section small{font-size:12px;font-weight:500;color:#536c7d}.e132-section-body{padding:0 18px}.e132-row{display:grid;grid-template-columns:minmax(0,1fr) 115px;gap:20px;padding:18px 0;border-bottom:1px solid #e8eff4;align-items:start}.e132-row:last-child{border-bottom:0}.e132-row label{display:block!important;font-size:14px!important;font-weight:700;margin:0 0 8px!important;white-space:normal;overflow-wrap:anywhere}.e132-row select{width:100%;min-height:42px;border:1px solid #afc5d5;border-radius:8px;background:#fff;color:#101820;padding:8px}.e132-row select:focus{outline:3px solid #62d3f555;border-color:#1986a6}.e132-guide{margin-top:10px;font-size:13px;line-height:1.6}.e132-guide&gt;summary{color:#126780;cursor:pointer}.e132-guide p{white-space:pre-wrap;color:#42596b}.e132-critical&gt;summary{background:#fff5f3}.e132-prior{margin-top:12px;padding:12px;background:#f5f9fc;border-radius:8px}.e132-prior input{display:block;width:100%;margin:6px 0 12px}.e132-section-body&gt;p,#e132-penalty{font-size:13px;line-height:1.6}#e132-total{display:block;color:#126780}#e132-penalty{padding:14px;background:#eafaff;border-left:4px solid #62d3f5}select:disabled{opacity:1;background:#edf5f8!important;color:#536c7d!important}@media(max-width:600px){.e132-row{grid-template-columns:1fr;gap:10px}.e132-row select{max-width:180px}.e132-section&gt;summary{flex-wrap:wrap}.e132-section&gt;summary small{width:100%;padding-left:20px}}
+.e132-row select{appearance:auto!important}
+
+&lt;/style&gt;
 &lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
 &lt;style id=&quot;echo-form-theme-110&quot;&gt;/* Echo 1.0.10: superficie de trabajo, accesible y compacta. */
 :root{--text-dark:#12233b;--text-body:#22354b;--text-muted:#607087;--primary:#087f9b;--border:#d8e2eb;--bg-section:#f6f9fc}
@@ -6958,7 +6967,7 @@ body:has(#FORM_ID){padding:24px!important}#container{max-width:1580px!important;
 &lt;option value=&quot;&quot;&gt;Select Outcome&lt;/option&gt;
 &lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;contactType&quot;&gt;Tipo de contacto&lt;/label&gt;&lt;select id=&quot;contactType&quot; name=&quot;contactType&quot; required=&quot;&quot;&gt;
 &lt;option value=&quot;&quot;&gt;Select Contact Type&lt;/option&gt;
-&lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;interactionDate&quot;&gt;Fecha de interacción&lt;/label&gt;&lt;input id=&quot;interactionDate&quot; name=&quot;Interaction Date&quot; required type=&quot;date&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;
+&lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;interactionDate&quot;&gt;Fecha de interacción · determina la rúbrica&lt;/label&gt;&lt;input id=&quot;interactionDate&quot; name=&quot;Interaction Date&quot; required type=&quot;date&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;
 &lt;p id=&quot;eaNotice&quot; class=&quot;eiMuted&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;&lt;details id=&quot;eiPanel&quot;&gt;&lt;summary&gt;Insights del agente &lt;span id=&quot;eiBadge&quot;&gt;Contexto del agente&lt;/span&gt;&lt;/summary&gt;&lt;div style=&quot;padding:0 22px 14px&quot;&gt;&lt;label for=&quot;eiScopeSelect&quot;&gt;Ver historial de&lt;/label&gt;&lt;select id=&quot;eiScopeSelect&quot;&gt;&lt;option value=&quot;agent&quot;&gt;Agente completo&lt;/option&gt;&lt;option value=&quot;operation&quot;&gt;Esta operación · todos los contact types&lt;/option&gt;&lt;option value=&quot;contact&quot;&gt;Este tipo de contacto&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;div id=&quot;eiBody&quot; aria-live=&quot;polite&quot;&gt;Selecciona un agente. Para acotar el historial, completa la operación y el tipo de contacto según el alcance elegido.&lt;/div&gt;&lt;/details&gt;
 &lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;02&lt;/span&gt;&lt;h3&gt;Evaluación por rubro&lt;/h3&gt;&lt;/div&gt;&lt;div id=&quot;dynamicRubricContainer&quot;&gt;&lt;/div&gt;&lt;/section&gt;
 &lt;section class=&quot;efSection&quot;&gt;&lt;div class=&quot;efHeading&quot;&gt;&lt;span class=&quot;efNumber&quot;&gt;03&lt;/span&gt;&lt;h3&gt;Evidencia y feedback&lt;/h3&gt;&lt;/div&gt;&lt;div class=&quot;efGrid efEvidence&quot;&gt;&lt;div class=&quot;efField efFull&quot;&gt;&lt;label for=&quot;feedback&quot;&gt;Feedback de la evaluación&lt;/label&gt;&lt;textarea id=&quot;feedback&quot; name=&quot;Feedback&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;link&quot;&gt;Enlace a la interacción&lt;/label&gt;&lt;textarea id=&quot;link&quot; name=&quot;Link&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;div class=&quot;efField &quot;&gt;&lt;label for=&quot;conversation&quot;&gt;Conversación / notas&lt;/label&gt;&lt;textarea id=&quot;conversation&quot; name=&quot;Conversation&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;
@@ -7127,6 +7136,7 @@ async function loadAgentNamesFromSupabase() {
       option.value = agent.name;
       option.textContent = agent.name + &#x27; · &#x27; + agent.id + ([&#x27;CX00323&#x27;,&#x27;CX00324&#x27;].includes(agent.id) ? &#x27; · Elite&#x27; : normalizeText(agent.role)===&#x27;supervisor&#x27; ? &#x27; · Supervisor&#x27; : &#x27;&#x27;);
       option.dataset.agentId = agent.id;
+      option.dataset.role = normalizeText(agent.role);
       option.dataset.campaign = agent.campaign;
       option.dataset.lob = agent.lob;
       option.dataset.queue = agent.queue;
@@ -7356,6 +7366,8 @@ async function loadAgentNamesFromSupabase() {
   const campaignKey = normalizeKey(campaign);
   const lobKey = getRubricLobKey(campaign, lob, queue);
   const queueKey = normalizeKey(queue);
+  const rubricDate=document.getElementById(&quot;interactionDate&quot;).value;
+  if(!rubricDate)return;
 
   const { data: group, error: groupError } = await supabaseClient
     .from(&quot;qa_rubric_groups&quot;)
@@ -7364,6 +7376,8 @@ async function loadAgentNamesFromSupabase() {
     .eq(&quot;lob_key&quot;, lobKey)
     .eq(&quot;queue_key&quot;, queueKey)
     .eq(&quot;is_active&quot;, true)
+    .or(`effective_from.is.null,effective_from.lte.${rubricDate}`)
+    .or(`effective_until.is.null,effective_until.gt.${rubricDate}`)
     .maybeSingle();
 
   if(rubricGeneration!==echoRubricGeneration)return;
@@ -7430,6 +7444,8 @@ async function loadAgentNamesFromSupabase() {
         .eq(&quot;lob_key&quot;, &quot;soporte&quot;)
         .eq(&quot;queue_key&quot;, &quot;race&quot;)
         .eq(&quot;is_active&quot;, true)
+        .or(`effective_from.is.null,effective_from.lte.${rubricDate}`)
+        .or(`effective_until.is.null,effective_until.gt.${rubricDate}`)
         .maybeSingle();
 
     if(rubricGeneration!==echoRubricGeneration)return;
@@ -7475,6 +7491,7 @@ async function loadAgentNamesFromSupabase() {
 
 
         function renderDynamicRubric() {
+          if(e132New())return e132Render();
           const container = document.getElementById(&quot;dynamicRubricContainer&quot;);
         
           let html = `
@@ -7491,7 +7508,7 @@ async function loadAgentNamesFromSupabase() {
         
             html += `
               &lt;label for=&quot;rubric_${item.id}&quot;&gt;
-                ${item.display_label} (${Number(item.weight).toFixed(0)} pts)
+                ${item.display_label} (${Number(item.weight)} pts)
               &lt;/label&gt;
               &lt;select 
                 id=&quot;rubric_${item.id}&quot; 
@@ -7569,9 +7586,63 @@ async function loadAgentNamesFromSupabase() {
           const finalScore = hasCriticalError ? 0 : baseScore + bonusScore;
         
           document.getElementById(&quot;evaluationScore&quot;).value = Number(finalScore).toFixed(2);
+          e132Update();
         }
         
-        function getDynamicResponses() {
+        // Aplazo / Soporte: 25 respuestas independientes, sin N/A.
+function e132New(){return currentRubricGroup?.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27;;}
+function e132Esc(v){return String(v??&#x27;&#x27;).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));}
+function e132Guide(yes,no){return &#x27;&lt;details class=&quot;e132-guide&quot;&gt;&lt;summary&gt;Ver criterio&lt;/summary&gt;&lt;p&gt;&lt;b&gt;Yes · Cumple&lt;/b&gt;&lt;br&gt;&#x27;+e132Esc(yes)+&#x27;&lt;/p&gt;&lt;p&gt;&lt;b&gt;No · No cumple&lt;/b&gt;&lt;br&gt;&#x27;+e132Esc(no)+&#x27;&lt;/p&gt;&lt;/details&gt;&#x27;;}
+function e132Render(){
+ const groups=new Map();currentRubricItems.forEach(i=&gt;{if(!groups.has(i.category))groups.set(i.category,[]);groups.get(i.category).push(i);});
+ let h=&#x27;&lt;div class=&quot;e132-rubric&quot;&gt;&lt;div class=&quot;e132-intro&quot;&gt;&lt;h3&gt;&#x27;+e132Esc(currentRubricGroup.display_name)+&#x27;&lt;/h3&gt;&lt;p&gt;25 rubros · 100 puntos · Yes = cumple / No = no cumple. Cada respuesta se registra por separado.&lt;/p&gt;&lt;p&gt;Valora las condiciones y excepciones descritas en cada criterio. Los criterios condicionales no se penalizan si no ocurre la situación que describe «No cumple».&lt;/p&gt;&lt;strong id=&quot;e132-total&quot; aria-live=&quot;polite&quot;&gt;&lt;/strong&gt;&lt;/div&gt;&#x27;;
+ let n=0;for(const [name,items] of groups){h+=&#x27;&lt;details class=&quot;e132-section&quot; &#x27;+(n++===0?&#x27;open&#x27;:&#x27;&#x27;)+&#x27;&gt;&lt;summary&gt;&lt;span&gt;&#x27;+e132Esc(name)+&#x27;&lt;/span&gt;&lt;small&gt;&#x27;+items.reduce((s,i)=&gt;s+Number(i.weight),0)+&#x27; pts · &lt;span class=&quot;e132-progress&quot;&gt;&lt;/span&gt;&lt;/small&gt;&lt;/summary&gt;&lt;div class=&quot;e132-section-body&quot;&gt;&#x27;;
+ for(const i of items){h+=&#x27;&lt;div class=&quot;e132-row&quot;&gt;&lt;div&gt;&lt;label for=&quot;rubric_&#x27;+i.id+&#x27;&quot;&gt;&#x27;+e132Esc(i.display_label)+&#x27;&lt;/label&gt;&lt;small&gt;&#x27;+e132Esc(i.field_key)+&#x27; · &#x27;+Number(i.weight)+&#x27; pts&lt;/small&gt;&#x27;+e132Guide(i.guidance_yes,i.guidance_no)+&#x27;&lt;/div&gt;&lt;select required class=&quot;dynamic-rubric-select&quot; id=&quot;rubric_&#x27;+i.id+&#x27;&quot; data-rubric-item-id=&quot;&#x27;+i.id+&#x27;&quot; data-weight=&quot;&#x27;+i.weight+&#x27;&quot; data-scoring-type=&quot;standard&quot; data-is-bonus=&quot;false&quot; onchange=&quot;updateDynamicScore()&quot;&gt;&lt;option value=&quot;&quot;&gt;Selecciona&lt;/option&gt;&#x27;+(i.qa_rubric_options||[]).filter(o=&gt;o.is_active).sort((a,b)=&gt;a.display_order-b.display_order).map(o=&gt;&#x27;&lt;option value=&quot;&#x27;+o.id+&#x27;&quot; data-multiplier=&quot;&#x27;+o.score_multiplier+&#x27;&quot; data-option-key=&quot;&#x27;+e132Esc(o.option_key)+&#x27;&quot;&gt;&#x27;+e132Esc(o.display_label)+&#x27;&lt;/option&gt;&#x27;).join(&#x27;&#x27;)+&#x27;&lt;/select&gt;&lt;/div&gt;&#x27;;}
+ h+=&#x27;&lt;/div&gt;&lt;/details&gt;&#x27;;}
+ h+=&#x27;&lt;details class=&quot;e132-section e132-critical&quot;&gt;&lt;summary&gt;&lt;span&gt;Criterios críticos y reincidencia&lt;/span&gt;&lt;small&gt;14 criterios · &lt;span class=&quot;e132-progress&quot;&gt;&lt;/span&gt;&lt;/small&gt;&lt;/summary&gt;&lt;div class=&quot;e132-section-body&quot;&gt;&lt;p&gt;Yes = cumple. No activa la penalización indicada. Puedes registrar más de una falla en la misma interacción.&lt;/p&gt;&#x27;;
+ for(const f of currentPolicyFlags){const recurrent=f.policy_key.startsWith(&#x27;ECR-&#x27;);h+=&#x27;&lt;div class=&quot;e132-row&quot;&gt;&lt;div&gt;&lt;label for=&quot;critical_&#x27;+f.id+&#x27;&quot;&gt;&#x27;+e132Esc(f.display_label)+&#x27;&lt;/label&gt;&lt;small&gt;&#x27;+e132Esc(f.policy_key)+&#x27; · &#x27;+(f.weekly_zero?&#x27;Cero semanal · Aplazo / Soporte&#x27;:&#x27;Cero en esta evaluación&#x27;)+&#x27;&lt;/small&gt;&#x27;+e132Guide(f.guidance_yes,f.guidance_no)+(recurrent?&#x27;&lt;div class=&quot;e132-prior&quot; data-for=&quot;&#x27;+f.id+&#x27;&quot; hidden&gt;&lt;label&gt;Enlace al feedback previo&lt;input id=&quot;evidence_&#x27;+f.id+&#x27;&quot; type=&quot;url&quot; placeholder=&quot;https://…&quot;&gt;&lt;/label&gt;&lt;label&gt;Fecha del feedback previo&lt;input id=&quot;feedback_date_&#x27;+f.id+&#x27;&quot; type=&quot;date&quot;&gt;&lt;/label&gt;&lt;small&gt;QA confirma que la nueva falla ocurrió después del feedback citado.&lt;/small&gt;&lt;/div&gt;&#x27;:&#x27;&#x27;)+&#x27;&lt;/div&gt;&lt;select class=&quot;e132-policy&quot; required id=&quot;critical_&#x27;+f.id+&#x27;&quot; data-flag-id=&quot;&#x27;+f.id+&#x27;&quot; data-key=&quot;&#x27;+e132Esc(f.policy_key)+&#x27;&quot; data-weekly=&quot;&#x27;+f.weekly_zero+&#x27;&quot; onchange=&quot;updateDynamicScore()&quot;&gt;&lt;option value=&quot;&quot;&gt;Selecciona&lt;/option&gt;&lt;option value=&quot;Yes&quot;&gt;Yes&lt;/option&gt;&lt;option value=&quot;No&quot;&gt;No&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&#x27;;}
+ h+=&#x27;&lt;/div&gt;&lt;/details&gt;&lt;p id=&quot;e132-penalty&quot; role=&quot;status&quot;&gt;&lt;/p&gt;&lt;/div&gt;&#x27;;
+ document.getElementById(&#x27;dynamicRubricContainer&#x27;).innerHTML=h;
+ document.querySelectorAll(&#x27;.e132-section,.e132-guide&#x27;).forEach(d=&gt;d.addEventListener(&#x27;toggle&#x27;,notifyParentHeight));
+ e132ApplyExceptions();updateDynamicScore();notifyParentHeight();
+}
+function e132ApplyExceptions(){
+ if(!e132New())return;
+ const agentSelect=document.getElementById(&#x27;agentName&#x27;);const sup=agentSelect.options[agentSelect.selectedIndex]?.dataset.role===&#x27;supervisor&#x27;;
+ document.querySelectorAll(&#x27;.e132-policy&#x27;).forEach(s=&gt;{if([&#x27;FCR-002&#x27;,&#x27;FCR-004&#x27;].includes(s.dataset.key)){
+ if(sup){s.value=&#x27;Yes&#x27;;s.disabled=true;s.title=&#x27;Excepción de la guía: permitido a supervisores&#x27;;s.dataset.exempt=&#x27;true&#x27;;}
+ else if(s.dataset.exempt){s.disabled=false;s.value=&#x27;&#x27;;delete s.dataset.exempt;s.title=&#x27;&#x27;;}
+ }});
+}
+function e132Update(){
+ if(!e132New())return;
+ e132ApplyExceptions();const selects=[...document.querySelectorAll(&#x27;.dynamic-rubric-select&#x27;)];
+ document.getElementById(&#x27;e132-total&#x27;).textContent=selects.filter(s=&gt;s.value).length+&#x27; / 25 rubros contestados&#x27;;
+ document.querySelectorAll(&#x27;.e132-section&#x27;).forEach(d=&gt;{const ss=[...d.querySelectorAll(&#x27;select&#x27;)];d.querySelector(&#x27;.e132-progress&#x27;).textContent=ss.filter(s=&gt;s.value).length+&#x27;/&#x27;+ss.length;});
+ const flags=[...document.querySelectorAll(&#x27;.e132-policy&#x27;)].filter(s=&gt;s.value===&#x27;No&#x27;);
+ document.querySelectorAll(&#x27;.e132-prior&#x27;).forEach(d=&gt;{d.hidden=document.getElementById(&#x27;critical_&#x27;+d.dataset.for).value!==&#x27;No&#x27;;d.querySelectorAll(&#x27;input&#x27;).forEach(i=&gt;i.required=!d.hidden);});
+ const weekly=flags.some(s=&gt;s.dataset.weekly===&#x27;true&#x27;);
+ if(flags.length)document.getElementById(&#x27;evaluationScore&#x27;).value=&#x27;0.00&#x27;;
+ const date=document.getElementById(&#x27;interactionDate&#x27;).value;
+ let period=&#x27;&#x27;;if(date){const d=new Date(date+&#x27;T12:00:00Z&#x27;);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));const end=new Date(d);end.setUTCDate(d.getUTCDate()+6);period=d.toISOString().slice(0,10)+&#x27; al &#x27;+end.toISOString().slice(0,10);}
+ document.getElementById(&#x27;e132-penalty&#x27;).textContent=weekly?&#x27;Se activará cero semanal en Aplazo / Soporte: &#x27;+period+&#x27;. Se conserva el score individual para consulta.&#x27;:flags.length?&#x27;Se activará cero únicamente en esta evaluación.&#x27;:&#x27;Sin errores críticos seleccionados. Al guardar se validará si existe un cero semanal para este agente.&#x27;;
+ notifyParentHeight();
+}
+function e132Answers(){return [...document.querySelectorAll(&#x27;.e132-policy&#x27;)].map(s=&gt;({policy_flag_id:s.dataset.flagId,answer:s.value,evidence:document.getElementById(&#x27;evidence_&#x27;+s.dataset.flagId)?.value.trim()||null,feedback_date:document.getElementById(&#x27;feedback_date_&#x27;+s.dataset.flagId)?.value||null}));}
+function e132Validate(){
+ if(!e132New())return [];
+ const errors=[];document.querySelectorAll(&#x27;.e132-policy&#x27;).forEach(s=&gt;{if(!s.value)errors.push(&#x27;• &#x27;+s.dataset.key+&#x27;: elige Yes o No&#x27;);});
+ for(const a of e132Answers()){const f=currentPolicyFlags.find(f=&gt;f.id===a.policy_flag_id);if(f.policy_key.startsWith(&#x27;ECR-&#x27;)&amp;&amp;a.answer===&#x27;No&#x27;){
+ if(!/^https?:\/\//i.test(a.evidence||&#x27;&#x27;))errors.push(&#x27;• &#x27;+f.policy_key+&#x27;: enlaza el feedback previo&#x27;);
+ if(!a.feedback_date||a.feedback_date&gt;document.getElementById(&#x27;interactionDate&#x27;).value)errors.push(&#x27;• &#x27;+f.policy_key+&#x27;: revisa la fecha del feedback previo&#x27;);
+ }}
+ document.querySelectorAll(&#x27;.e132-section&#x27;).forEach(d=&gt;{if([...d.querySelectorAll(&#x27;select&#x27;)].some(s=&gt;!s.value)||[...d.querySelectorAll(&#x27;input[required]&#x27;)].some(i=&gt;!i.value))d.open=true;});
+ return errors;
+}
+document.getElementById(&#x27;interactionDate&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{if(document.getElementById(&#x27;Queue&#x27;).value)loadRubricFromSupabase();});
+document.getElementById(&#x27;agentName&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{e132ApplyExceptions();if(e132New())updateDynamicScore();});
+
+function getDynamicResponses() {
           return Array.from(document.querySelectorAll(&quot;.dynamic-rubric-select&quot;)).map(select =&gt; {
             const selectedOption = select.options[select.selectedIndex];
         
@@ -7745,7 +7816,7 @@ async function addEvaluation() {
   }
 
   // ── Validaciones ──────────────────────────────────────────────
-  const errors = [];
+  const errors = e132Validate();
 
   // Campos base
   if (!document.getElementById(&quot;agentName&quot;).value)
@@ -7811,6 +7882,7 @@ async function addEvaluation() {
     evaluator_name: getEvaluatorFromURL(),
   };
 
+  if(e132New()){payload.policy_answers=e132Answers();}
   const responses = getDynamicResponses();
 
   if (responses.length === 0) {
@@ -7956,7 +8028,7 @@ if(seq!==eiSequence)return;if(!data)throw new Error(&#x27;Respuesta vacía.&#x27
 }catch(error){if(seq!==eiSequence)return;eiMessage(error.code===&#x27;42501&#x27;?&#x27;Tu cuenta no tiene permiso para consultar esta operación.&#x27;:&#x27;No se pudo consultar el historial. Puedes continuar evaluando.&#x27;);document.getElementById(&#x27;eiBadge&#x27;).textContent=&#x27;Historial no disponible&#x27;;if(error.code!==&#x27;42501&#x27;){const b=document.createElement(&#x27;button&#x27;);b.type=&#x27;button&#x27;;b.className=&#x27;eiLink&#x27;;b.textContent=&#x27;Reintentar&#x27;;b.onclick=()=&gt;eiSchedule(false);document.getElementById(&#x27;eiBody&#x27;).appendChild(b);}}}
 function eiRender(d){const c=d.current,p=d.previous;const delta=c.average!=null&amp;&amp;p.average!=null?Number(c.average)-Number(p.average):null;const scope=d.scope.all_types?&#x27;Toda la queue · todos los tipos de contacto&#x27;:&#x27;Combinación exacta · &#x27;+d.scope.contact_type;
 document.getElementById(&#x27;eiBadge&#x27;).textContent=c.evaluations?c.evaluations+&#x27; evaluaciones recientes&#x27;:&#x27;Sin evaluaciones recientes&#x27;;
-let h=&#x27;&lt;p class=&quot;eiScope&quot;&gt;&#x27;+eiEsc(scope)+&#x27;&lt;/p&gt;&lt;div class=&quot;eiMetrics&quot;&gt;&lt;div&gt;&lt;span&gt;Score · últimas 4 semanas&lt;/span&gt;&lt;strong&gt;&#x27;+(c.average==null?&#x27;—&#x27;:eiEsc(c.average)+&#x27;%&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+c.scored+&#x27; con score / &#x27;+c.evaluations+&#x27; evaluaciones&lt;/small&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;Frente a 4 semanas previas&lt;/span&gt;&lt;strong&gt;&#x27;+(delta==null?&#x27;Sin comparación&#x27;:(delta&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+delta.toFixed(1)+&#x27; pp&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+p.scored+&#x27; con score / &#x27;+p.evaluations+&#x27; evaluaciones previas&lt;/small&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+let h=&#x27;&lt;p class=&quot;eiScope&quot;&gt;&#x27;+eiEsc(scope)+&#x27;&lt;/p&gt;&lt;p class=&quot;eiNotice&quot;&gt;Aplazo / Soporte cambió de rúbrica el 05/oct/2026. Si el periodo cruza esa fecha, el score puede incluir guías con pesos distintos.&lt;/p&gt;&lt;div class=&quot;eiMetrics&quot;&gt;&lt;div&gt;&lt;span&gt;Score · últimas 4 semanas&lt;/span&gt;&lt;strong&gt;&#x27;+(c.average==null?&#x27;—&#x27;:eiEsc(c.average)+&#x27;%&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+c.scored+&#x27; con score / &#x27;+c.evaluations+&#x27; evaluaciones&lt;/small&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;Frente a 4 semanas previas&lt;/span&gt;&lt;strong&gt;&#x27;+(delta==null?&#x27;Sin comparación&#x27;:(delta&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+delta.toFixed(1)+&#x27; pp&#x27;)+&#x27;&lt;/strong&gt;&lt;small&gt;&#x27;+p.scored+&#x27; con score / &#x27;+p.evaluations+&#x27; evaluaciones previas&lt;/small&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
 if(!c.evaluations)h+=&#x27;&lt;p&gt;No hay historial reciente para este alcance. Esto no indica buen o mal desempeño.&lt;/p&gt;&#x27;;
 h+=&#x27;&lt;small&gt;&#x27;+eiEsc(d.current_from)+&#x27; a &#x27;+eiEsc(d.today)+&#x27; · Previo: &#x27;+eiEsc(d.previous_from)+&#x27; a &#x27;+eiEsc(d.previous_to)+&#x27;&lt;/small&gt;&#x27;;
 if(c.evaluations&gt;0&amp;&amp;c.evaluations&lt;5)h+=&#x27;&lt;p class=&quot;eiNotice&quot;&gt;Poca evidencia: interpreta la tendencia con cautela.&lt;/p&gt;&#x27;;
@@ -9599,7 +9671,7 @@ function openCorrModal(id) {
               &lt;span style=&quot;font-size:11px;color:#64748b;&quot;&gt;${r.original_score??&#x27;—&#x27;}&lt;/span&gt;
               &lt;span style=&quot;font-size:11px;color:#94a3b8;&quot;&gt;→&lt;/span&gt;
               ${isPending
-                ? `&lt;input type=&quot;number&quot; class=&quot;rubric-score&quot; id=&quot;c-rub-${i}&quot; value=&quot;${esc(String(r.new_score??&#x27;&#x27;))}&quot; min=&quot;0&quot; max=&quot;${esc(String(r.weight||10))}&quot; step=&quot;0.01&quot;&gt;`
+                ? `${r.rubric_version===&#x27;aplazo_soporte_2026_10_05&#x27; ? `&lt;select class=&quot;rubric-score&quot; id=&quot;c-rub-${i}&quot;&gt;&lt;option value=&quot;${Number(r.weight)}&quot; ${Number(r.new_score)&gt;0?&#x27;selected&#x27;:&#x27;&#x27;}&gt;Yes&lt;/option&gt;&lt;option value=&quot;0&quot; ${Number(r.new_score)===0?&#x27;selected&#x27;:&#x27;&#x27;}&gt;No&lt;/option&gt;&lt;/select&gt;` : `&lt;input type=&quot;number&quot; class=&quot;rubric-score&quot; id=&quot;c-rub-${i}&quot; value=&quot;${esc(String(r.new_score??&#x27;&#x27;))}&quot; min=&quot;0&quot; max=&quot;${esc(String(r.weight||10))}&quot; step=&quot;0.01&quot;&gt;`}`
                 : `&lt;span style=&quot;color:#16a34a;font-weight:700;&quot;&gt;${r.new_score??&#x27;—&#x27;}&lt;/span&gt;`}
               &lt;span style=&quot;font-size:11px;color:#94a3b8;&quot;&gt;/ ${r.weight??&#x27;—&#x27;}&lt;/span&gt;
             &lt;/div&gt;`).join(&quot;&quot;)}
@@ -9739,7 +9811,8 @@ async function resolveCorrection(newStatus) {
           rubric_item_id: row.dataset.rubricItemId || origRub.rubric_item_id || null,
           rubric_item:    origRub.rubric_item || origRub.rubric_name || `Rubro ${i+1}`,
           new_score:      parseFloat(document.getElementById(`c-rub-${i}`)?.value ?? origRub.new_score ?? 0),
-          weight:         origRub.weight || 0
+          weight:         origRub.weight || 0,
+          rubric_version: origRub.rubric_version || null
         };
       });
     }
@@ -9806,7 +9879,7 @@ async function resolveCorrection(newStatus) {
         await fetch(
           `${SB_URL}/rest/v1/qa_evaluations?id=eq.${ACTIVE_CORRECTION.evaluation_id}`,
           { method:&quot;PATCH&quot;, headers:H, body:JSON.stringify(evalUpdate) }
-        ).catch(e =&gt; console.warn(&quot;Error actualizando evaluación:&quot;, e));
+        ).then(async r=&gt;{if(!r.ok){const e=await r.json().catch(()=&gt;({}));throw new Error(e.message||&quot;No se pudo actualizar la evaluación&quot;);}});
       }
 
       // 3. Update rubric responses
@@ -9816,7 +9889,7 @@ async function resolveCorrection(newStatus) {
           await fetch(
             `${SB_URL}/rest/v1/qa_evaluation_responses?evaluation_id=eq.${ACTIVE_CORRECTION.evaluation_id}&amp;rubric_item_id=eq.${rub.rubric_item_id}`,
             { method:&quot;PATCH&quot;, headers:H, body:JSON.stringify({ calculated_score: rub.new_score }) }
-          ).catch(e =&gt; console.warn(&quot;Error actualizando rubro:&quot;, e));
+          ).then(async r=&gt;{if(!r.ok){const e=await r.json().catch(()=&gt;({}));throw new Error(e.message||&quot;No se pudo actualizar el rubro&quot;);}});
         }
       }
     }
@@ -10201,7 +10274,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.31";
+const ECHO_APP_VERSION = "1.0.32";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
