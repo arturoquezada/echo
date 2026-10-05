@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Echo — Role-Based QA · Survey Fix V2</title>
-<meta content="1.0.32" name="echo-version"/>
+<meta content="1.0.33" name="echo-version"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6846,6 +6846,8 @@ document.addEventListener(&quot;DOMContentLoaded&quot;, async () =&gt; {
     .e132-rubric{color:#101820}.e132-intro{padding:8px 0 18px}.e132-intro h3{margin:0 0 8px}.e132-intro p{font-size:13px;color:#526779;line-height:1.6}.e132-section{border:1px solid #d6e3ec;border-radius:12px;margin-bottom:12px;background:#fff;overflow:hidden}.e132-section&gt;summary{cursor:pointer;padding:17px;display:flex;justify-content:space-between;gap:12px;align-items:center;background:#f3f9fc;font-weight:750;list-style:none}.e132-section&gt;summary:before{content:&#x27;▸&#x27;;color:#147792}.e132-section[open]&gt;summary:before{content:&#x27;▾&#x27;}.e132-section&gt;summary&gt;span{flex:1}.e132-section small{font-size:12px;font-weight:500;color:#536c7d}.e132-section-body{padding:0 18px}.e132-row{display:grid;grid-template-columns:minmax(0,1fr) 115px;gap:20px;padding:18px 0;border-bottom:1px solid #e8eff4;align-items:start}.e132-row:last-child{border-bottom:0}.e132-row label{display:block!important;font-size:14px!important;font-weight:700;margin:0 0 8px!important;white-space:normal;overflow-wrap:anywhere}.e132-row select{width:100%;min-height:42px;border:1px solid #afc5d5;border-radius:8px;background:#fff;color:#101820;padding:8px}.e132-row select:focus{outline:3px solid #62d3f555;border-color:#1986a6}.e132-guide{margin-top:10px;font-size:13px;line-height:1.6}.e132-guide&gt;summary{color:#126780;cursor:pointer}.e132-guide p{white-space:pre-wrap;color:#42596b}.e132-critical&gt;summary{background:#fff5f3}.e132-prior{margin-top:12px;padding:12px;background:#f5f9fc;border-radius:8px}.e132-prior input{display:block;width:100%;margin:6px 0 12px}.e132-section-body&gt;p,#e132-penalty{font-size:13px;line-height:1.6}#e132-total{display:block;color:#126780}#e132-penalty{padding:14px;background:#eafaff;border-left:4px solid #62d3f5}select:disabled{opacity:1;background:#edf5f8!important;color:#536c7d!important}@media(max-width:600px){.e132-row{grid-template-columns:1fr;gap:10px}.e132-row select{max-width:180px}.e132-section&gt;summary{flex-wrap:wrap}.e132-section&gt;summary small{width:100%;padding-left:20px}}
 .e132-row select{appearance:auto!important}
 
+.e133-option{padding:16px 0;border-bottom:1px solid #e0e9f0}.e133-option:last-child{border-bottom:0}.e133-choice{display:flex!important;align-items:flex-start;gap:12px;cursor:pointer;margin:0!important;text-transform:none!important}.e133-choice input.e133-check{appearance:auto!important;display:block!important;width:20px!important;height:20px!important;min-height:20px!important;flex:0 0 20px;margin:2px 0!important;padding:0!important;accent-color:#147c9b}.e133-choice span{min-width:0}.e133-choice b{display:block;font-size:14px;line-height:1.5}.e133-choice small,.e133-card&gt;small{display:block;margin-top:5px;color:#5b7181;font-size:12px}.e133-option&gt;.e132-guide{margin-left:32px}.e133-exempt{font-size:12px;color:#596d7c;margin:8px 0 0 32px}.e133-selection{display:grid;gap:10px;margin:12px 0}.e133-card{padding:14px 16px;border:1px solid #f0c8c8;border-radius:10px;background:#fff7f7}.e133-card-head{display:flex;align-items:start;justify-content:space-between;gap:12px}.e133-card-head strong{font-size:14px;line-height:1.5}.e133-card-head button{font-size:12px!important;color:#8d3030!important;background:white!important;border:1px solid #dfbcbc!important;padding:6px 10px!important;border-radius:7px!important;white-space:nowrap;min-width:0!important;box-shadow:none!important}.e133-card .e132-prior input{box-sizing:border-box;max-width:100%}.e132-critical[open]&gt;summary{border-bottom:1px solid #eee}.e133-choice:has(input:disabled){cursor:default;opacity:.65}@media(max-width:500px){.e133-card-head{flex-wrap:wrap}.e132-critical&gt;summary small{white-space:normal}}
+
 &lt;/style&gt;
 &lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
 &lt;style id=&quot;echo-form-theme-110&quot;&gt;/* Echo 1.0.10: superficie de trabajo, accesible y compacta. */
@@ -7852,6 +7854,8 @@ async function addEvaluation() {
     return;
   }
 
+  if(!e133ConfirmNoErrors())return;
+
   // ── Resto del flujo (sin cambios) ─────────────────────────────
   const policySelect = document.getElementById(&quot;policyFlagSelect&quot;);
   const selectedPolicyOption = policySelect ? policySelect.options[policySelect.selectedIndex] : null;
@@ -8175,7 +8179,90 @@ function eaPopulate(){
 })();
 
 &lt;/script&gt;
-&lt;/body&gt;
+&lt;script&gt;
+// Echo 1.0.33: checked means the critical error occurred.
+const e133Labels={
+ &#x27;FCR-002&#x27;:&#x27;Usa la categoría Backlog sin autorización&#x27;,
+ &#x27;FCR-003&#x27;:&#x27;Cierra la conversación sin atender al cliente&#x27;,
+ &#x27;FCR-004&#x27;:&#x27;Usa la tipificación Blackbox sin autorización&#x27;,
+ &#x27;FCR-005&#x27;:&#x27;Culpa a terceros o inventa consultas internas para justificar decisiones&#x27;,
+ &#x27;FCR-006&#x27;:&#x27;Da un trato irrespetuoso o discriminatorio&#x27;,
+ &#x27;FCR-007&#x27;:&#x27;Usa lenguaje ofensivo, burlas o juicios hacia el cliente&#x27;,
+ &#x27;FCR-008&#x27;:&#x27;Envía al cliente capturas de herramientas internas&#x27;,
+ &#x27;FCR-009&#x27;:&#x27;Envía mensajes fuera del horario permitido, sin aplicar una excepción&#x27;,
+ &#x27;FCR-010&#x27;:&#x27;Deja atributos obligatorios de la conversación sin completar&#x27;,
+ &#x27;FCR-011&#x27;:&#x27;Revela información personal completa del cliente&#x27;,
+ &#x27;GAT-001&#x27;:&#x27;Continúa la gestión o transfiere a un cliente bloqueado&#x27;,
+ &#x27;GAT-003&#x27;:&#x27;Ofrece crédito a un cliente rechazado o promete aprobación futura&#x27;,
+ &#x27;ECR-001&#x27;:&#x27;Repite una falla de conocimiento después del feedback&#x27;,
+ &#x27;ECR-002&#x27;:&#x27;Repite una falla de tipificación después del feedback&#x27;
+};
+function e133Selected(){return [...document.querySelectorAll(&#x27;.e133-check:checked&#x27;)];}
+const e133RenderBase=e132Render;
+e132Render=function(){
+ e133RenderBase();
+ const block=document.querySelector(&#x27;.e132-critical&#x27;);
+ if(!block)return;
+ block.innerHTML=&#x27;&lt;summary&gt;&lt;span&gt;Errores críticos · seleccionar uno o varios&lt;/span&gt;&lt;small id=&quot;e133-count&quot;&gt;Sin errores críticos seleccionados&lt;/small&gt;&lt;/summary&gt;&lt;div class=&quot;e132-section-body&quot;&gt;&lt;p&gt;Marca únicamente los errores que ocurrieron. &lt;b&gt;Una casilla marcada significa que sí hubo ese EC.&lt;/b&gt; Si no marcas ninguno, se guardará sin errores críticos.&lt;/p&gt;&#x27;+currentPolicyFlags.map(f=&gt;{
+ const label=e133Labels[f.policy_key]||f.display_label;
+ return &#x27;&lt;div class=&quot;e133-option&quot;&gt;&lt;label class=&quot;e133-choice&quot; for=&quot;ec_&#x27;+f.id+&#x27;&quot;&gt;&lt;input type=&quot;checkbox&quot; class=&quot;e133-check&quot; id=&quot;ec_&#x27;+f.id+&#x27;&quot; data-flag-id=&quot;&#x27;+f.id+&#x27;&quot; data-key=&quot;&#x27;+e132Esc(f.policy_key)+&#x27;&quot; data-weekly=&quot;&#x27;+f.weekly_zero+&#x27;&quot; onchange=&quot;updateDynamicScore()&quot;&gt;&lt;span&gt;&lt;b&gt;&#x27;+e132Esc(label)+&#x27;&lt;/b&gt;&lt;small&gt;&#x27;+e132Esc(f.policy_key)+&#x27; · &#x27;+(f.weekly_zero?&#x27;Cero semanal · Aplazo / Soporte&#x27;:&#x27;Cero en esta evaluación&#x27;)+&#x27;&lt;/small&gt;&lt;/span&gt;&lt;/label&gt;&lt;p class=&quot;e133-exempt&quot; id=&quot;exempt_&#x27;+f.id+&#x27;&quot; hidden&gt;Permitido a supervisores según la guía; este EC no se puede seleccionar.&lt;/p&gt;&lt;details class=&quot;e132-guide&quot;&gt;&lt;summary&gt;Ver cuándo marcar y sus excepciones&lt;/summary&gt;&lt;p&gt;&lt;b&gt;La falla ocurre cuando:&lt;/b&gt;&lt;br&gt;&#x27;+e132Esc(f.guidance_no)+&#x27;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Criterio de cumplimiento y excepciones:&lt;/b&gt;&lt;br&gt;&#x27;+e132Esc(f.guidance_yes)+&#x27;&lt;/p&gt;&lt;/details&gt;&lt;/div&gt;&#x27;;
+ }).join(&#x27;&#x27;)+&#x27;&lt;/div&gt;&#x27;;
+ block.after(Object.assign(document.createElement(&#x27;div&#x27;),{id:&#x27;e133-selection&#x27;,className:&#x27;e133-selection&#x27;}));
+ document.querySelectorAll(&#x27;.e132-critical .e132-guide&#x27;).forEach(d=&gt;d.addEventListener(&#x27;toggle&#x27;,notifyParentHeight));
+ e132ApplyExceptions();updateDynamicScore();notifyParentHeight();
+};
+e132ApplyExceptions=function(){
+ if(!e132New())return;
+ const s=document.getElementById(&#x27;agentName&#x27;);const supervisor=s.options[s.selectedIndex]?.dataset.role===&#x27;supervisor&#x27;;
+ document.querySelectorAll(&#x27;.e133-check&#x27;).forEach(cb=&gt;{
+  if([&#x27;FCR-002&#x27;,&#x27;FCR-004&#x27;].includes(cb.dataset.key)){
+   cb.disabled=supervisor;if(supervisor)cb.checked=false;
+   const note=document.getElementById(&#x27;exempt_&#x27;+cb.dataset.flagId);if(note)note.hidden=!supervisor;
+  }
+ });
+};
+function e133Remove(id){const cb=document.getElementById(&#x27;ec_&#x27;+id);if(cb){cb.checked=false;updateDynamicScore();}}
+e132Update=function(){
+ if(!e132New())return;
+ e132ApplyExceptions();const weighted=[...document.querySelectorAll(&#x27;.dynamic-rubric-select&#x27;)];
+ const total=document.getElementById(&#x27;e132-total&#x27;);if(total)total.textContent=weighted.filter(s=&gt;s.value).length+&#x27; / 25 rubros contestados&#x27;;
+ document.querySelectorAll(&#x27;.e132-section:not(.e132-critical)&#x27;).forEach(d=&gt;{const ss=[...d.querySelectorAll(&#x27;.dynamic-rubric-select&#x27;)];const p=d.querySelector(&#x27;.e132-progress&#x27;);if(p)p.textContent=ss.filter(s=&gt;s.value).length+&#x27;/&#x27;+ss.length;});
+ const selected=e133Selected(),ids=new Set(selected.map(s=&gt;s.dataset.flagId));
+ const count=document.getElementById(&#x27;e133-count&#x27;);if(count)count.textContent=selected.length?selected.length+&#x27; EC seleccionado&#x27;+(selected.length===1?&#x27;&#x27;:&#x27;s&#x27;):&#x27;Sin errores críticos seleccionados&#x27;;
+ const panel=document.getElementById(&#x27;e133-selection&#x27;);
+ if(panel){
+  // Reconcile cards instead of rebuilding them: preserve typed evidence and dates.
+  [...panel.children].forEach(card=&gt;{if(!ids.has(card.dataset.id))card.remove();});
+  for(const cb of selected){const id=cb.dataset.flagId;if([...panel.children].some(c=&gt;c.dataset.id===id))continue;
+   const f=currentPolicyFlags.find(f=&gt;f.id===id),card=document.createElement(&#x27;section&#x27;);card.className=&#x27;e133-card&#x27;;card.dataset.id=id;
+   card.innerHTML=&#x27;&lt;div class=&quot;e133-card-head&quot;&gt;&lt;strong&gt;&#x27;+e132Esc(e133Labels[f.policy_key]||f.display_label)+&#x27;&lt;/strong&gt;&lt;button type=&quot;button&quot; onclick=&quot;e133Remove(\&#x27;&#x27;+id+&#x27;\&#x27;)&quot; aria-label=&quot;Quitar &#x27;+e132Esc(e133Labels[f.policy_key]||f.display_label)+&#x27;&quot;&gt;Quitar&lt;/button&gt;&lt;/div&gt;&lt;small&gt;&#x27;+e132Esc(f.policy_key)+&#x27; · &#x27;+(f.weekly_zero?&#x27;Cero semanal&#x27;:&#x27;Cero en la evaluación&#x27;)+&#x27;&lt;/small&gt;&#x27;+(f.policy_key.startsWith(&#x27;ECR-&#x27;)?&#x27;&lt;div class=&quot;e132-prior&quot;&gt;&lt;label for=&quot;evidence_&#x27;+id+&#x27;&quot;&gt;Enlace al feedback previo&lt;/label&gt;&lt;input required id=&quot;evidence_&#x27;+id+&#x27;&quot; type=&quot;url&quot; placeholder=&quot;https://…&quot;&gt;&lt;label for=&quot;feedback_date_&#x27;+id+&#x27;&quot;&gt;Fecha del feedback previo&lt;/label&gt;&lt;input required id=&quot;feedback_date_&#x27;+id+&#x27;&quot; type=&quot;date&quot;&gt;&lt;small&gt;QA confirma que la nueva falla ocurrió después del feedback citado.&lt;/small&gt;&lt;/div&gt;&#x27;:&#x27;&#x27;);
+   panel.append(card);
+  }
+ }
+ if(selected.length)document.getElementById(&#x27;evaluationScore&#x27;).value=&#x27;0.00&#x27;;
+ const weekly=selected.some(s=&gt;s.dataset.weekly===&#x27;true&#x27;),date=document.getElementById(&#x27;interactionDate&#x27;).value;let period=&#x27;&#x27;;
+ if(date){const d=new Date(date+&#x27;T12:00:00Z&#x27;);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));const end=new Date(d);end.setUTCDate(d.getUTCDate()+6);period=d.toISOString().slice(0,10)+&#x27; al &#x27;+end.toISOString().slice(0,10);}
+ const note=document.getElementById(&#x27;e132-penalty&#x27;);if(note)note.textContent=weekly?&#x27;Se activará cero semanal en Aplazo / Soporte: &#x27;+period+&#x27;. Se conserva el score individual para consulta.&#x27;:selected.length?&#x27;Se activará cero únicamente en esta evaluación.&#x27;:&#x27;Sin errores críticos seleccionados. Al guardar confirmarás que no hubo EC. Un cero semanal ya existente para este agente seguirá aplicando.&#x27;;
+ notifyParentHeight();
+};
+e132Answers=function(){
+ // Keep the v132 storage contract: No means criterion violated, not &quot;no EC&quot;.
+ return currentPolicyFlags.map(f=&gt;{const occurred=document.getElementById(&#x27;ec_&#x27;+f.id)?.checked===true;return {policy_flag_id:f.id,answer:occurred?&#x27;No&#x27;:&#x27;Yes&#x27;,evidence:occurred?(document.getElementById(&#x27;evidence_&#x27;+f.id)?.value.trim()||null):null,feedback_date:occurred?(document.getElementById(&#x27;feedback_date_&#x27;+f.id)?.value||null):null};});
+};
+e132Validate=function(){
+ if(!e132New())return [];
+ const errors=[];
+ if(currentPolicyFlags.length!==14||document.querySelectorAll(&#x27;.e133-check&#x27;).length!==14)errors.push(&#x27;• No se cargó el catálogo completo de EC. Recarga el formulario.&#x27;);
+ for(const a of e132Answers()){const f=currentPolicyFlags.find(f=&gt;f.id===a.policy_flag_id);if(f.policy_key.startsWith(&#x27;ECR-&#x27;)&amp;&amp;a.answer===&#x27;No&#x27;){
+  if(!/^https?:\/\//i.test(a.evidence||&#x27;&#x27;))errors.push(&#x27;• &#x27;+f.policy_key+&#x27;: enlaza el feedback previo&#x27;);
+  if(!a.feedback_date||a.feedback_date&gt;document.getElementById(&#x27;interactionDate&#x27;).value)errors.push(&#x27;• &#x27;+f.policy_key+&#x27;: revisa la fecha del feedback previo&#x27;);
+ }}
+ document.querySelectorAll(&#x27;.e132-section:not(.e132-critical)&#x27;).forEach(d=&gt;{if([...d.querySelectorAll(&#x27;select&#x27;)].some(s=&gt;!s.value))d.open=true;});
+ return errors;
+};
+function e133ConfirmNoErrors(){return !e132New()||e133Selected().length&gt;0||window.confirm(&#x27;No seleccionaste errores críticos. ¿Confirmas que no hubo EC en esta interacción?&#x27;);}
+
+&lt;/script&gt;&lt;/body&gt;
 &lt;/html&gt;" id="qaFormIframe" onload="window.sendEvaluatorToForm &amp;&amp; window.sendEvaluatorToForm();" scrolling="yes" style="width:100%;height:calc(100vh - var(--header-h));min-height:760px;border:0;display:block;background:#f4fbff;overflow:auto;" title="Herramienta de QA"></iframe>
 </div>
 <!-- PAGE: CORRECCIONES -->
@@ -10274,7 +10361,7 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 
-const ECHO_APP_VERSION = "1.0.32";
+const ECHO_APP_VERSION = "1.0.33";
 const ECHO_VERSION_CONFIG_KEY = "echo_version";
 const ECHO_VERSION_CHECK_MS = 60 * 1000;
 
